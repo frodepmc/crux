@@ -22,16 +22,16 @@
         }
 
         :root {
-            --bg: #1A2030;
-            --bg-card: #212838;
-            --bg-accent: #151C2C;
-            --text: #E8E4DD;
-            --text-muted: #808896;
-            --accent: #7BA3CA;
-            --accent-hover: #96BDDD;
-            --accent-deep: #5578A0;
-            --border: rgba(200, 210, 225, 0.08);
-            --border-strong: rgba(200, 210, 225, 0.16);
+            --bg: #F2EFE9;
+            --bg-card: #E8E4DD;
+            --bg-accent: #1C2536;
+            --text: #1C1F26;
+            --text-muted: #7A7E88;
+            --accent: #3E6D94;
+            --accent-hover: #2C5478;
+            --accent-deep: #4A7DA6;
+            --border: rgba(28, 31, 38, 0.1);
+            --border-strong: rgba(28, 31, 38, 0.18);
             --font-display: 'Bodoni Moda', 'Didot', 'Georgia', serif;
             --font-body: 'Jost', 'Futura', 'Helvetica Neue', sans-serif;
             --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -103,7 +103,6 @@
             height: 44px;
             background: transparent;
             border: 1px solid var(--accent);
-            mix-blend-mode: difference;
         }
 
         /* ═══════════════════════════════════════
@@ -115,7 +114,7 @@
             inset: 0;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
             background-size: 256px 256px;
-            opacity: 0.025;
+            opacity: 0.035;
             pointer-events: none;
             z-index: 10000;
         }
@@ -187,7 +186,7 @@
         }
 
         .nav.is-scrolled {
-            background-color: rgba(26, 32, 48, 0.95);
+            background-color: rgba(242, 239, 233, 0.95);
             backdrop-filter: blur(30px);
             -webkit-backdrop-filter: blur(30px);
             padding: 1.2rem 0;
@@ -334,7 +333,7 @@
             left: -10%;
             width: 55%;
             height: 60%;
-            background: radial-gradient(ellipse, rgba(123, 163, 202, 0.08) 0%, transparent 70%);
+            background: radial-gradient(ellipse, rgba(62, 109, 148, 0.07) 0%, transparent 70%);
             pointer-events: none;
             z-index: 0;
         }
@@ -617,7 +616,7 @@
         }
 
         .service:hover {
-            background: linear-gradient(90deg, rgba(123, 163, 202, 0.04) 0%, transparent 60%);
+            background: linear-gradient(90deg, rgba(62, 109, 148, 0.06) 0%, transparent 60%);
         }
 
         .service__number {
@@ -720,7 +719,7 @@
         .work-item__overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to top, rgba(26, 32, 48, 0.7) 0%, transparent 50%);
+            background: linear-gradient(to top, rgba(28, 37, 54, 0.75) 0%, transparent 50%);
             display: flex;
             align-items: flex-end;
             padding: 2rem;
@@ -737,7 +736,7 @@
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.2em;
-            color: var(--text);
+            color: #E8E4DD;
         }
 
         .work-item__info {
@@ -759,9 +758,9 @@
             letter-spacing: 0.15em;
         }
 
-        /* Project Visuals — Midnight Atelier */
+        /* Project Visuals — Light Atelier */
         .visual--nomada {
-            background: linear-gradient(160deg, #223040 0%, #1A2535 40%, #2A3A50 100%);
+            background: linear-gradient(160deg, #DED8CE 0%, #E8E4DD 40%, #D0CAC0 100%);
             position: relative;
         }
 
@@ -770,7 +769,7 @@
             position: absolute;
             width: 50%;
             aspect-ratio: 1;
-            border: 1px solid rgba(123, 163, 202, 0.22);
+            border: 1px solid rgba(62, 109, 148, 0.25);
             top: 20%;
             left: 28%;
             transform: rotate(45deg);
@@ -781,14 +780,14 @@
             position: absolute;
             width: 25%;
             aspect-ratio: 1;
-            border: 1px solid rgba(123, 163, 202, 0.14);
+            border: 1px solid rgba(62, 109, 148, 0.15);
             top: 35%;
             left: 40%;
             transform: rotate(45deg);
         }
 
         .visual--horizonte {
-            background: #182230;
+            background: #E2DED7;
             position: relative;
             overflow: hidden;
         }
@@ -800,11 +799,11 @@
             background:
                 linear-gradient(0deg,
                     transparent 0%, transparent 30%,
-                    rgba(123, 163, 202, 0.08) 30%, rgba(123, 163, 202, 0.08) 30.5%,
+                    rgba(62, 109, 148, 0.1) 30%, rgba(62, 109, 148, 0.1) 30.5%,
                     transparent 30.5%, transparent 55%,
-                    rgba(200, 210, 225, 0.05) 55%, rgba(200, 210, 225, 0.05) 55.3%,
+                    rgba(28, 31, 38, 0.06) 55%, rgba(28, 31, 38, 0.06) 55.3%,
                     transparent 55.3%, transparent 72%,
-                    rgba(123, 163, 202, 0.1) 72%, rgba(123, 163, 202, 0.1) 73%,
+                    rgba(62, 109, 148, 0.12) 72%, rgba(62, 109, 148, 0.12) 73%,
                     transparent 73%
                 );
         }
@@ -816,11 +815,11 @@
             right: 10%;
             width: 30%;
             height: 40%;
-            background: linear-gradient(135deg, rgba(123, 163, 202, 0.1) 0%, transparent 70%);
+            background: linear-gradient(135deg, rgba(62, 109, 148, 0.08) 0%, transparent 70%);
         }
 
         .visual--materia {
-            background: #1E2838;
+            background: #E5E1DA;
             position: relative;
         }
 
@@ -830,8 +829,8 @@
             width: 60%;
             aspect-ratio: 1;
             border-radius: 50%;
-            background: linear-gradient(135deg, #2A3548 0%, #1E2838 100%);
-            border: 1px solid rgba(200, 210, 225, 0.06);
+            background: linear-gradient(135deg, #D8D3CB 0%, #E5E1DA 100%);
+            border: 1px solid rgba(28, 31, 38, 0.08);
             bottom: -10%;
             right: -5%;
         }
@@ -844,11 +843,11 @@
             width: 30px;
             height: 1px;
             background: var(--accent);
-            opacity: 0.45;
+            opacity: 0.5;
         }
 
         .visual--silencio {
-            background: #151C2A;
+            background: #EAE7E1;
             position: relative;
         }
 
@@ -858,7 +857,7 @@
             width: 1px;
             height: 30%;
             background: linear-gradient(to bottom, transparent, var(--accent), transparent);
-            opacity: 0.3;
+            opacity: 0.35;
             top: 35%;
             left: 50%;
         }
@@ -870,7 +869,7 @@
             left: 10%;
             right: 10%;
             height: 1px;
-            background: rgba(200, 210, 225, 0.04);
+            background: rgba(28, 31, 38, 0.06);
         }
 
         /* ═══════════════════════════════════════
@@ -942,7 +941,7 @@
            ═══════════════════════════════════════ */
         .contact {
             background: var(--bg-accent);
-            color: var(--text);
+            color: #E8E4DD;
             position: relative;
             overflow: hidden;
         }
@@ -954,8 +953,7 @@
             left: 0;
             right: 0;
             height: 1px;
-            background: var(--accent);
-            opacity: 0.5;
+            background: rgba(255, 255, 255, 0.1);
         }
 
         /* Ambient glow in contact */
@@ -966,12 +964,12 @@
             right: -5%;
             width: 45%;
             height: 70%;
-            background: radial-gradient(ellipse, rgba(123, 163, 202, 0.1) 0%, transparent 65%);
+            background: radial-gradient(ellipse, rgba(74, 125, 166, 0.12) 0%, transparent 65%);
             pointer-events: none;
         }
 
         .contact .label {
-            color: var(--text-muted);
+            color: rgba(232, 228, 221, 0.45);
         }
 
         .contact__inner {
@@ -984,7 +982,7 @@
 
         .contact__question {
             font-size: clamp(0.85rem, 1vw, 1rem);
-            color: var(--text-muted);
+            color: rgba(232, 228, 221, 0.5);
             margin-bottom: 1.5rem;
             font-weight: 300;
         }
@@ -996,7 +994,7 @@
             font-size: clamp(4rem, 11vw, 9rem);
             line-height: 1;
             margin-bottom: 3rem;
-            color: var(--accent);
+            color: #7BA3CA;
         }
 
         .contact__email {
@@ -1005,15 +1003,15 @@
             gap: 1rem;
             font-size: clamp(1rem, 1.4vw, 1.2rem);
             font-weight: 400;
-            color: var(--text);
-            border-bottom: 1px solid var(--border-strong);
+            color: #E8E4DD;
+            border-bottom: 1px solid rgba(232, 228, 221, 0.2);
             padding-bottom: 0.5rem;
             transition: border-color 0.3s ease, color 0.3s ease;
         }
 
         .contact__email:hover {
-            border-color: var(--accent);
-            color: var(--accent-hover);
+            border-color: #7BA3CA;
+            color: #7BA3CA;
         }
 
         .contact__email-arrow {
