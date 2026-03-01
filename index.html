@@ -234,7 +234,7 @@
         }
 
         .nav__links a:hover {
-            color: var(--text);
+            color: var(--accent);
         }
 
         .nav__links a::after {
@@ -522,6 +522,7 @@
             border-bottom: 1px solid var(--border);
             padding: 1.2rem 0;
             overflow: hidden;
+            background: rgba(62, 109, 148, 0.04);
         }
 
         .keywords__track {
@@ -582,6 +583,7 @@
             font-weight: 400;
             font-size: clamp(2rem, 4.5vw, 3.5rem);
             line-height: 1.15;
+            color: var(--accent-deep);
         }
 
         .services__list {
@@ -638,6 +640,11 @@
             margin-bottom: 0.75rem;
             line-height: 1.3;
             letter-spacing: 0.01em;
+            transition: color 0.4s ease;
+        }
+
+        .service:hover .service__name {
+            color: var(--accent);
         }
 
         .service__desc {
@@ -679,6 +686,7 @@
             font-weight: 400;
             font-size: clamp(2rem, 4.5vw, 3.5rem);
             line-height: 1.15;
+            color: var(--accent-deep);
         }
 
         .work__grid {
@@ -748,6 +756,7 @@
             font-size: clamp(1.1rem, 1.5vw, 1.35rem);
             font-weight: 400;
             margin-bottom: 0.3rem;
+            color: var(--accent);
         }
 
         .work-item__category {
@@ -877,6 +886,7 @@
            ═══════════════════════════════════════ */
         .about {
             border-top: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(62, 109, 148, 0.03) 0%, transparent 40%);
         }
 
         .about__manifesto {
@@ -894,6 +904,7 @@
 
         .about__quote-mark {
             color: var(--accent);
+            font-size: 1.3em;
         }
 
         .about__grid {
@@ -934,6 +945,7 @@
             font-weight: 400;
             font-size: 1.05rem;
             letter-spacing: 0.02em;
+            color: var(--accent);
         }
 
         /* ═══════════════════════════════════════
@@ -1028,7 +1040,8 @@
         .footer {
             background: var(--bg);
             padding: 3rem 0;
-            border-top: 1px solid var(--border);
+            border-top: 1px solid var(--accent);
+            border-image: linear-gradient(90deg, var(--accent), transparent 60%) 1;
         }
 
         .footer__inner {
