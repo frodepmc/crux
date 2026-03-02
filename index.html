@@ -468,7 +468,7 @@
         /* Geometric accent */
         .hero__geo {
             position: relative;
-            width: clamp(200px, 22vw, 350px);
+            width: clamp(260px, 30vw, 450px);
             aspect-ratio: 1;
             z-index: 1;
             opacity: 0;
@@ -516,6 +516,21 @@
             border-radius: 50%;
             background: var(--accent);
             transform: translate(-50%, -50%);
+        }
+
+        /* Hero logo inside geo */
+        .hero__logo-img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60%;
+            height: auto;
+            transition: filter 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+        }
+
+        .hero__geo:hover .hero__logo-img {
+            transform: translate(-50%, -50%) scale(1.04);
         }
 
         @keyframes geoSpin {
@@ -639,100 +654,236 @@
             color: var(--accent-deep);
         }
 
-        .services__list {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .service {
+        /* Accordion blocks layout */
+        .services__blocks {
             display: grid;
-            grid-template-columns: 60px 1fr auto;
-            gap: clamp(1.5rem, 3vw, 3rem);
-            align-items: start;
-            padding: clamp(2.5rem, 4vh, 3.5rem) 0;
-            border-top: 1px solid var(--border);
-            position: relative;
-            transition: background 0.5s ease;
+            grid-template-columns: 1fr 1fr;
+            gap: clamp(1.5rem, 3vw, 2.5rem);
         }
 
-        .service::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 1px;
-            background: var(--accent);
-            transition: width 0.8s var(--ease-out);
+        /* Primary block (Entornos digitales) spans full width */
+        .svc-block--primary {
+            grid-column: 1 / -1;
         }
 
-        .service:hover::after {
-            width: 100%;
+        /* Secondary blocks side by side */
+        .svc-block--secondary {
+            grid-column: auto;
         }
 
-        .service:hover {
-            background: linear-gradient(90deg, rgba(62, 109, 148, 0.06) 0%, transparent 60%);
+        /* Block wrapper */
+        .svc-block {
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+            transition: border-color 0.5s ease;
         }
 
-        .service__number {
+        .svc-block:hover {
+            border-color: var(--border-strong);
+        }
+
+        /* Block header (number + title bar) */
+        .svc-block__header {
+            display: flex;
+            align-items: center;
+            gap: clamp(1rem, 2vw, 1.5rem);
+            padding: clamp(1rem, 2vw, 1.5rem) clamp(1.2rem, 2.5vw, 2rem);
+            background: rgba(62, 109, 148, 0.03);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .svc-block__number {
             font-family: var(--font-display);
             font-style: italic;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--accent);
-            padding-top: 0.2rem;
-            position: relative;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 38px;
-            height: 38px;
+            width: 34px;
+            height: 34px;
             border: 1px solid rgba(62, 109, 148, 0.2);
             border-radius: 50%;
-            transition: border-color 0.4s ease, background 0.4s ease;
+            flex-shrink: 0;
         }
 
-        .service:hover .service__number {
-            border-color: var(--accent);
-            background: rgba(62, 109, 148, 0.06);
-        }
-
-        .service__content {
-            max-width: 520px;
-        }
-
-        .service__name {
+        .svc-block__title {
             font-family: var(--font-display);
-            font-size: clamp(1.3rem, 2vw, 1.7rem);
+            font-size: clamp(1.2rem, 1.8vw, 1.55rem);
             font-weight: 400;
-            margin-bottom: 0.75rem;
             line-height: 1.3;
             letter-spacing: 0.01em;
-            transition: color 0.4s ease;
+            color: var(--text);
         }
 
-        .service:hover .service__name {
+        .svc-block__badge {
+            margin-left: auto;
+            font-family: var(--font-body);
+            font-size: 0.6rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            color: var(--accent);
+            opacity: 0.6;
+            white-space: nowrap;
+        }
+
+        /* Accordion item */
+        .svc-accordion {
+            border-top: 1px solid var(--border);
+        }
+
+        .svc-accordion:first-child {
+            border-top: none;
+        }
+
+        /* Accordion trigger button */
+        .svc-accordion__trigger {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: clamp(1rem, 1.8vw, 1.4rem) clamp(1.2rem, 2.5vw, 2rem);
+            font-family: var(--font-body);
+            font-size: clamp(0.85rem, 1vw, 0.95rem);
+            font-weight: 400;
+            color: var(--text);
+            letter-spacing: 0.01em;
+            text-align: left;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: background 0.4s ease, color 0.3s ease;
+            position: relative;
+        }
+
+        .svc-accordion__trigger:hover {
+            background: rgba(62, 109, 148, 0.04);
             color: var(--accent);
         }
 
-        .service__desc {
-            color: var(--text-muted);
-            font-size: clamp(0.85rem, 0.95vw, 0.95rem);
-            line-height: 1.8;
-            font-weight: 300;
+        /* Plus/minus icon */
+        .svc-accordion__icon {
+            position: relative;
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+            margin-left: 1.5rem;
         }
 
-        .service__arrow {
-            font-size: 1.2rem;
-            color: var(--accent);
+        .svc-accordion__icon::before,
+        .svc-accordion__icon::after {
+            content: '';
+            position: absolute;
+            background: var(--accent);
+            transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.35s ease;
+        }
+
+        .svc-accordion__icon::before {
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            transform: translateY(-50%);
+        }
+
+        .svc-accordion__icon::after {
+            top: 0;
+            left: 50%;
+            width: 1px;
+            height: 100%;
+            transform: translateX(-50%);
+        }
+
+        /* Open state: rotate plus to minus */
+        .svc-accordion.is-open > .svc-accordion__trigger .svc-accordion__icon::after {
+            transform: translateX(-50%) rotate(90deg);
             opacity: 0;
-            transform: translateX(-10px);
-            transition: opacity 0.4s var(--ease-out), transform 0.4s var(--ease-out);
-            padding-top: 0.3rem;
         }
 
-        .service:hover .service__arrow {
+        .svc-accordion.is-open > .svc-accordion__trigger {
+            color: var(--accent);
+        }
+
+        /* Accordion panel (content) */
+        .svc-accordion__panel {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+
+        .svc-accordion.is-open > .svc-accordion__panel {
+            grid-template-rows: 1fr;
+        }
+
+        .svc-accordion__panel > .svc-accordion__body {
+            overflow: hidden;
+        }
+
+        .svc-accordion__body {
+            padding: 0 clamp(1.2rem, 2.5vw, 2rem) clamp(1.2rem, 2vw, 1.8rem);
+            opacity: 0;
+            transform: translateY(-8px);
+            transition: opacity 0.35s ease 0.1s, transform 0.35s ease 0.1s;
+        }
+
+        .svc-accordion.is-open > .svc-accordion__panel > .svc-accordion__body {
             opacity: 1;
-            transform: translateX(0);
+            transform: translateY(0);
+        }
+
+        .svc-accordion__text {
+            color: var(--text-muted);
+            font-size: clamp(0.84rem, 0.92vw, 0.92rem);
+            line-height: 1.85;
+            font-weight: 300;
+            max-width: 680px;
+        }
+
+        /* Sub-accordions (nested, indented) */
+        .svc-accordion--sub {
+            margin-left: clamp(1rem, 2vw, 1.8rem);
+            border-top: 1px solid var(--border);
+        }
+
+        .svc-accordion--sub > .svc-accordion__trigger {
+            font-size: clamp(0.8rem, 0.9vw, 0.88rem);
+            color: var(--text-muted);
+            padding: clamp(0.8rem, 1.2vw, 1rem) clamp(1.2rem, 2.5vw, 2rem);
+        }
+
+        .svc-accordion--sub > .svc-accordion__trigger::before {
+            content: '';
+            width: 12px;
+            height: 1px;
+            background: var(--border-strong);
+            margin-right: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        .svc-accordion--sub > .svc-accordion__trigger:hover {
+            color: var(--accent);
+        }
+
+        .svc-accordion--sub .svc-accordion__icon {
+            width: 10px;
+            height: 10px;
+        }
+
+        .svc-accordion--sub .svc-accordion__text {
+            font-size: clamp(0.8rem, 0.88vw, 0.88rem);
+        }
+
+        /* Blue accent line on open primary accordion */
+        .svc-accordion:not(.svc-accordion--sub).is-open > .svc-accordion__trigger::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--accent);
         }
 
         /* ═══════════════════════════════════════
@@ -1201,22 +1352,23 @@
         @media (max-width: 1024px) {
             .hero__inner {
                 grid-template-columns: 1fr;
+                justify-items: start;
+                gap: 2.5rem;
             }
 
             .hero__geo {
-                display: none;
+                width: clamp(180px, 45vw, 280px);
+                justify-self: center;
+                order: -1;
             }
 
             .work__grid {
                 gap: 1.5rem;
             }
 
-            .service {
-                grid-template-columns: 40px 1fr;
-            }
-
-            .service__arrow {
-                display: none;
+            .services__blocks {
+                grid-template-columns: 1fr 1fr;
+                gap: 1.2rem;
             }
         }
 
@@ -1238,20 +1390,64 @@
             }
 
             .hero {
-                min-height: 85vh;
+                min-height: 100vh;
+                min-height: 100dvh;
                 padding-top: 5rem;
+                align-items: flex-start;
+                padding-bottom: 3rem;
+            }
+
+            .hero__inner {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                align-content: center;
+                min-height: calc(100vh - 8rem);
+                min-height: calc(100dvh - 8rem);
+            }
+
+            .hero__geo {
+                width: clamp(150px, 40vw, 220px);
+                justify-self: center;
+                order: -1;
+            }
+
+            .hero__content {
+                text-align: center;
+            }
+
+            .hero__label {
+                justify-content: center;
+                margin-bottom: 1.5rem;
+            }
+
+            .hero__heading {
+                margin-bottom: 1.5rem;
             }
 
             .hero-line:nth-child(1) .hero-line__inner {
-                font-size: clamp(2.2rem, 10vw, 3.5rem);
+                font-size: clamp(2.4rem, 11vw, 3.5rem);
             }
 
             .hero-line:nth-child(2) .hero-line__inner {
-                font-size: clamp(2.4rem, 11vw, 3.8rem);
+                font-size: clamp(2.6rem, 12vw, 3.8rem);
+            }
+
+            .hero__descriptor {
+                max-width: 100%;
+                border-left: none;
+                padding-left: 0;
+                text-align: center;
+                border-top: 1px solid var(--border);
+                padding-top: 1.2rem;
+                margin: 0 auto;
+                max-width: 320px;
             }
 
             .hero::after {
-                display: none;
+                font-size: clamp(12rem, 55vw, 20rem);
+                right: 50%;
+                transform: translate(50%, -55%);
+                opacity: 0.03;
             }
 
             .hero__scroll {
@@ -1275,13 +1471,29 @@
                 gap: 1.5rem;
             }
 
-            .service {
+            .services__blocks {
                 grid-template-columns: 1fr;
-                gap: 0.75rem;
+                gap: 1rem;
             }
 
-            .service__number {
-                font-size: 0.8rem;
+            .svc-block__header {
+                padding: 1rem 1.2rem;
+            }
+
+            .svc-block__badge {
+                display: none;
+            }
+
+            .svc-accordion__trigger {
+                padding: 1rem 1.2rem;
+            }
+
+            .svc-accordion__body {
+                padding: 0 1.2rem 1.2rem;
+            }
+
+            .svc-accordion--sub {
+                margin-left: 0.8rem;
             }
 
             .footer__inner {
@@ -1335,7 +1547,7 @@
     <!-- Navigation -->
     <nav class="nav" role="navigation">
         <div class="container nav__inner">
-            <a href="#" class="nav__logo">Álvaro</a>
+            <a href="#" class="nav__logo">Crux Consulting</a>
             <ul class="nav__links">
                 <li><a href="#servicios">Servicios</a></li>
                 <li><a href="#trabajo">Trabajo</a></li>
@@ -1362,14 +1574,14 @@
             <div class="hero__content">
                 <p class="label hero__label">
                     <span class="line-accent"></span>
-                    Diseño & dirección creativa
+                    Desarrollo de entornos digitales
                 </p>
                 <h1 class="hero__heading">
                     <span class="hero-line">
-                        <span class="hero-line__inner">Diseño</span>
+                        <span class="hero-line__inner">Soluciones</span>
                     </span>
                     <span class="hero-line">
-                        <span class="hero-line__inner">lo esencial.</span>
+                        <span class="hero-line__inner">integrales.</span>
                     </span>
                 </h1>
                 <p class="hero__descriptor">
@@ -1381,6 +1593,7 @@
                 <div class="hero__geo-ring"></div>
                 <div class="hero__geo-ring hero__geo-ring--inner"></div>
                 <div class="hero__geo-dot"></div>
+                <img src="Logo_Crux.PNG" alt="Crux Consulting" class="hero__logo-img">
             </div>
         </div>
         <div class="hero__scroll" aria-hidden="true">
@@ -1422,40 +1635,135 @@
                 <h2 class="services__title">Lo que hacemos</h2>
                 <p class="label">Servicios</p>
             </div>
-            <div class="services__list">
-                <article class="service reveal">
-                    <span class="service__number">01</span>
-                    <div class="service__content">
-                        <h3 class="service__name">Diseño & Branding</h3>
-                        <p class="service__desc">
-                            Construimos identidades visuales con carácter. Desde la estrategia de marca
-                            hasta cada punto de contacto, creamos sistemas que perduran.
-                        </p>
+
+            <div class="services__blocks">
+
+                <!-- Block 1: Entornos digitales (primary, 50%) -->
+                <div class="svc-block svc-block--primary reveal">
+                    <div class="svc-block__header">
+                        <span class="svc-block__number">01</span>
+                        <h3 class="svc-block__title">Entornos digitales</h3>
+                        <span class="svc-block__badge">Core</span>
                     </div>
-                    <span class="service__arrow">&#8594;</span>
-                </article>
-                <article class="service reveal">
-                    <span class="service__number">02</span>
-                    <div class="service__content">
-                        <h3 class="service__name">Producto Digital</h3>
-                        <p class="service__desc">
-                            Diseñamos y desarrollamos experiencias digitales que funcionan.
-                            Interfaces, plataformas y sistemas pensados desde el usuario.
-                        </p>
+
+                    <!-- Main dropdown -->
+                    <div class="svc-accordion" data-accordion>
+                        <button class="svc-accordion__trigger" aria-expanded="false">
+                            <span>Visión general del servicio</span>
+                            <span class="svc-accordion__icon" aria-hidden="true"></span>
+                        </button>
+                        <div class="svc-accordion__panel">
+                            <div class="svc-accordion__body">
+                                <p class="svc-accordion__text">
+                                    Diseñamos, construimos y evolucionamos ecosistemas digitales completos. Desde la arquitectura de información hasta la implementación técnica, cada entorno que creamos está pensado para escalar, conectar y generar valor real. Trabajamos con plataformas web, intranets corporativas, portales de cliente y herramientas internas — siempre con una visión integral que alinea tecnología, diseño y estrategia de negocio.
+                                </p>
+
+                                <!-- Sub-dropdown 1 -->
+                                <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                    <button class="svc-accordion__trigger" aria-expanded="false">
+                                        <span>Arquitectura y plataformas</span>
+                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                    </button>
+                                    <div class="svc-accordion__panel">
+                                        <div class="svc-accordion__body">
+                                            <p class="svc-accordion__text">
+                                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae. Sed vel lacus at nisi consequat tincidunt vel ac risus. Praesent facilisis dui non eros fringilla, id sagittis mauris tempor. Donec ac ligula sit amet nunc bibendum placerat at vel magna.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Sub-dropdown 2 -->
+                                <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                    <button class="svc-accordion__trigger" aria-expanded="false">
+                                        <span>Integración y escalabilidad</span>
+                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                    </button>
+                                    <div class="svc-accordion__panel">
+                                        <div class="svc-accordion__body">
+                                            <p class="svc-accordion__text">
+                                                Curabitur dignissim lacus vel arcu fermentum, nec ultricies nulla vehicula. Integer posuere justo eu dolor elementum, et tincidunt orci dictum. Nulla facilisi. Morbi at eros nec sem ullamcorper fermentum. Fusce ultrices enim non ipsum consequat, a pharetra nunc fringilla.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <span class="service__arrow">&#8594;</span>
-                </article>
-                <article class="service reveal">
-                    <span class="service__number">03</span>
-                    <div class="service__content">
-                        <h3 class="service__name">Dirección Creativa</h3>
-                        <p class="service__desc">
-                            Definimos la visión. Acompañamos cada proyecto con una mirada
-                            estratégica y una exigencia estética rigurosa.
-                        </p>
+                </div>
+
+                <!-- Block 2: Automatización (25%) -->
+                <div class="svc-block svc-block--secondary reveal">
+                    <div class="svc-block__header">
+                        <span class="svc-block__number">02</span>
+                        <h3 class="svc-block__title">Automatización</h3>
                     </div>
-                    <span class="service__arrow">&#8594;</span>
-                </article>
+
+                    <div class="svc-accordion" data-accordion>
+                        <button class="svc-accordion__trigger" aria-expanded="false">
+                            <span>Flujos y procesos inteligentes</span>
+                            <span class="svc-accordion__icon" aria-hidden="true"></span>
+                        </button>
+                        <div class="svc-accordion__panel">
+                            <div class="svc-accordion__body">
+                                <p class="svc-accordion__text">
+                                    Identificamos tareas repetitivas y las transformamos en flujos automáticos que ahorran tiempo y reducen errores. Conectamos herramientas, plataformas y datos para que tu equipo se enfoque en lo que importa.
+                                </p>
+
+                                <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                    <button class="svc-accordion__trigger" aria-expanded="false">
+                                        <span>Herramientas y conectores</span>
+                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                    </button>
+                                    <div class="svc-accordion__panel">
+                                        <div class="svc-accordion__body">
+                                            <p class="svc-accordion__text">
+                                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Block 3: Web + SEO (25%) -->
+                <div class="svc-block svc-block--secondary reveal">
+                    <div class="svc-block__header">
+                        <span class="svc-block__number">03</span>
+                        <h3 class="svc-block__title">Web + SEO</h3>
+                    </div>
+
+                    <div class="svc-accordion" data-accordion>
+                        <button class="svc-accordion__trigger" aria-expanded="false">
+                            <span>Presencia y posicionamiento</span>
+                            <span class="svc-accordion__icon" aria-hidden="true"></span>
+                        </button>
+                        <div class="svc-accordion__panel">
+                            <div class="svc-accordion__body">
+                                <p class="svc-accordion__text">
+                                    Creamos sitios web que no solo se ven bien — se encuentran bien. Combinamos diseño, desarrollo y estrategia SEO para que tu presencia digital trabaje por ti las 24 horas.
+                                </p>
+
+                                <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                    <button class="svc-accordion__trigger" aria-expanded="false">
+                                        <span>Estrategia de contenidos y métricas</span>
+                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                    </button>
+                                    <div class="svc-accordion__panel">
+                                        <div class="svc-accordion__body">
+                                            <p class="svc-accordion__text">
+                                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc maximus, nulla ut commodo sagittis, sapien dui mattis dui, non pulvinar lorem felis nec erat.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
@@ -1744,6 +2052,19 @@
                         behavior: 'smooth'
                     });
                 }
+            });
+        });
+
+        /* ═══════════════════════════════════════
+           ACCORDIONS
+           ═══════════════════════════════════════ */
+        document.querySelectorAll('[data-accordion]').forEach(acc => {
+            const trigger = acc.querySelector(':scope > .svc-accordion__trigger');
+            if (!trigger) return;
+            trigger.addEventListener('click', () => {
+                const isOpen = acc.classList.contains('is-open');
+                acc.classList.toggle('is-open');
+                trigger.setAttribute('aria-expanded', !isOpen);
             });
         });
     </script>
