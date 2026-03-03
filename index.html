@@ -340,9 +340,19 @@
             align-items: center;
             position: relative;
             overflow: hidden;
+            background: url('jean-philippe-delberghe-75xPHEQBmvA-unsplash.jpg.jpeg') center center / cover no-repeat;
         }
 
-        /* (watermark removed) */
+        /* Image overlay to blend with site palette */
+        .hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--bg);
+            opacity: 0.82;
+            pointer-events: none;
+            z-index: 0;
+        }
 
         /* Ambient glow */
         .hero::before {
@@ -354,7 +364,7 @@
             height: 60%;
             background: radial-gradient(ellipse, rgba(62, 109, 148, 0.07) 0%, transparent 70%);
             pointer-events: none;
-            z-index: 0;
+            z-index: 1;
         }
 
         .hero__inner {
@@ -453,7 +463,7 @@
             transform: translate(-50%, -50%);
             width: clamp(350px, 35vw, 550px);
             aspect-ratio: 1;
-            z-index: 0;
+            z-index: 2;
             opacity: 0;
             animation: fadeIn 1.5s var(--ease-out) 0.6s forwards;
         }
@@ -515,6 +525,7 @@
             gap: 1rem;
             opacity: 0;
             animation: fadeUp 0.8s var(--ease-out) 1.2s forwards;
+            z-index: 2;
         }
 
         .hero__scroll-line {
@@ -605,6 +616,22 @@
         .services {
             border-bottom: 1px solid var(--border);
             font-family: var(--font-brand);
+            position: relative;
+            background: url('oleg-laptev-7jQh3EiS8Bs-unsplash.jpg.jpeg') center center / cover no-repeat;
+        }
+
+        .services::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--bg) 0%, rgba(232, 228, 221, 0.6) 50%, var(--bg) 100%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .services > * {
+            position: relative;
+            z-index: 1;
         }
 
         .services__header {
@@ -864,13 +891,24 @@
             position: relative;
             overflow: hidden;
             font-family: var(--font-brand);
-            background: var(--bg-accent);
+            background: url('agung-pratamah-GUYs3Q6LTFc-unsplash.jpg.jpeg') center center / cover no-repeat;
             color: #fff;
         }
 
         .work .container {
             position: relative;
             z-index: 1;
+        }
+
+        /* Dark overlay to keep readability */
+        .work::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--bg-accent);
+            opacity: 0.78;
+            pointer-events: none;
+            z-index: 0;
         }
 
         /* Subtle grid texture on dark bg */
@@ -883,6 +921,7 @@
                 linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
             background-size: 50px 50px;
             pointer-events: none;
+            z-index: 1;
         }
 
         /* ─── Header ─── */
@@ -1202,7 +1241,23 @@
            ═══════════════════════════════════════ */
         .about {
             border-top: 1px solid var(--border);
-            background: linear-gradient(180deg, rgba(62, 109, 148, 0.03) 0%, transparent 40%);
+            position: relative;
+            background: url('milad-fakurian-I4yMBCjVljo-unsplash.jpg.jpeg') center center / cover no-repeat;
+        }
+
+        .about::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--bg);
+            opacity: 0.85;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .about > * {
+            position: relative;
+            z-index: 1;
         }
 
         .about__manifesto {
@@ -1280,8 +1335,8 @@
            CONTACT
            ═══════════════════════════════════════ */
         .contact {
-            background: var(--bg-accent);
-            color: #E8E4DD;
+            background: url('sebastian-schuster-ohugy87T1K8-unsplash.jpg.jpeg') center 30% / cover no-repeat;
+            color: var(--text);
             position: relative;
             overflow: hidden;
         }
@@ -1293,7 +1348,7 @@
             left: 0;
             right: 0;
             height: 1px;
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--border);
         }
 
         /* Ambient glow in contact */
@@ -1304,7 +1359,7 @@
             right: -5%;
             width: 45%;
             height: 70%;
-            background: radial-gradient(ellipse, rgba(74, 125, 166, 0.12) 0%, transparent 65%);
+            background: radial-gradient(ellipse, rgba(62, 109, 148, 0.06) 0%, transparent 65%);
             pointer-events: none;
         }
 
@@ -1336,9 +1391,9 @@
 
         .contact__question {
             font-size: clamp(0.85rem, 1vw, 1rem);
-            color: rgba(232, 228, 221, 0.5);
+            color: var(--text);
             margin-bottom: 1.5rem;
-            font-weight: 300;
+            font-weight: 400;
         }
 
         .contact__heading {
@@ -1347,13 +1402,14 @@
             font-weight: 400;
             font-size: clamp(3.5rem, 8vw, 7rem);
             line-height: 1;
-            color: #7BA3CA;
+            color: var(--bg-accent);
         }
 
         /* ─── Form System ─── */
         .contact__form-system {
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-strong);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
         }
 
         /* Channel buttons — stacked vertically */
@@ -1365,9 +1421,9 @@
         .contact__channel-btn {
             background: transparent;
             border: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            border-bottom: 1px solid var(--border);
             padding: clamp(1.1rem, 1.8vw, 1.5rem) clamp(1.5rem, 2.5vw, 2rem);
-            color: rgba(232, 228, 221, 0.5);
+            color: var(--text-muted);
             font-family: var(--font-body);
             font-size: 0.65rem;
             font-weight: 500;
@@ -1381,20 +1437,20 @@
         }
 
         .contact__channel-btn:hover {
-            color: #E8E4DD;
-            background: rgba(62, 109, 148, 0.08);
+            color: var(--text);
+            background: rgba(56, 105, 171, 0.06);
         }
 
         .contact__channel-btn.is-active {
-            color: #7BA3CA;
-            background: rgba(62, 109, 148, 0.1);
+            color: var(--accent);
+            background: rgba(56, 105, 171, 0.08);
         }
 
         .contact__channel-btn svg {
             width: 15px;
             height: 15px;
             flex-shrink: 0;
-            opacity: 0.5;
+            opacity: 0.85;
             transition: opacity 0.3s ease;
         }
 
@@ -1456,7 +1512,7 @@
         }
 
         .contact__field {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            border-bottom: 1px solid var(--border);
         }
 
         .contact__input,
@@ -1465,7 +1521,7 @@
             background: transparent;
             border: none;
             outline: none;
-            color: #E8E4DD;
+            color: var(--text);
             font-family: var(--font-body);
             font-size: 0.85rem;
             font-weight: 300;
@@ -1474,13 +1530,13 @@
 
         .contact__input::placeholder,
         .contact__textarea::placeholder {
-            color: rgba(232, 228, 221, 0.25);
+            color: var(--text-muted);
             font-weight: 300;
         }
 
         .contact__input:focus,
         .contact__textarea:focus {
-            color: #fff;
+            color: var(--text);
         }
 
         .contact__textarea {
@@ -1494,8 +1550,8 @@
             margin-top: 1.3rem;
             padding: 0.9rem 2.2rem;
             background: transparent;
-            border: 1px solid rgba(123, 163, 202, 0.35);
-            color: #7BA3CA;
+            border: 1px solid var(--accent);
+            color: var(--accent);
             font-family: var(--font-body);
             font-size: 0.6rem;
             font-weight: 500;
@@ -1506,9 +1562,9 @@
         }
 
         .contact__submit:hover {
-            background: rgba(62, 109, 148, 0.2);
-            border-color: #7BA3CA;
-            color: #E8E4DD;
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
         }
 
         /* ═══════════════════════════════════════
@@ -2159,12 +2215,8 @@
                     </p>
                     <div class="about__details">
                         <div class="about__detail-item">
-                            <span class="label">Fundado</span>
-                            <span class="about__detail-value">2020</span>
-                        </div>
-                        <div class="about__detail-item">
                             <span class="label">Ubicación</span>
-                            <span class="about__detail-value">Madrid, España</span>
+                            <span class="about__detail-value">Mallorca, España</span>
                         </div>
                         <div class="about__detail-item">
                             <span class="label">Equipo</span>
