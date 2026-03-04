@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crux Consulting — Soluciones Digitales Integrales</title>
-    <meta name="description" content="Crux Consulting desarrolla entornos digitales, automatización y estrategia web. Soluciones integrales con propósito.">
-    <meta property="og:title" content="Crux Consulting — Soluciones Digitales">
-    <meta property="og:description" content="Soluciones integrales. Entornos digitales, automatización y estrategia web con propósito.">
+    <title>CRUX Consulting — Digitalización operativa para PYMEs en Baleares</title>
+    <meta name="description" content="Ayudamos a PYMEs de Baleares a digitalizar su operativa: facturación, gestión de clientes, automatizaciones y control de negocio. Herramientas que funcionan y que tu equipo usará de verdad.">
+    <meta property="og:title" content="CRUX Consulting — Digitalización operativa para PYMEs en Baleares">
+    <meta property="og:description" content="Ayudamos a PYMEs de Baleares a digitalizar su operativa: facturación, gestión de clientes, automatizaciones y control de negocio.">
     <meta property="og:type" content="website">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -411,7 +411,7 @@
         .hero-line:nth-child(1) .hero-line__inner {
             font-family: var(--font-body);
             font-weight: 300;
-            font-size: clamp(3rem, 7vw, 10.5rem);
+            font-size: clamp(3rem, 6vw, 5.5rem);
             line-height: 1.05;
             letter-spacing: -0.02em;
             animation-delay: 0.3s;
@@ -421,7 +421,7 @@
             font-family: var(--font-display);
             font-style: italic;
             font-weight: 400;
-            font-size: clamp(3.2rem, 7.5vw, 11rem);
+            font-size: clamp(3.2rem, 6.5vw, 6rem);
             line-height: 1;
             letter-spacing: -0.01em;
             animation-delay: 0.5s;
@@ -443,6 +443,28 @@
             animation: fadeUp 1s var(--ease-out) 0.9s forwards;
             padding-left: 1.5rem;
             border-left: 1px solid var(--border);
+        }
+
+        .hero__cta {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 0.9rem 2.5rem;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            font-family: var(--font-body);
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: background 0.3s ease, color 0.3s ease;
+            opacity: 0;
+            animation: fadeUp 0.8s var(--ease-out) 1.1s forwards;
+        }
+
+        .hero__cta:hover {
+            background: var(--accent);
+            color: #fff;
         }
 
         @keyframes fadeUp {
@@ -652,33 +674,56 @@
             color: var(--accent-deep);
         }
 
-        /* Accordion blocks layout */
+        /* Accordion blocks layout — 2×2 with diagonal dividers */
         .services__blocks {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: clamp(1.5rem, 3vw, 2.5rem);
+            gap: 0;
+            position: relative;
         }
 
-        /* Primary block (Entornos digitales) spans full width */
-        .svc-block--primary {
-            grid-column: 1 / -1;
+        /* Diagonal vertical divider */
+        .services__blocks::before {
+            content: '';
+            position: absolute;
+            top: -1%;
+            left: 50%;
+            width: 1px;
+            height: 102%;
+            background: var(--border-strong);
+            transform: rotate(1.5deg);
+            transform-origin: top center;
+            z-index: 2;
+            pointer-events: none;
         }
 
-        /* Secondary blocks side by side */
-        .svc-block--secondary {
-            grid-column: auto;
+        /* Diagonal horizontal divider — top set dynamically via --row-split */
+        .services__blocks::after {
+            content: '';
+            position: absolute;
+            left: -1%;
+            top: var(--row-split, 50%);
+            width: 102%;
+            height: 1px;
+            background: var(--border-strong);
+            transform: rotate(-0.8deg);
+            transform-origin: center left;
+            z-index: 2;
+            pointer-events: none;
         }
 
         /* Block wrapper */
         .svc-block {
-            border: 1px solid var(--border);
-            border-radius: 2px;
+            border: none;
+            border-radius: 0;
             overflow: hidden;
-            transition: border-color 0.5s ease;
+            padding: clamp(0.5rem, 1vw, 0.8rem);
+            transition: background 0.4s ease;
+            position: relative;
         }
 
         .svc-block:hover {
-            border-color: var(--border-strong);
+            background: rgba(62, 109, 148, 0.03);
         }
 
         /* Block header (number + title bar) */
@@ -1404,6 +1449,15 @@
             color: var(--bg-accent);
         }
 
+        .contact__subtext {
+            margin-top: 1.5rem;
+            font-size: clamp(0.85rem, 1vw, 1rem);
+            color: var(--text-muted);
+            font-weight: 300;
+            line-height: 1.7;
+            max-width: 480px;
+        }
+
         /* ─── Form System ─── */
         .contact__form-system {
             border: 1px solid var(--border-strong);
@@ -1660,6 +1714,16 @@
                 grid-template-columns: 1fr 1fr;
                 gap: 1.2rem;
             }
+
+            .services__blocks::before,
+            .services__blocks::after {
+                display: none;
+            }
+
+            .svc-block {
+                border: 1px solid var(--border);
+                padding: 0;
+            }
         }
 
         @media (max-width: 768px) {
@@ -1858,6 +1922,177 @@
         }
 
         /* ═══════════════════════════════════════
+           LARGE SCREENS (1440px+)
+           ═══════════════════════════════════════ */
+        @media (min-width: 1440px) {
+            :root {
+                --container: 1500px;
+            }
+
+            /* Hero — tame the heading size, better proportions */
+            .hero-line:nth-child(1) .hero-line__inner {
+                font-size: 6.5rem;
+            }
+
+            .hero-line:nth-child(2) .hero-line__inner {
+                font-size: 7rem;
+            }
+
+            .hero__label {
+                margin-bottom: 3rem;
+            }
+
+            .hero__descriptor {
+                max-width: 440px;
+                font-size: 1rem;
+            }
+
+            .hero__cta {
+                padding: 1rem 3rem;
+                font-size: 0.75rem;
+            }
+
+            /* Services — more breathing room */
+            .svc-block {
+                padding: clamp(0.8rem, 1.2vw, 1.2rem);
+            }
+
+            .svc-block__header {
+                padding: 1.5rem 2rem;
+            }
+
+            .svc-block__title {
+                font-size: 1.55rem;
+            }
+
+            .svc-accordion__trigger {
+                padding: 1.4rem 2rem;
+                font-size: 0.95rem;
+            }
+
+            .svc-accordion__body {
+                padding: 0 2rem 1.8rem;
+            }
+
+            .svc-accordion__text {
+                font-size: 0.92rem;
+            }
+
+            /* Process — wider flowchart and cards */
+            .flowchart {
+                max-width: 920px;
+            }
+
+            .flow-card {
+                max-width: 680px;
+                padding: 2.8rem 3.5rem;
+            }
+
+            .flow-card__title {
+                font-size: 2rem;
+            }
+
+            .flow-card__desc {
+                font-size: 0.95rem;
+                max-width: 480px;
+            }
+
+            .flow-pills {
+                max-width: 680px;
+            }
+
+            .flow-fork,
+            .flow-merge {
+                max-width: 680px;
+            }
+
+            .flow-outcome {
+                padding: 1.8rem 3.5rem;
+            }
+
+            /* Quote — larger text */
+            .about__quote {
+                font-size: 3rem;
+                max-width: 950px;
+            }
+
+            /* About — wider body */
+            .about__body {
+                max-width: 620px;
+            }
+
+            .about__text {
+                font-size: 1.05rem;
+            }
+
+            .about__details {
+                gap: 4.5rem;
+            }
+
+            .about__detail-value {
+                font-size: 1.15rem;
+            }
+
+            /* Contact — better proportions */
+            .contact__heading {
+                font-size: 6rem;
+            }
+
+            .contact__subtext {
+                max-width: 540px;
+                font-size: 1rem;
+            }
+        }
+
+        /* ═══════════════════════════════════════
+           EXTRA LARGE SCREENS (1800px+)
+           ═══════════════════════════════════════ */
+        @media (min-width: 1800px) {
+            :root {
+                --container: 1600px;
+                --gutter: 5rem;
+            }
+
+            .hero-line:nth-child(1) .hero-line__inner {
+                font-size: 7.5rem;
+            }
+
+            .hero-line:nth-child(2) .hero-line__inner {
+                font-size: 8rem;
+            }
+
+            .hero__descriptor {
+                max-width: 480px;
+            }
+
+            .flowchart {
+                max-width: 1000px;
+            }
+
+            .flow-card {
+                max-width: 740px;
+            }
+
+            .flow-pills {
+                max-width: 740px;
+            }
+
+            .flow-fork,
+            .flow-merge {
+                max-width: 740px;
+            }
+
+            .about__quote {
+                max-width: 1050px;
+                font-size: 3.2rem;
+            }
+
+            .about__body {
+                max-width: 700px;
+            }
+        }
+
+        /* ═══════════════════════════════════════
            REDUCED MOTION
            ═══════════════════════════════════════ */
         @media (prefers-reduced-motion: reduce) {
@@ -1897,7 +2132,7 @@
             <a href="#" class="nav__logo"><img src="Crux logo header.png" alt="Crux Consulting" class="nav__logo-img"></a>
             <ul class="nav__links">
                 <li><a href="#servicios">Servicios</a></li>
-                <li><a href="#trabajo">Trabajo</a></li>
+                <li><a href="#proceso">Proceso</a></li>
                 <li><a href="#nosotros">Nosotros</a></li>
                 <li><a href="#contacto">Contacto</a></li>
             </ul>
@@ -1909,7 +2144,7 @@
     <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
         <ul class="mobile-menu__links">
             <li><a href="#servicios">Servicios</a></li>
-            <li><a href="#trabajo">Trabajo</a></li>
+            <li><a href="#proceso">Proceso</a></li>
             <li><a href="#nosotros">Nosotros</a></li>
             <li><a href="#contacto">Contacto</a></li>
         </ul>
@@ -1921,20 +2156,23 @@
             <div class="hero__content">
                 <p class="label hero__label">
                     <span class="line-accent"></span>
-                    Desarrollo de entornos digitales
+                    Consultoría de digitalización operativa
                 </p>
                 <h1 class="hero__heading">
                     <span class="hero-line">
-                        <span class="hero-line__inner">Soluciones</span>
+                        <span class="hero-line__inner">Estructuramos tu negocio</span>
                     </span>
                     <span class="hero-line">
-                        <span class="hero-line__inner">integrales.</span>
+                        <span class="hero-line__inner">con herramientas digitales.</span>
                     </span>
                 </h1>
                 <p class="hero__descriptor">
-                    Creo identidades, experiencias y productos digitales
-                    con propósito. Cada decisión nace de una intención clara.
+                    Ayudamos a PYMEs de Baleares a estructurar su operativa con
+                    herramientas digitales. Facturación electrónica, gestión de clientes,
+                    automatizaciones y dashboards de negocio. Herramientas que tu equipo
+                    usará de verdad.
                 </p>
+                <a href="#contacto" class="hero__cta">Hablemos</a>
             </div>
             <div class="hero__geo" aria-hidden="true">
                 <div class="hero__geo-ring"></div>
@@ -1952,24 +2190,20 @@
     <div class="keywords" aria-hidden="true">
         <div class="keywords__track">
             <div class="keywords__group">
-                <span class="keywords__item">Branding</span><span class="keywords__sep"></span>
-                <span class="keywords__item">Digital</span><span class="keywords__sep"></span>
-                <span class="keywords__item">Estrategia</span><span class="keywords__sep"></span>
-                <span class="keywords__item">Producto</span><span class="keywords__sep"></span>
-                <span class="keywords__item">Identidad</span><span class="keywords__sep"></span>
-                <span class="keywords__item">Experiencia</span><span class="keywords__sep"></span>
-                <span class="keywords__item">Concepto</span><span class="keywords__sep"></span>
-                <span class="keywords__item">Sistemas</span><span class="keywords__sep"></span>
+                <span class="keywords__item">Hostelería</span><span class="keywords__sep"></span>
+                <span class="keywords__item">Comercio</span><span class="keywords__sep"></span>
+                <span class="keywords__item">Construcción</span><span class="keywords__sep"></span>
+                <span class="keywords__item">Servicios profesionales</span><span class="keywords__sep"></span>
+                <span class="keywords__item">Turismo</span><span class="keywords__sep"></span>
+                <span class="keywords__item">Salud y bienestar</span><span class="keywords__sep"></span>
             </div>
             <div class="keywords__group">
-                <span class="keywords__item">Branding</span><span class="keywords__sep"></span>
-                <span class="keywords__item">Digital</span><span class="keywords__sep"></span>
-                <span class="keywords__item">Estrategia</span><span class="keywords__sep"></span>
-                <span class="keywords__item">Producto</span><span class="keywords__sep"></span>
-                <span class="keywords__item">Identidad</span><span class="keywords__sep"></span>
-                <span class="keywords__item">Experiencia</span><span class="keywords__sep"></span>
-                <span class="keywords__item">Concepto</span><span class="keywords__sep"></span>
-                <span class="keywords__item">Sistemas</span><span class="keywords__sep"></span>
+                <span class="keywords__item">Hostelería</span><span class="keywords__sep"></span>
+                <span class="keywords__item">Comercio</span><span class="keywords__sep"></span>
+                <span class="keywords__item">Construcción</span><span class="keywords__sep"></span>
+                <span class="keywords__item">Servicios profesionales</span><span class="keywords__sep"></span>
+                <span class="keywords__item">Turismo</span><span class="keywords__sep"></span>
+                <span class="keywords__item">Salud y bienestar</span><span class="keywords__sep"></span>
             </div>
         </div>
     </div>
@@ -1984,51 +2218,62 @@
 
             <div class="services__blocks">
 
-                <!-- Block 1: Entornos digitales (primary, 50%) -->
-                <div class="svc-block svc-block--primary reveal">
+                <!-- Block 1: Digitalización operativa -->
+                <div class="svc-block reveal">
                     <div class="svc-block__header">
                         <span class="svc-block__number">01</span>
-                        <h3 class="svc-block__title">Entornos digitales</h3>
+                        <h3 class="svc-block__title">Digitalización operativa</h3>
                         <span class="svc-block__badge">Core</span>
                     </div>
 
-                    <!-- Main dropdown -->
                     <div class="svc-accordion" data-accordion>
                         <button class="svc-accordion__trigger" aria-expanded="false">
-                            <span>Visión general del servicio</span>
+                            <span>Del papel y el Excel al control digital</span>
                             <span class="svc-accordion__icon" aria-hidden="true"></span>
                         </button>
                         <div class="svc-accordion__panel">
                             <div class="svc-accordion__body">
                                 <p class="svc-accordion__text">
-                                    Diseñamos, construimos y evolucionamos ecosistemas digitales completos. Desde la arquitectura de información hasta la implementación técnica, cada entorno que creamos está pensado para escalar, conectar y generar valor real. Trabajamos con plataformas web, intranets corporativas, portales de cliente y herramientas internas — siempre con una visión integral que alinea tecnología, diseño y estrategia de negocio.
+                                    Implantamos las herramientas básicas que toda empresa necesita para funcionar con estructura: facturación electrónica adaptada a la nueva normativa, CRM para gestionar clientes y oportunidades de venta, y documentos en la nube accesibles para todo el equipo. Todo configurado, migrado y con formación incluida.
                                 </p>
 
-                                <!-- Sub-dropdown 1 -->
                                 <div class="svc-accordion svc-accordion--sub" data-accordion>
                                     <button class="svc-accordion__trigger" aria-expanded="false">
-                                        <span>Arquitectura y plataformas</span>
+                                        <span>Facturación electrónica y cumplimiento normativo</span>
                                         <span class="svc-accordion__icon" aria-hidden="true"></span>
                                     </button>
                                     <div class="svc-accordion__panel">
                                         <div class="svc-accordion__body">
                                             <p class="svc-accordion__text">
-                                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae. Sed vel lacus at nisi consequat tincidunt vel ac risus. Praesent facilisis dui non eros fringilla, id sagittis mauris tempor. Donec ac ligula sit amet nunc bibendum placerat at vel magna.
+                                                Holded, Sage o la herramienta que mejor encaje con tu gestor. Alta, plantillas, numeración legal y conexión con tu asesoría. Lista para VeriFactu antes de julio 2026.
                                             </p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Sub-dropdown 2 -->
                                 <div class="svc-accordion svc-accordion--sub" data-accordion>
                                     <button class="svc-accordion__trigger" aria-expanded="false">
-                                        <span>Integración y escalabilidad</span>
+                                        <span>CRM y gestión de clientes</span>
                                         <span class="svc-accordion__icon" aria-hidden="true"></span>
                                     </button>
                                     <div class="svc-accordion__panel">
                                         <div class="svc-accordion__body">
                                             <p class="svc-accordion__text">
-                                                Curabitur dignissim lacus vel arcu fermentum, nec ultricies nulla vehicula. Integer posuere justo eu dolor elementum, et tincidunt orci dictum. Nulla facilisi. Morbi at eros nec sem ullamcorper fermentum. Fusce ultrices enim non ipsum consequat, a pharetra nunc fringilla.
+                                                Un sitio donde ver todas tus oportunidades, hacer seguimiento de presupuestos y no perder ventas. HubSpot o Zoho según tu perfil. Configurado con tus datos reales.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                    <button class="svc-accordion__trigger" aria-expanded="false">
+                                        <span>Gestión documental y nube</span>
+                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                    </button>
+                                    <div class="svc-accordion__panel">
+                                        <div class="svc-accordion__body">
+                                            <p class="svc-accordion__text">
+                                                Google Workspace o Microsoft 365 con estructura de carpetas adaptada a tu negocio, permisos configurados y migración de datos. Se acabaron los documentos perdidos en WhatsApp.
                                             </p>
                                         </div>
                                     </div>
@@ -2038,33 +2283,62 @@
                     </div>
                 </div>
 
-                <!-- Block 2: Automatización (25%) -->
-                <div class="svc-block svc-block--secondary reveal">
+                <!-- Block 2: Inteligencia y control -->
+                <div class="svc-block reveal">
                     <div class="svc-block__header">
                         <span class="svc-block__number">02</span>
-                        <h3 class="svc-block__title">Automatización</h3>
+                        <h3 class="svc-block__title">Inteligencia y control</h3>
+                        <span class="svc-block__badge">Control</span>
                     </div>
 
                     <div class="svc-accordion" data-accordion>
                         <button class="svc-accordion__trigger" aria-expanded="false">
-                            <span>Flujos y procesos inteligentes</span>
+                            <span>Menos tareas manuales, más decisiones con datos</span>
                             <span class="svc-accordion__icon" aria-hidden="true"></span>
                         </button>
                         <div class="svc-accordion__panel">
                             <div class="svc-accordion__body">
                                 <p class="svc-accordion__text">
-                                    Identificamos tareas repetitivas y las transformamos en flujos automáticos que ahorran tiempo y reducen errores. Conectamos herramientas, plataformas y datos para que tu equipo se enfoque en lo que importa.
+                                    Eliminamos las tareas repetitivas que te roban horas cada semana y te damos visibilidad real de cómo va tu negocio. Automatizaciones, dashboards personalizados e inteligencia artificial aplicada a tu operativa diaria.
                                 </p>
 
                                 <div class="svc-accordion svc-accordion--sub" data-accordion>
                                     <button class="svc-accordion__trigger" aria-expanded="false">
-                                        <span>Herramientas y conectores</span>
+                                        <span>Automatizaciones</span>
                                         <span class="svc-accordion__icon" aria-hidden="true"></span>
                                     </button>
                                     <div class="svc-accordion__panel">
                                         <div class="svc-accordion__body">
                                             <p class="svc-accordion__text">
-                                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.
+                                                Confirmaciones de reserva, recordatorios de cobro, alertas de stock, sincronización entre herramientas. Identificamos las tareas que te quitan tiempo y las convertimos en flujos automáticos con Make o n8n.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                    <button class="svc-accordion__trigger" aria-expanded="false">
+                                        <span>Dashboard ejecutivo</span>
+                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                    </button>
+                                    <div class="svc-accordion__panel">
+                                        <div class="svc-accordion__body">
+                                            <p class="svc-accordion__text">
+                                                Tus KPIs de negocio en una pantalla: ventas, costes, márgenes, ocupación. Desarrollado a medida con tus datos reales. Actualizado automáticamente. Sin depender de Excel ni de nadie.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                    <button class="svc-accordion__trigger" aria-expanded="false">
+                                        <span>IA aplicada</span>
+                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                    </button>
+                                    <div class="svc-accordion__panel">
+                                        <div class="svc-accordion__body">
+                                            <p class="svc-accordion__text">
+                                                Chatbots de atención al cliente, automatización inteligente de respuestas y análisis de datos con inteligencia artificial. Para empresas que quieren dar un paso más.
                                             </p>
                                         </div>
                                     </div>
@@ -2074,37 +2348,75 @@
                     </div>
                 </div>
 
-                <!-- Block 3: Web + SEO (25%) -->
-                <div class="svc-block svc-block--secondary reveal">
+                <!-- Block 3: Visibilidad y captación -->
+                <div class="svc-block reveal">
                     <div class="svc-block__header">
                         <span class="svc-block__number">03</span>
-                        <h3 class="svc-block__title">Web + SEO</h3>
+                        <h3 class="svc-block__title">Visibilidad y captación</h3>
+                        <span class="svc-block__badge">Captación</span>
                     </div>
 
                     <div class="svc-accordion" data-accordion>
                         <button class="svc-accordion__trigger" aria-expanded="false">
-                            <span>Presencia y posicionamiento</span>
+                            <span>Tu presencia digital trabajando para ti</span>
                             <span class="svc-accordion__icon" aria-hidden="true"></span>
                         </button>
                         <div class="svc-accordion__panel">
                             <div class="svc-accordion__body">
                                 <p class="svc-accordion__text">
-                                    Creamos sitios web que no solo se ven bien — se encuentran bien. Combinamos diseño, desarrollo y estrategia SEO para que tu presencia digital trabaje por ti las 24 horas.
+                                    Creamos tu presencia digital para que genere negocio, no solo para que exista. Web profesional optimizada para búsquedas locales y sistema de reservas propio sin comisiones de terceros.
                                 </p>
 
                                 <div class="svc-accordion svc-accordion--sub" data-accordion>
                                     <button class="svc-accordion__trigger" aria-expanded="false">
-                                        <span>Estrategia de contenidos y métricas</span>
+                                        <span>Web profesional + SEO local</span>
                                         <span class="svc-accordion__icon" aria-hidden="true"></span>
                                     </button>
                                     <div class="svc-accordion__panel">
                                         <div class="svc-accordion__body">
                                             <p class="svc-accordion__text">
-                                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc maximus, nulla ut commodo sagittis, sapien dui mattis dui, non pulvinar lorem felis nec erat.
+                                                Sitio web rápido, bien diseñado y posicionado en Google para tu zona. Desde una landing en días hasta una web completa con CMS para que edites tú mismo.
                                             </p>
                                         </div>
                                     </div>
                                 </div>
+
+                                <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                    <button class="svc-accordion__trigger" aria-expanded="false">
+                                        <span>Motor de reservas online</span>
+                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                    </button>
+                                    <div class="svc-accordion__panel">
+                                        <div class="svc-accordion__body">
+                                            <p class="svc-accordion__text">
+                                                Sistema propio para que tus clientes reserven directamente. Sin comisiones de plataformas. Integrado con tu calendario, tu web y tu CRM.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Block 4: Gestión de proyectos -->
+                <div class="svc-block reveal">
+                    <div class="svc-block__header">
+                        <span class="svc-block__number">04</span>
+                        <h3 class="svc-block__title">Gestión de proyectos</h3>
+                        <span class="svc-block__badge">Proyectos</span>
+                    </div>
+
+                    <div class="svc-accordion" data-accordion>
+                        <button class="svc-accordion__trigger" aria-expanded="false">
+                            <span>Control de tareas, plazos y equipos</span>
+                            <span class="svc-accordion__icon" aria-hidden="true"></span>
+                        </button>
+                        <div class="svc-accordion__panel">
+                            <div class="svc-accordion__body">
+                                <p class="svc-accordion__text">
+                                    Para empresas de construcción, servicios o cualquier negocio con proyectos en marcha. Implantamos herramientas de gestión para que sepas quién hace qué, cuándo y a qué coste. Asana, Monday o ClickUp según tu equipo.
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -2114,11 +2426,11 @@
         </div>
     </section>
 
-    <!-- Nuestro Trabajo — Infographic -->
-    <section class="work section-padding" id="trabajo">
+    <!-- Proceso — Infographic -->
+    <section class="work section-padding" id="proceso">
         <div class="container">
             <div class="work__header reveal">
-                <h2 class="work__title">Nuestro trabajo</h2>
+                <h2 class="work__title">Cómo trabajamos</h2>
                 <p class="label">Proceso</p>
             </div>
             <div class="flowchart">
@@ -2128,16 +2440,16 @@
                 <!-- Phase 01 -->
                 <div class="flow-card reveal">
                     <span class="flow-card__num">Fase 01</span>
-                    <h3 class="flow-card__title">Descubrimiento</h3>
+                    <h3 class="flow-card__title">Diagnóstico</h3>
                     <div class="flow-card__rule"></div>
-                    <p class="flow-card__desc">Analizamos el ecosistema digital de cada cliente. Identificamos oportunidades, necesidades y puntos de fricción para construir sobre una base sólida.</p>
+                    <p class="flow-card__desc">Nos sentamos contigo, entendemos cómo funciona tu negocio y detectamos dónde pierdes tiempo y dinero. Sin compromiso, sin jerga técnica.</p>
                 </div>
 
                 <!-- Fork 01 → pills -->
                 <div class="flow-fork reveal"><div class="flow-fork__arm flow-fork__arm--left"></div><div class="flow-fork__arm flow-fork__arm--right"></div></div>
                 <div class="flow-pills reveal">
                     <span class="flow-pill">Análisis</span>
-                    <span class="flow-pill">Auditoría</span>
+                    <span class="flow-pill">Oportunidades</span>
                 </div>
 
                 <!-- Merge → Phase 02 -->
@@ -2146,15 +2458,15 @@
                 <!-- Phase 02 -->
                 <div class="flow-card reveal">
                     <span class="flow-card__num">Fase 02</span>
-                    <h3 class="flow-card__title">Estrategia</h3>
+                    <h3 class="flow-card__title">Plan de acción</h3>
                     <div class="flow-card__rule"></div>
-                    <p class="flow-card__desc">Diseñamos hojas de ruta digitales personalizadas. Cada paso está calibrado para maximizar el impacto con los recursos disponibles.</p>
+                    <p class="flow-card__desc">Te proponemos exactamente qué hacer, en qué orden, con qué herramientas y a qué coste. Una hoja de ruta clara, sin sorpresas.</p>
                 </div>
 
                 <!-- Fork 02 → pills -->
                 <div class="flow-fork reveal"><div class="flow-fork__arm flow-fork__arm--left"></div><div class="flow-fork__arm flow-fork__arm--right"></div></div>
                 <div class="flow-pills reveal">
-                    <span class="flow-pill">Roadmap</span>
+                    <span class="flow-pill">Hoja de ruta</span>
                     <span class="flow-pill">Priorización</span>
                 </div>
 
@@ -2164,16 +2476,16 @@
                 <!-- Phase 03 -->
                 <div class="flow-card reveal">
                     <span class="flow-card__num">Fase 03</span>
-                    <h3 class="flow-card__title">Ejecución</h3>
+                    <h3 class="flow-card__title">Implementación</h3>
                     <div class="flow-card__rule"></div>
-                    <p class="flow-card__desc">Construimos, integramos y lanzamos soluciones que funcionan. Desarrollo ágil con entregas incrementales y comunicación constante.</p>
+                    <p class="flow-card__desc">Configuramos las herramientas, migramos tus datos y formamos a tu equipo. No nos vamos hasta que todo funciona y todos saben usarlo.</p>
                 </div>
 
                 <!-- Fork 03 → pills -->
                 <div class="flow-fork reveal"><div class="flow-fork__arm flow-fork__arm--left"></div><div class="flow-fork__arm flow-fork__arm--right"></div></div>
                 <div class="flow-pills reveal">
-                    <span class="flow-pill">Desarrollo</span>
-                    <span class="flow-pill">Testing</span>
+                    <span class="flow-pill">Configuración</span>
+                    <span class="flow-pill">Formación</span>
                 </div>
 
                 <!-- Merge → Phase 04 -->
@@ -2182,9 +2494,9 @@
                 <!-- Phase 04 -->
                 <div class="flow-card reveal">
                     <span class="flow-card__num">Fase 04</span>
-                    <h3 class="flow-card__title">Impacto</h3>
+                    <h3 class="flow-card__title">Acompañamiento</h3>
                     <div class="flow-card__rule"></div>
-                    <p class="flow-card__desc">Medimos resultados, optimizamos procesos y escalamos lo que funciona. El éxito de nuestros clientes es nuestro mejor indicador.</p>
+                    <p class="flow-card__desc">Seguimos contigo. Revisamos métricas, ajustamos lo que haga falta y te ayudamos a sacarle el máximo partido a cada herramienta. Soporte continuo por WhatsApp.</p>
                 </div>
 
                 <!-- Final arrow + outcome -->
@@ -2201,9 +2513,9 @@
         <div class="container">
             <div class="about__manifesto reveal">
                 <blockquote class="about__quote">
-                    <span class="about__quote-mark">&ldquo;</span>Creemos en el poder de la restricción.
-                    Lo esencial emerge cuando se elimina lo superfluo.
-                    Cada proyecto es una búsqueda de claridad.<span class="about__quote-mark">&rdquo;</span>
+                    <span class="about__quote-mark">&ldquo;</span>No vendemos tecnología. Estructuramos tu negocio con herramientas
+                    digitales y nos aseguramos de que tu equipo las use.
+                    Si no las usan, no sirve de nada.<span class="about__quote-mark">&rdquo;</span>
                 </blockquote>
             </div>
             <div class="about__grid reveal">
@@ -2212,19 +2524,24 @@
                 </div>
                 <div class="about__body">
                     <p class="about__text">
-                        Crux Consulting es una consultora independiente de soluciones digitales.
-                        Trabajamos con empresas y equipos que entienden que la tecnología no es
-                        un fin — es un medio. Cada proyecto comienza con una pregunta:
-                        ¿qué es lo que realmente importa?
+                        CRUX Consulting es una consultora de digitalización operativa con base en
+                        Baleares. Trabajamos con PYMEs que saben que necesitan cambiar pero
+                        no saben por dónde empezar. No somos una empresa de software ni una
+                        agencia de marketing. Somos el equipo que se sienta contigo, entiende tu
+                        negocio y estructura tu operativa con las herramientas digitales adecuadas.
                     </p>
                     <div class="about__details">
                         <div class="about__detail-item">
+                            <span class="label">Fundado</span>
+                            <span class="about__detail-value">2025</span>
+                        </div>
+                        <div class="about__detail-item">
                             <span class="label">Ubicación</span>
-                            <span class="about__detail-value">Mallorca, España</span>
+                            <span class="about__detail-value">Baleares</span>
                         </div>
                         <div class="about__detail-item">
                             <span class="label">Equipo</span>
-                            <span class="about__detail-value">Boutique</span>
+                            <span class="about__detail-value">4 personas</span>
                         </div>
                     </div>
                 </div>
@@ -2240,8 +2557,9 @@
 
             <!-- Text -->
             <div class="contact__text reveal">
-                <p class="contact__question">¿Tienes un proyecto en mente?</p>
+                <p class="contact__question">¿Quieres estructurar tu negocio con herramientas digitales?</p>
                 <h2 class="contact__heading">Hablemos.</h2>
+                <p class="contact__subtext">Primera consulta sin compromiso. Te escuchamos, analizamos tu situación y te decimos si podemos ayudarte.</p>
             </div>
 
             <!-- Form system -->
@@ -2299,13 +2617,12 @@
     <footer class="footer">
         <div class="container footer__inner">
             <div class="footer__left">
-                <span class="footer__logo">Crux</span>
+                <span class="footer__logo">CRUX Consulting</span>
                 <span class="footer__copy">&copy; 2026</span>
             </div>
             <ul class="footer__social">
                 <li><a href="#" target="_blank" rel="noopener">Instagram</a></li>
                 <li><a href="#" target="_blank" rel="noopener">LinkedIn</a></li>
-                <li><a href="#" target="_blank" rel="noopener">Behance</a></li>
             </ul>
         </div>
     </footer>
@@ -2473,6 +2790,22 @@
         /* ═══════════════════════════════════════
            ACCORDIONS
            ═══════════════════════════════════════ */
+        /* Row-split: position horizontal diagonal at the actual row boundary */
+        function updateRowSplit() {
+            const grid = document.querySelector('.services__blocks');
+            if (!grid) return;
+            const firstBlock = grid.querySelector('.svc-block:nth-child(1)');
+            const secondBlock = grid.querySelector('.svc-block:nth-child(2)');
+            if (!firstBlock || !secondBlock) return;
+            const gridRect = grid.getBoundingClientRect();
+            const row1Bottom = Math.max(
+                firstBlock.getBoundingClientRect().bottom,
+                secondBlock.getBoundingClientRect().bottom
+            );
+            const splitPx = row1Bottom - gridRect.top;
+            grid.style.setProperty('--row-split', splitPx + 'px');
+        }
+
         document.querySelectorAll('[data-accordion]').forEach(acc => {
             const trigger = acc.querySelector(':scope > .svc-accordion__trigger');
             if (!trigger) return;
@@ -2480,8 +2813,14 @@
                 const isOpen = acc.classList.contains('is-open');
                 acc.classList.toggle('is-open');
                 trigger.setAttribute('aria-expanded', !isOpen);
+                // Update diagonal line after accordion transition
+                setTimeout(updateRowSplit, 350);
             });
         });
+
+        // Initial + resize
+        updateRowSplit();
+        window.addEventListener('resize', updateRowSplit);
 
         /* ═══════════════════════════════════════
            CONTACT FORM CHANNEL TOGGLE
