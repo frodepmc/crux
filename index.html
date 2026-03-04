@@ -668,12 +668,14 @@
         }
 
         .services__title {
-            font-family: var(--font-display);
-            font-style: italic;
-            font-weight: 400;
-            font-size: clamp(2rem, 4.5vw, 3.5rem);
+            font-family: var(--font-body);
+            font-style: normal;
+            font-weight: 500;
+            font-size: clamp(1.6rem, 3.5vw, 2.6rem);
             line-height: 1.15;
-            color: var(--accent-deep);
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
         }
 
         /* Accordion blocks layout — 2×2 with diagonal dividers */
@@ -766,11 +768,13 @@
             margin-left: auto;
             font-family: var(--font-body);
             font-size: 0.6rem;
-            font-weight: 500;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.18em;
-            color: var(--accent);
-            opacity: 0.6;
+            letter-spacing: 0.15em;
+            color: #fff;
+            background: var(--accent);
+            padding: 0.35rem 0.9rem;
+            border-radius: 2px;
             white-space: nowrap;
         }
 
@@ -965,6 +969,48 @@
             opacity: 0.4;
         }
 
+        /* Tier comparison (Esencial vs Pro) */
+        .svc-tiers {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            margin-top: 1.2rem;
+        }
+
+        .svc-tier {
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .svc-tier--pro {
+            border-color: rgba(56, 105, 171, 0.25);
+            background: rgba(56, 105, 171, 0.04);
+        }
+
+        .svc-tier__label {
+            display: inline-block;
+            font-family: var(--font-body);
+            font-size: 0.58rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .svc-tier--pro .svc-tier__label {
+            color: var(--accent);
+        }
+
+        .svc-tier__desc {
+            font-size: clamp(0.76rem, 0.85vw, 0.84rem);
+            color: var(--text-muted);
+            font-weight: 300;
+            line-height: 1.6;
+        }
+
         /* "Qué incluye" wrapper — separates description from sub-items */
         .svc-accordion__includes {
             margin-top: 1.6rem;
@@ -986,6 +1032,41 @@
             padding-left: 0.2rem;
         }
 
+        /* ─── Asesoría incluida banner ─── */
+        .services__included {
+            margin-top: clamp(3rem, 6vh, 5rem);
+            display: flex;
+            align-items: flex-start;
+            gap: clamp(1rem, 2vw, 1.5rem);
+            padding: clamp(1.5rem, 3vw, 2.2rem);
+            background: var(--accent);
+            color: #fff;
+            border-radius: 2px;
+        }
+
+        .services__included-icon {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            margin-top: 0.15rem;
+            opacity: 0.8;
+        }
+
+        .services__included-title {
+            font-family: var(--font-body);
+            font-size: clamp(0.85rem, 1.1vw, 1.05rem);
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        .services__included-desc {
+            font-size: clamp(0.78rem, 0.9vw, 0.9rem);
+            font-weight: 300;
+            line-height: 1.7;
+            opacity: 0.8;
+        }
+
         /* ─── Servicios Individuales ─── */
         .services__individual {
             margin-top: clamp(4rem, 8vh, 7rem);
@@ -998,11 +1079,13 @@
         }
 
         .services__individual-title {
-            font-family: var(--font-display);
-            font-style: italic;
-            font-weight: 400;
-            font-size: clamp(1.6rem, 3vw, 2.2rem);
-            color: var(--accent-deep);
+            font-family: var(--font-body);
+            font-style: normal;
+            font-weight: 500;
+            font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
             margin-bottom: 0.8rem;
         }
 
@@ -2048,6 +2131,10 @@
                 padding-top: 1rem;
             }
 
+            .svc-tiers {
+                grid-template-columns: 1fr;
+            }
+
             .contact__inner {
                 grid-template-columns: 1fr;
                 gap: 2.5rem;
@@ -2404,6 +2491,16 @@
                                 <p class="svc-accordion__text">
                                     Pierdes reservas porque dependes de WhatsApp y llamadas. Montamos tu sistema de reservas online con web profesional, motor de reservas y Google Business optimizado. Tus clientes te encuentran y reservan sin que tú tengas que estar pendiente.
                                 </p>
+                                <div class="svc-tiers">
+                                    <div class="svc-tier">
+                                        <span class="svc-tier__label">Esencial</span>
+                                        <p class="svc-tier__desc">Landing page + motor de reservas básico + Google Business</p>
+                                    </div>
+                                    <div class="svc-tier svc-tier--pro">
+                                        <span class="svc-tier__label">Pro</span>
+                                        <p class="svc-tier__desc">Web profesional (2-3 págs) + motor de reservas avanzado con CRM y pagos online</p>
+                                    </div>
+                                </div>
                                 <span class="svc-block__price">Desde 700 EUR</span>
 
                                 <div class="svc-accordion__includes">
@@ -2540,8 +2637,18 @@
                         <div class="svc-accordion__panel">
                             <div class="svc-accordion__body">
                                 <p class="svc-accordion__text">
-                                    Facturas con Word, pierdes tiempo y te preocupa Hacienda. Configuramos tu facturación digital con Holded: cumplimiento VeriFactu/SII, conciliación bancaria automática y recordatorios de cobro. La versión Pro incluye landing con pasarela de pago.
+                                    Facturas con Word, pierdes tiempo y te preocupa Hacienda. Configuramos tu facturación digital con Holded: cumplimiento VeriFactu/SII, conciliación bancaria automática y recordatorios de cobro.
                                 </p>
+                                <div class="svc-tiers">
+                                    <div class="svc-tier">
+                                        <span class="svc-tier__label">Esencial</span>
+                                        <p class="svc-tier__desc">Holded facturación + VeriFactu/SII + conciliación bancaria</p>
+                                    </div>
+                                    <div class="svc-tier svc-tier--pro">
+                                        <span class="svc-tier__label">Pro</span>
+                                        <p class="svc-tier__desc">Todo lo Esencial + landing con pasarela de pago + automatización de cobros</p>
+                                    </div>
+                                </div>
                                 <span class="svc-block__price">Desde 450 EUR</span>
 
                                 <div class="svc-accordion__includes">
@@ -2611,6 +2718,16 @@
                                 <p class="svc-accordion__text">
                                     Tienes leads pero no conviertes. No haces seguimiento y las oportunidades se enfrían. Implantamos HubSpot como CRM con automatizaciones de seguimiento, plantillas de email y WhatsApp, y secuencias comerciales para que no se te escape ningún cliente.
                                 </p>
+                                <div class="svc-tiers">
+                                    <div class="svc-tier">
+                                        <span class="svc-tier__label">Esencial</span>
+                                        <p class="svc-tier__desc">HubSpot Starter + pipeline configurado + plantillas de email y WhatsApp</p>
+                                    </div>
+                                    <div class="svc-tier svc-tier--pro">
+                                        <span class="svc-tier__label">Pro</span>
+                                        <p class="svc-tier__desc">HubSpot Business + secuencias comerciales automatizadas + reporting avanzado</p>
+                                    </div>
+                                </div>
                                 <span class="svc-block__price">Desde 1.000 EUR</span>
 
                                 <div class="svc-accordion__includes">
@@ -2662,6 +2779,17 @@
                     </div>
                 </div>
 
+            </div>
+
+            <!-- Asesoría y Formación incluida -->
+            <div class="services__included reveal">
+                <div class="services__included-icon" aria-hidden="true">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <div class="services__included-content">
+                    <p class="services__included-title">Asesoría y formación incluida en todos los servicios</p>
+                    <p class="services__included-desc">Cada pack y servicio incluye sesiones de asesoría personalizada, formación para tu equipo y soporte post-implementación. No te dejamos solo con las herramientas: nos aseguramos de que las uséis.</p>
+                </div>
             </div>
 
             <!-- Servicios Individuales -->
