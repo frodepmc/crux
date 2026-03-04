@@ -845,8 +845,9 @@
             opacity: 0;
         }
 
-        .svc-accordion.is-open > .svc-accordion__trigger {
+        .svc-accordion:not(.svc-accordion--sub).is-open > .svc-accordion__trigger {
             color: var(--accent);
+            background: rgba(56, 105, 171, 0.03);
         }
 
         /* Accordion panel (content) */
@@ -885,27 +886,30 @@
 
         /* Sub-accordions (nested, indented) */
         .svc-accordion--sub {
-            margin-left: clamp(1rem, 2vw, 1.8rem);
             border-top: 1px solid var(--border);
+            border-left: 2px solid transparent;
+            transition: border-color 0.3s ease, background 0.3s ease;
+        }
+
+        .svc-accordion--sub.is-open {
+            border-left-color: rgba(56, 105, 171, 0.25);
+            background: rgba(56, 105, 171, 0.015);
         }
 
         .svc-accordion--sub > .svc-accordion__trigger {
             font-size: clamp(0.8rem, 0.9vw, 0.88rem);
             color: var(--text-muted);
             padding: clamp(0.8rem, 1.2vw, 1rem) clamp(1.2rem, 2.5vw, 2rem);
-        }
-
-        .svc-accordion--sub > .svc-accordion__trigger::before {
-            content: '';
-            width: 12px;
-            height: 1px;
-            background: var(--border-strong);
-            margin-right: 0.8rem;
-            flex-shrink: 0;
+            padding-left: clamp(1.4rem, 2.8vw, 2.2rem);
         }
 
         .svc-accordion--sub > .svc-accordion__trigger:hover {
             color: var(--accent);
+        }
+
+        .svc-accordion--sub.is-open > .svc-accordion__trigger {
+            color: var(--accent);
+            font-weight: 400;
         }
 
         .svc-accordion--sub .svc-accordion__icon {
@@ -913,8 +917,165 @@
             height: 10px;
         }
 
+        .svc-accordion--sub .svc-accordion__body {
+            padding-left: clamp(1.4rem, 2.8vw, 2.2rem);
+        }
+
         .svc-accordion--sub .svc-accordion__text {
             font-size: clamp(0.8rem, 0.88vw, 0.88rem);
+        }
+
+        /* Staggered reveal for sub-accordions */
+        .svc-accordion__includes .svc-accordion--sub:nth-child(2) {
+            transition-delay: 0.05s;
+        }
+        .svc-accordion__includes .svc-accordion--sub:nth-child(3) {
+            transition-delay: 0.1s;
+        }
+        .svc-accordion__includes .svc-accordion--sub:nth-child(4) {
+            transition-delay: 0.15s;
+        }
+
+        /* Price indicator */
+        .svc-block__price {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1.4rem;
+            font-family: var(--font-body);
+            font-size: 0.72rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--accent);
+            padding: 0.5rem 1.2rem;
+            background: rgba(56, 105, 171, 0.04);
+            border: 1px solid rgba(56, 105, 171, 0.15);
+            border-radius: 2px;
+        }
+
+        .svc-block__price::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0.4;
+        }
+
+        /* "Qué incluye" wrapper — separates description from sub-items */
+        .svc-accordion__includes {
+            margin-top: 1.6rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid var(--border);
+            position: relative;
+        }
+
+        .svc-accordion__includes-label {
+            display: block;
+            font-family: var(--font-body);
+            font-size: 0.62rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+            opacity: 0.5;
+            margin-bottom: 0.2rem;
+            padding-left: 0.2rem;
+        }
+
+        /* ─── Servicios Individuales ─── */
+        .services__individual {
+            margin-top: clamp(4rem, 8vh, 7rem);
+            padding-top: clamp(3rem, 6vh, 5rem);
+            border-top: 1px solid var(--border);
+        }
+
+        .services__individual-header {
+            margin-bottom: clamp(2rem, 4vh, 3.5rem);
+        }
+
+        .services__individual-title {
+            font-family: var(--font-display);
+            font-style: italic;
+            font-weight: 400;
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+            color: var(--accent-deep);
+            margin-bottom: 0.8rem;
+        }
+
+        .services__individual-desc {
+            color: var(--text-muted);
+            font-size: clamp(0.85rem, 1vw, 1rem);
+            font-weight: 300;
+            line-height: 1.7;
+            max-width: 600px;
+        }
+
+        .services__individual-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: clamp(1.2rem, 2vw, 2rem);
+        }
+
+        .services__individual-card {
+            border: 1px solid var(--border);
+            padding: clamp(1.5rem, 2.5vw, 2rem);
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .services__individual-card:hover {
+            background: rgba(62, 109, 148, 0.03);
+            border-color: var(--border-strong);
+        }
+
+        .services__individual-num {
+            font-family: var(--font-display);
+            font-style: italic;
+            font-size: 0.75rem;
+            color: var(--accent);
+            opacity: 0.5;
+            display: block;
+            margin-bottom: 0.8rem;
+        }
+
+        .services__individual-card-title {
+            font-family: var(--font-display);
+            font-size: clamp(1rem, 1.4vw, 1.2rem);
+            font-weight: 400;
+            letter-spacing: 0.01em;
+            margin-bottom: 1.2rem;
+            color: var(--text);
+        }
+
+        .services__individual-list {
+            list-style: none;
+            margin-bottom: 1.2rem;
+        }
+
+        .services__individual-list li {
+            font-size: clamp(0.8rem, 0.9vw, 0.88rem);
+            color: var(--text-muted);
+            font-weight: 300;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .services__individual-list li::before {
+            content: '';
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0.4;
+            flex-shrink: 0;
+        }
+
+        .services__individual-list li:last-child {
+            border-bottom: none;
         }
 
         /* Blue accent line on open primary accordion */
@@ -1868,6 +2029,10 @@
                 display: none;
             }
 
+            .services__individual-grid {
+                grid-template-columns: 1fr;
+            }
+
             .svc-accordion__trigger {
                 padding: 1rem 1.2rem;
             }
@@ -1876,8 +2041,9 @@
                 padding: 0 1.2rem 1.2rem;
             }
 
-            .svc-accordion--sub {
-                margin-left: 0.8rem;
+            .svc-accordion__includes {
+                margin-top: 1.2rem;
+                padding-top: 1rem;
             }
 
             .contact__inner {
@@ -2212,69 +2378,73 @@
     <section class="services section-padding" id="servicios">
         <div class="container">
             <div class="services__header reveal">
-                <h2 class="services__title">Lo que hacemos</h2>
+                <h2 class="services__title">Nuestros packs</h2>
                 <p class="label">Servicios</p>
             </div>
 
             <div class="services__blocks">
 
-                <!-- Block 1: Digitalización operativa -->
+                <!-- Block 1: Motor de Reservas -->
                 <div class="svc-block reveal">
                     <div class="svc-block__header">
                         <span class="svc-block__number">01</span>
-                        <h3 class="svc-block__title">Digitalización operativa</h3>
-                        <span class="svc-block__badge">Core</span>
+                        <h3 class="svc-block__title">Motor de Reservas</h3>
+                        <span class="svc-block__badge">Esencial / Pro</span>
                     </div>
 
                     <div class="svc-accordion" data-accordion>
                         <button class="svc-accordion__trigger" aria-expanded="false">
-                            <span>Del papel y el Excel al control digital</span>
+                            <span>Que me encuentren y reserven</span>
                             <span class="svc-accordion__icon" aria-hidden="true"></span>
                         </button>
                         <div class="svc-accordion__panel">
                             <div class="svc-accordion__body">
                                 <p class="svc-accordion__text">
-                                    Implantamos las herramientas básicas que toda empresa necesita para funcionar con estructura: facturación electrónica adaptada a la nueva normativa, CRM para gestionar clientes y oportunidades de venta, y documentos en la nube accesibles para todo el equipo. Todo configurado, migrado y con formación incluida.
+                                    Pierdes reservas porque dependes de WhatsApp y llamadas. Montamos tu sistema de reservas online con web profesional, motor de reservas y Google Business optimizado. Tus clientes te encuentran y reservan sin que tú tengas que estar pendiente.
                                 </p>
+                                <span class="svc-block__price">Desde 700 EUR</span>
 
-                                <div class="svc-accordion svc-accordion--sub" data-accordion>
-                                    <button class="svc-accordion__trigger" aria-expanded="false">
-                                        <span>Facturación electrónica y cumplimiento normativo</span>
-                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                    </button>
-                                    <div class="svc-accordion__panel">
-                                        <div class="svc-accordion__body">
-                                            <p class="svc-accordion__text">
-                                                Holded, Sage o la herramienta que mejor encaje con tu gestor. Alta, plantillas, numeración legal y conexión con tu asesoría. Lista para VeriFactu antes de julio 2026.
-                                            </p>
+                                <div class="svc-accordion__includes">
+                                    <span class="svc-accordion__includes-label">Qué incluye</span>
+                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                        <button class="svc-accordion__trigger" aria-expanded="false">
+                                            <span>Web profesional</span>
+                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                        </button>
+                                        <div class="svc-accordion__panel">
+                                            <div class="svc-accordion__body">
+                                                <p class="svc-accordion__text">
+                                                    Landing básica en Astro para la versión Esencial. Landing Pro con CMS e integraciones para la versión Pro. Rápida, optimizada para móvil y posicionada en Google.
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div class="svc-accordion svc-accordion--sub" data-accordion>
-                                    <button class="svc-accordion__trigger" aria-expanded="false">
-                                        <span>CRM y gestión de clientes</span>
-                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                    </button>
-                                    <div class="svc-accordion__panel">
-                                        <div class="svc-accordion__body">
-                                            <p class="svc-accordion__text">
-                                                Un sitio donde ver todas tus oportunidades, hacer seguimiento de presupuestos y no perder ventas. HubSpot o Zoho según tu perfil. Configurado con tus datos reales.
-                                            </p>
+                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                        <button class="svc-accordion__trigger" aria-expanded="false">
+                                            <span>Motor de reservas</span>
+                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                        </button>
+                                        <div class="svc-accordion__panel">
+                                            <div class="svc-accordion__body">
+                                                <p class="svc-accordion__text">
+                                                    Checkfront, Acuity, Beds24 o Cover Manager según tu sector. Configuración básica o avanzada con CRM y pagos online integrados. Recordatorios automáticos para reducir no-shows.
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div class="svc-accordion svc-accordion--sub" data-accordion>
-                                    <button class="svc-accordion__trigger" aria-expanded="false">
-                                        <span>Gestión documental y nube</span>
-                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                    </button>
-                                    <div class="svc-accordion__panel">
-                                        <div class="svc-accordion__body">
-                                            <p class="svc-accordion__text">
-                                                Google Workspace o Microsoft 365 con estructura de carpetas adaptada a tu negocio, permisos configurados y migración de datos. Se acabaron los documentos perdidos en WhatsApp.
-                                            </p>
+                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                        <button class="svc-accordion__trigger" aria-expanded="false">
+                                            <span>Google Business + Formación</span>
+                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                        </button>
+                                        <div class="svc-accordion__panel">
+                                            <div class="svc-accordion__body">
+                                                <p class="svc-accordion__text">
+                                                    Configuración y optimización de tu perfil de Google Business para que te encuentren en búsquedas locales. Incluye 4-6h de formación y 4-6 semanas de soporte post-implementación.
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -2283,63 +2453,67 @@
                     </div>
                 </div>
 
-                <!-- Block 2: Inteligencia y control -->
+                <!-- Block 2: Central de Operaciones -->
                 <div class="svc-block reveal">
                     <div class="svc-block__header">
                         <span class="svc-block__number">02</span>
-                        <h3 class="svc-block__title">Inteligencia y control</h3>
-                        <span class="svc-block__badge">Control</span>
+                        <h3 class="svc-block__title">Central de Operaciones</h3>
+                        <span class="svc-block__badge">Único</span>
                     </div>
 
                     <div class="svc-accordion" data-accordion>
                         <button class="svc-accordion__trigger" aria-expanded="false">
-                            <span>Menos tareas manuales, más decisiones con datos</span>
+                            <span>Equipo coordinado, sin caos</span>
                             <span class="svc-accordion__icon" aria-hidden="true"></span>
                         </button>
                         <div class="svc-accordion__panel">
                             <div class="svc-accordion__body">
                                 <p class="svc-accordion__text">
-                                    Eliminamos las tareas repetitivas que te roban horas cada semana y te damos visibilidad real de cómo va tu negocio. Automatizaciones, dashboards personalizados e inteligencia artificial aplicada a tu operativa diaria.
+                                    Tu equipo vive en WhatsApp, las tareas se pierden y nadie sabe quién hace qué. Centralizamos toda la operativa en un solo sitio: gestión de proyectos, documentos compartidos y automatizaciones que eliminan el trabajo repetitivo.
                                 </p>
+                                <span class="svc-block__price">Desde 800 EUR</span>
 
-                                <div class="svc-accordion svc-accordion--sub" data-accordion>
-                                    <button class="svc-accordion__trigger" aria-expanded="false">
-                                        <span>Automatizaciones</span>
-                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                    </button>
-                                    <div class="svc-accordion__panel">
-                                        <div class="svc-accordion__body">
-                                            <p class="svc-accordion__text">
-                                                Confirmaciones de reserva, recordatorios de cobro, alertas de stock, sincronización entre herramientas. Identificamos las tareas que te quitan tiempo y las convertimos en flujos automáticos con Make o n8n.
-                                            </p>
+                                <div class="svc-accordion__includes">
+                                    <span class="svc-accordion__includes-label">Qué incluye</span>
+                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                        <button class="svc-accordion__trigger" aria-expanded="false">
+                                            <span>Monday — gestión de proyectos</span>
+                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                        </button>
+                                        <div class="svc-accordion__panel">
+                                            <div class="svc-accordion__body">
+                                                <p class="svc-accordion__text">
+                                                    Configuración completa de Monday adaptada a tus procesos. Tableros, vistas, automatizaciones internas y permisos por equipo. Todo listo para que empieces a trabajar desde el primer día.
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div class="svc-accordion svc-accordion--sub" data-accordion>
-                                    <button class="svc-accordion__trigger" aria-expanded="false">
-                                        <span>Dashboard ejecutivo</span>
-                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                    </button>
-                                    <div class="svc-accordion__panel">
-                                        <div class="svc-accordion__body">
-                                            <p class="svc-accordion__text">
-                                                Tus KPIs de negocio en una pantalla: ventas, costes, márgenes, ocupación. Desarrollado a medida con tus datos reales. Actualizado automáticamente. Sin depender de Excel ni de nadie.
-                                            </p>
+                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                        <button class="svc-accordion__trigger" aria-expanded="false">
+                                            <span>Google Workspace + Documentos</span>
+                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                        </button>
+                                        <div class="svc-accordion__panel">
+                                            <div class="svc-accordion__body">
+                                                <p class="svc-accordion__text">
+                                                    Email profesional, Drive con estructura de carpetas, permisos configurados y migración de datos. Se acabaron los documentos perdidos en WhatsApp.
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div class="svc-accordion svc-accordion--sub" data-accordion>
-                                    <button class="svc-accordion__trigger" aria-expanded="false">
-                                        <span>IA aplicada</span>
-                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                    </button>
-                                    <div class="svc-accordion__panel">
-                                        <div class="svc-accordion__body">
-                                            <p class="svc-accordion__text">
-                                                Chatbots de atención al cliente, automatización inteligente de respuestas y análisis de datos con inteligencia artificial. Para empresas que quieren dar un paso más.
-                                            </p>
+                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                        <button class="svc-accordion__trigger" aria-expanded="false">
+                                            <span>Automatizaciones + Formación</span>
+                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                        </button>
+                                        <div class="svc-accordion__panel">
+                                            <div class="svc-accordion__body">
+                                                <p class="svc-accordion__text">
+                                                    3 flujos automatizados con Make para eliminar tareas repetitivas. Incluye 4h de formación para tu equipo y 4 semanas de soporte post-implementación.
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -2348,49 +2522,67 @@
                     </div>
                 </div>
 
-                <!-- Block 3: Visibilidad y captación -->
+                <!-- Block 3: Facturación Digital -->
                 <div class="svc-block reveal">
                     <div class="svc-block__header">
                         <span class="svc-block__number">03</span>
-                        <h3 class="svc-block__title">Visibilidad y captación</h3>
-                        <span class="svc-block__badge">Captación</span>
+                        <h3 class="svc-block__title">Facturación Digital</h3>
+                        <span class="svc-block__badge">Esencial / Pro</span>
                     </div>
 
                     <div class="svc-accordion" data-accordion>
                         <button class="svc-accordion__trigger" aria-expanded="false">
-                            <span>Tu presencia digital trabajando para ti</span>
+                            <span>Facturar bien y cumplir normativa</span>
                             <span class="svc-accordion__icon" aria-hidden="true"></span>
                         </button>
                         <div class="svc-accordion__panel">
                             <div class="svc-accordion__body">
                                 <p class="svc-accordion__text">
-                                    Creamos tu presencia digital para que genere negocio, no solo para que exista. Web profesional optimizada para búsquedas locales y sistema de reservas propio sin comisiones de terceros.
+                                    Facturas con Word, pierdes tiempo y te preocupa Hacienda. Configuramos tu facturación digital con Holded: cumplimiento VeriFactu/SII, conciliación bancaria automática y recordatorios de cobro. La versión Pro incluye landing con pasarela de pago.
                                 </p>
+                                <span class="svc-block__price">Desde 450 EUR</span>
 
-                                <div class="svc-accordion svc-accordion--sub" data-accordion>
-                                    <button class="svc-accordion__trigger" aria-expanded="false">
-                                        <span>Web profesional + SEO local</span>
-                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                    </button>
-                                    <div class="svc-accordion__panel">
-                                        <div class="svc-accordion__body">
-                                            <p class="svc-accordion__text">
-                                                Sitio web rápido, bien diseñado y posicionado en Google para tu zona. Desde una landing en días hasta una web completa con CMS para que edites tú mismo.
-                                            </p>
+                                <div class="svc-accordion__includes">
+                                    <span class="svc-accordion__includes-label">Qué incluye</span>
+                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                        <button class="svc-accordion__trigger" aria-expanded="false">
+                                            <span>Holded — facturación completa</span>
+                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                        </button>
+                                        <div class="svc-accordion__panel">
+                                            <div class="svc-accordion__body">
+                                                <p class="svc-accordion__text">
+                                                    Configuración completa de Holded: plantillas de factura personalizadas, numeración legal, catálogo de productos y conexión con tu gestor. Todo listo para facturar desde el primer día.
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div class="svc-accordion svc-accordion--sub" data-accordion>
-                                    <button class="svc-accordion__trigger" aria-expanded="false">
-                                        <span>Motor de reservas online</span>
-                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                    </button>
-                                    <div class="svc-accordion__panel">
-                                        <div class="svc-accordion__body">
-                                            <p class="svc-accordion__text">
-                                                Sistema propio para que tus clientes reserven directamente. Sin comisiones de plataformas. Integrado con tu calendario, tu web y tu CRM.
-                                            </p>
+                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                        <button class="svc-accordion__trigger" aria-expanded="false">
+                                            <span>VeriFactu/SII + Conciliación</span>
+                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                        </button>
+                                        <div class="svc-accordion__panel">
+                                            <div class="svc-accordion__body">
+                                                <p class="svc-accordion__text">
+                                                    Cumplimiento normativo configurado y verificado. Conciliación bancaria automática para que no tengas que cuadrar nada a mano. Incluye automatización de recordatorios de facturas pendientes.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                        <button class="svc-accordion__trigger" aria-expanded="false">
+                                            <span>Formación + Soporte</span>
+                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                        </button>
+                                        <div class="svc-accordion__panel">
+                                            <div class="svc-accordion__body">
+                                                <p class="svc-accordion__text">
+                                                    4-6h de formación para que tu equipo domine la herramienta. 4-6 semanas de soporte post-implementación para resolver dudas y ajustar lo que haga falta.
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -2399,29 +2591,120 @@
                     </div>
                 </div>
 
-                <!-- Block 4: Gestión de proyectos -->
+                <!-- Block 4: Control Comercial -->
                 <div class="svc-block reveal">
                     <div class="svc-block__header">
                         <span class="svc-block__number">04</span>
-                        <h3 class="svc-block__title">Gestión de proyectos</h3>
-                        <span class="svc-block__badge">Proyectos</span>
+                        <h3 class="svc-block__title">Control Comercial</h3>
+                        <span class="svc-block__badge">Esencial / Pro</span>
                     </div>
 
                     <div class="svc-accordion" data-accordion>
                         <button class="svc-accordion__trigger" aria-expanded="false">
-                            <span>Control de tareas, plazos y equipos</span>
+                            <span>Que no se me escape ningún cliente</span>
                             <span class="svc-accordion__icon" aria-hidden="true"></span>
                         </button>
                         <div class="svc-accordion__panel">
                             <div class="svc-accordion__body">
                                 <p class="svc-accordion__text">
-                                    Para empresas de construcción, servicios o cualquier negocio con proyectos en marcha. Implantamos herramientas de gestión para que sepas quién hace qué, cuándo y a qué coste. Asana, Monday o ClickUp según tu equipo.
+                                    Tienes leads pero no conviertes. No haces seguimiento y las oportunidades se enfrían. Implantamos HubSpot como CRM con automatizaciones de seguimiento, plantillas de email y WhatsApp, y secuencias comerciales para que no se te escape ningún cliente.
                                 </p>
+                                <span class="svc-block__price">Desde 1.000 EUR</span>
+
+                                <div class="svc-accordion__includes">
+                                    <span class="svc-accordion__includes-label">Qué incluye</span>
+                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                        <button class="svc-accordion__trigger" aria-expanded="false">
+                                            <span>HubSpot CRM</span>
+                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                        </button>
+                                        <div class="svc-accordion__panel">
+                                            <div class="svc-accordion__body">
+                                                <p class="svc-accordion__text">
+                                                    HubSpot Starter o Business según tu volumen. Pipeline de ventas configurado con tus etapas, propiedades personalizadas y registro automático de emails. Todo adaptado a tu proceso comercial.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                        <button class="svc-accordion__trigger" aria-expanded="false">
+                                            <span>Automatización de seguimiento</span>
+                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                        </button>
+                                        <div class="svc-accordion__panel">
+                                            <div class="svc-accordion__body">
+                                                <p class="svc-accordion__text">
+                                                    3-5 flujos automatizados con Make para seguimiento comercial. Recordatorios de presupuestos pendientes, alertas de oportunidades frías y notificaciones al equipo.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                        <button class="svc-accordion__trigger" aria-expanded="false">
+                                            <span>Templates + Formación</span>
+                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                        </button>
+                                        <div class="svc-accordion__panel">
+                                            <div class="svc-accordion__body">
+                                                <p class="svc-accordion__text">
+                                                    5-8 plantillas de email y WhatsApp listas para usar. Secuencias comerciales automatizadas en la versión Pro. 6-8h de formación y 4-6 semanas de soporte.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
+            </div>
+
+            <!-- Servicios Individuales -->
+            <div class="services__individual reveal">
+                <div class="services__individual-header">
+                    <h3 class="services__individual-title">Servicios a la carta</h3>
+                    <p class="services__individual-desc">También trabajamos por servicio individual. Si necesitas algo concreto, lo hacemos sin necesidad de contratar un pack completo.</p>
+                </div>
+                <div class="services__individual-grid">
+                    <div class="services__individual-card">
+                        <span class="services__individual-num">01</span>
+                        <h4 class="services__individual-card-title">Presencia Web</h4>
+                        <ul class="services__individual-list">
+                            <li>Landing básica</li>
+                            <li>Landing Pro</li>
+                            <li>Web Profesional</li>
+                            <li>SEO local</li>
+                            <li>SEM / Google Ads</li>
+                        </ul>
+                        <span class="svc-block__price">Desde 250 EUR</span>
+                    </div>
+                    <div class="services__individual-card">
+                        <span class="services__individual-num">02</span>
+                        <h4 class="services__individual-card-title">Herramientas Básicas</h4>
+                        <ul class="services__individual-list">
+                            <li>HubSpot CRM</li>
+                            <li>Holded + VeriFactu</li>
+                            <li>Monday + Workspace</li>
+                            <li>Motor de reservas</li>
+                            <li>Dashboard ejecutivo</li>
+                            <li>Cobros online</li>
+                        </ul>
+                        <span class="svc-block__price">Desde 150 EUR</span>
+                    </div>
+                    <div class="services__individual-card">
+                        <span class="services__individual-num">03</span>
+                        <h4 class="services__individual-card-title">Automatización + IA</h4>
+                        <ul class="services__individual-list">
+                            <li>Automatización por flujo</li>
+                            <li>Chatbot</li>
+                            <li>IA en procesos</li>
+                        </ul>
+                        <span class="svc-block__price">Desde 200 EUR</span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -2541,7 +2824,7 @@
                         </div>
                         <div class="about__detail-item">
                             <span class="label">Equipo</span>
-                            <span class="about__detail-value">4 personas</span>
+                            <span class="about__detail-value">5 personas</span>
                         </div>
                     </div>
                 </div>
@@ -2557,9 +2840,9 @@
 
             <!-- Text -->
             <div class="contact__text reveal">
-                <p class="contact__question">¿Quieres estructurar tu negocio con herramientas digitales?</p>
+                <p class="contact__question">Consultoría y análisis digital gratuito. ¿Empezamos?</p>
                 <h2 class="contact__heading">Hablemos.</h2>
-                <p class="contact__subtext">Primera consulta sin compromiso. Te escuchamos, analizamos tu situación y te decimos si podemos ayudarte.</p>
+                <p class="contact__subtext">Diagnosticamos los puntos de dolor de tu negocio sin compromiso. Te escuchamos, analizamos tu situación y te proponemos un plan concreto.</p>
             </div>
 
             <!-- Form system -->
