@@ -2,13 +2,13 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRUX Consulting — Digitalización para PYMEs en Baleares</title>
     <meta name="description" content="Ayudamos a PYMEs de Baleares a digitalizar su operativa: facturación, gestión de clientes, automatizaciones y control de negocio. Herramientas que funcionan y que tu equipo usará de verdad.">
     <meta property="og:title" content="CRUX Consulting — Digitalización operativa para PYMEs en Baleares">
     <meta property="og:description" content="Ayudamos a PYMEs de Baleares a digitalizar su operativa: facturación, gestión de clientes, automatizaciones y control de negocio.">
     <meta property="og:type" content="website">
-    <meta name="theme-color" content="#F2EFE9">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,700;1,6..96,400;1,6..96,500;1,6..96,700&family=Jost:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -46,8 +46,8 @@
             scroll-behavior: smooth;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            overflow-x: clip;
-            background-color: #F2EFE9;
+            overflow-x: hidden;
+            background-color: var(--bg);
         }
 
         body {
@@ -57,7 +57,7 @@
             font-size: clamp(0.95rem, 1.1vw, 1.1rem);
             font-weight: 300;
             line-height: 1.7;
-            overflow-x: clip;
+            overflow-x: hidden;
             cursor: none;
         }
 
@@ -192,13 +192,12 @@
            NAVIGATION
            ═══════════════════════════════════════ */
         .nav {
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             z-index: 1000;
             padding: 1.2rem 0;
-            padding-top: max(1.2rem, env(safe-area-inset-top, 0px));
-            padding-left: env(safe-area-inset-left, 0px);
-            padding-right: env(safe-area-inset-right, 0px);
             background-color: var(--bg);
             transition: backdrop-filter 0.5s ease;
         }
