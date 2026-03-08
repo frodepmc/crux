@@ -42,6 +42,9 @@
         }
     </script>
 
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -1986,6 +1989,26 @@
             color: #fff;
         }
 
+        .contact__submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .contact__submit--sending {
+            pointer-events: none;
+        }
+
+        .contact__submit--success {
+            border-color: #2e7d32;
+            color: #2e7d32;
+            pointer-events: none;
+        }
+
+        .contact__submit--error {
+            border-color: #c62828;
+            color: #c62828;
+        }
+
         /* ═══════════════════════════════════════
            FOOTER
            ═══════════════════════════════════════ */
@@ -3574,6 +3597,107 @@
         });
 
         setActiveChannel(null);
+
+        /* ═══════════════════════════════════════
+           FORM SUBMISSIONS
+           ═══════════════════════════════════════ */
+
+        /* ─── EmailJS Init ─── */
+        if (typeof emailjs !== 'undefined') {
+            emailjs.init('Jx7AidbORhprabBNA');
+        }
+
+        /* ─── Button state helper ─── */
+        function setButtonState(btn, state, originalText) {
+            btn.classList.remove('contact__submit--sending', 'contact__submit--success', 'contact__submit--error');
+
+            switch (state) {
+                case 'sending':
+                    btn.disabled = true;
+                    btn.classList.add('contact__submit--sending');
+                    btn.textContent = 'Enviando...';
+                    break;
+                case 'success':
+                    btn.disabled = true;
+                    btn.classList.add('contact__submit--success');
+                    btn.textContent = 'Enviado \u2714';
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btn.classList.remove('contact__submit--success');
+                        btn.textContent = originalText;
+                    }, 3000);
+                    break;
+                case 'error':
+                    btn.disabled = false;
+                    btn.classList.add('contact__submit--error');
+                    btn.textContent = 'Error \u2014 Reintentar';
+                    setTimeout(() => {
+                        btn.classList.remove('contact__submit--error');
+                        btn.textContent = originalText;
+                    }, 4000);
+                    break;
+                default:
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+            }
+        }
+
+        /* ─── WhatsApp form ─── */
+        const whatsappForm = document.getElementById('form-whatsapp');
+        if (whatsappForm) {
+            whatsappForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const name = this.querySelector('[name="name"]').value.trim();
+                const phone = this.querySelector('[name="phone"]').value.trim();
+                const message = this.querySelector('[name="message"]').value.trim();
+
+                if (!name || !phone) return;
+
+                var text = '*Nuevo contacto desde la web CRUX*\n\n'
+                    + '*Nombre:* ' + name + '\n'
+                    + '*Teléfono:* ' + phone;
+
+                if (message) {
+                    text += '\n*Proyecto:* ' + message;
+                }
+
+                var url = 'https://wa.me/34692447491?text=' + encodeURIComponent(text);
+                window.open(url, '_blank');
+
+                /* Visual feedback */
+                var btn = this.querySelector('.contact__submit');
+                setButtonState(btn, 'success', 'Enviar por WhatsApp');
+                this.reset();
+            });
+        }
+
+        /* ─── Email form (EmailJS) ─── */
+        const emailForm = document.getElementById('form-email');
+        if (emailForm) {
+            emailForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                var btn = this.querySelector('.contact__submit');
+                var originalText = 'Enviar email';
+
+                if (typeof emailjs === 'undefined') {
+                    setButtonState(btn, 'error', originalText);
+                    return;
+                }
+
+                setButtonState(btn, 'sending', originalText);
+
+                try {
+                    await emailjs.sendForm('service_5ir3mca', 'template_97d0r04', this);
+                    setButtonState(btn, 'success', originalText);
+                    this.reset();
+                } catch (err) {
+                    console.error('EmailJS error:', err);
+                    setButtonState(btn, 'error', originalText);
+                }
+            });
+        }
     </script>
 </body>
 </html>
