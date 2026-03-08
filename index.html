@@ -1059,13 +1059,13 @@
         }
 
         /* Staggered reveal for sub-accordions */
-        .svc-accordion__includes .svc-accordion--sub:nth-child(2) {
+        .svc-accordion--tier .svc-accordion--sub:nth-child(2) {
             transition-delay: 0.05s;
         }
-        .svc-accordion__includes .svc-accordion--sub:nth-child(3) {
+        .svc-accordion--tier .svc-accordion--sub:nth-child(3) {
             transition-delay: 0.1s;
         }
-        .svc-accordion__includes .svc-accordion--sub:nth-child(4) {
+        .svc-accordion--tier .svc-accordion--sub:nth-child(4) {
             transition-delay: 0.15s;
         }
 
@@ -1096,24 +1096,41 @@
             opacity: 0.4;
         }
 
-        /* Tier comparison (Esencial vs Pro) */
+        /* Tier comparison — stacked expandable */
         .svc-tiers {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.8rem;
+            display: flex;
+            flex-direction: column;
             margin-top: 1.2rem;
         }
 
-        .svc-tier {
-            padding: 0.8rem 1rem;
+        .svc-accordion--tier {
             border: 1px solid var(--border);
             border-radius: 2px;
             background: rgba(255, 255, 255, 0.3);
         }
 
-        .svc-tier--pro {
+        .svc-accordion--tier + .svc-accordion--tier {
+            margin-top: -1px;
+        }
+
+        .svc-accordion--tier.svc-tier--pro {
             border-color: rgba(56, 105, 171, 0.25);
             background: rgba(56, 105, 171, 0.04);
+        }
+
+        .svc-accordion--tier > .svc-accordion__trigger {
+            padding: 1rem 1.2rem;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+
+        .svc-accordion--tier.is-open > .svc-accordion__trigger {
+            background: rgba(56, 105, 171, 0.02);
+        }
+
+        .svc-tier__info {
+            flex: 1;
+            min-width: 0;
         }
 
         .svc-tier__label {
@@ -1124,7 +1141,7 @@
             text-transform: uppercase;
             letter-spacing: 0.18em;
             color: var(--text-muted);
-            margin-bottom: 0.4rem;
+            margin-bottom: 0.3rem;
         }
 
         .svc-tier--pro .svc-tier__label {
@@ -1136,27 +1153,64 @@
             color: var(--text-muted);
             font-weight: 300;
             line-height: 1.6;
+            margin: 0;
         }
 
-        /* "Qué incluye" wrapper — separates description from sub-items */
-        .svc-accordion__includes {
-            margin-top: 1.6rem;
-            padding-top: 1.2rem;
-            border-top: 1px solid var(--border);
-            position: relative;
+        .svc-tier__pricing {
+            text-align: right;
+            flex-shrink: 0;
         }
 
-        .svc-accordion__includes-label {
+        .svc-tier__monthly {
+            display: block;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            font-weight: 300;
+            margin-top: 0.15rem;
+            white-space: nowrap;
+        }
+
+        .svc-accordion--tier .svc-accordion__body {
+            padding: 0 1.2rem 1.2rem;
+        }
+
+        .svc-tier__includes-label {
             display: block;
             font-family: var(--font-body);
-            font-size: 0.62rem;
+            font-size: 0.6rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.2em;
             color: var(--text-muted);
             opacity: 0.5;
-            margin-bottom: 0.2rem;
-            padding-left: 0.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .svc-tier__includes {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .svc-tier__includes li {
+            position: relative;
+            padding-left: 1.1rem;
+            font-size: clamp(0.8rem, 0.88vw, 0.88rem);
+            color: var(--text-muted);
+            font-weight: 300;
+            line-height: 1.75;
+        }
+
+        .svc-tier__includes li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.6em;
+            width: 4px;
+            height: 4px;
+            background: var(--accent);
+            opacity: 0.4;
+            transform: rotate(45deg);
         }
 
         /* ─── Asesoría incluida banner ─── */
@@ -2313,13 +2367,28 @@
                 padding: 0 1.2rem 1.2rem;
             }
 
-            .svc-accordion__includes {
-                margin-top: 1.2rem;
-                padding-top: 1rem;
+            .svc-accordion--tier > .svc-accordion__trigger {
+                flex-wrap: wrap;
+                padding: 0.8rem 1rem;
+                gap: 0.4rem;
             }
 
-            .svc-tiers {
-                grid-template-columns: 1fr;
+            .svc-tier__info {
+                flex-basis: calc(100% - 2rem);
+            }
+
+            .svc-tier__pricing {
+                text-align: left;
+                flex-basis: 100%;
+                display: flex;
+                align-items: baseline;
+                gap: 0.5rem;
+            }
+
+            .svc-accordion--tier > .svc-accordion__trigger > .svc-accordion__icon {
+                position: absolute;
+                top: 0.9rem;
+                right: 1rem;
             }
 
             .contact__inner {
@@ -2714,58 +2783,53 @@
                                     Pierdes reservas porque dependes de WhatsApp y llamadas. Montamos tu sistema de reservas online con web profesional, motor de reservas y Google Business optimizado. Tus clientes te encuentran y reservan sin que tú tengas que estar pendiente.
                                 </p>
                                 <div class="svc-tiers">
-                                    <div class="svc-tier">
-                                        <span class="svc-tier__label">Esencial</span>
-                                        <p class="svc-tier__desc">Landing page + motor de reservas básico + Google Business</p>
-                                        <span class="svc-block__price">Desde 700 EUR</span>
-                                    </div>
-                                    <div class="svc-tier svc-tier--pro">
-                                        <span class="svc-tier__label">Pro</span>
-                                        <p class="svc-tier__desc">Web profesional (2-3 págs) + motor de reservas avanzado con CRM y pagos online</p>
-                                        <span class="svc-block__price">Desde 1.400 EUR</span>
-                                    </div>
-                                </div>
-
-                                <div class="svc-accordion__includes">
-                                    <span class="svc-accordion__includes-label">Qué incluye</span>
-                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                    <div class="svc-accordion svc-accordion--tier" data-accordion>
                                         <button class="svc-accordion__trigger" aria-expanded="false">
-                                            <span>Web profesional</span>
+                                            <div class="svc-tier__info">
+                                                <span class="svc-tier__label">Esencial</span>
+                                                <p class="svc-tier__desc">Landing + motor de reservas básico + Google Business</p>
+                                            </div>
+                                            <div class="svc-tier__pricing">
+                                                <span class="svc-block__price">Desde 810 EUR</span>
+                                                <span class="svc-tier__monthly">+ 30–90 EUR/mes</span>
+                                            </div>
                                             <span class="svc-accordion__icon" aria-hidden="true"></span>
                                         </button>
                                         <div class="svc-accordion__panel">
                                             <div class="svc-accordion__body">
-                                                <p class="svc-accordion__text">
-                                                    Landing básica en Astro para la versión Esencial. Landing Pro con CMS e integraciones para la versión Pro. Rápida, optimizada para móvil y posicionada en Google.
-                                                </p>
+                                                <span class="svc-tier__includes-label">Qué incluye</span>
+                                                <ul class="svc-tier__includes">
+                                                    <li>Landing optimizada para móvil y SEO</li>
+                                                    <li>Motor de reservas básico (Checkfront, Acuity o similar)</li>
+                                                    <li>Google Business configurado y optimizado</li>
+                                                    <li>Recordatorios automáticos de reservas</li>
+                                                    <li>4–6h de formación + 4–6 semanas de soporte</li>
+                                                </ul>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                    <div class="svc-accordion svc-accordion--tier svc-tier--pro" data-accordion>
                                         <button class="svc-accordion__trigger" aria-expanded="false">
-                                            <span>Motor de reservas</span>
-                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                        </button>
-                                        <div class="svc-accordion__panel">
-                                            <div class="svc-accordion__body">
-                                                <p class="svc-accordion__text">
-                                                    Checkfront, Acuity, Beds24 o Cover Manager según tu sector. Configuración básica o avanzada con CRM y pagos online integrados. Recordatorios automáticos para reducir no-shows.
-                                                </p>
+                                            <div class="svc-tier__info">
+                                                <span class="svc-tier__label">Pro</span>
+                                                <p class="svc-tier__desc">Web profesional (2–3 págs) + motor de reservas avanzado con CRM y pagos online</p>
                                             </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
-                                        <button class="svc-accordion__trigger" aria-expanded="false">
-                                            <span>Google Business + Formación</span>
+                                            <div class="svc-tier__pricing">
+                                                <span class="svc-block__price">Desde 2.640 EUR</span>
+                                                <span class="svc-tier__monthly">+ 60–180 EUR/mes</span>
+                                            </div>
                                             <span class="svc-accordion__icon" aria-hidden="true"></span>
                                         </button>
                                         <div class="svc-accordion__panel">
                                             <div class="svc-accordion__body">
-                                                <p class="svc-accordion__text">
-                                                    Configuración y optimización de tu perfil de Google Business para que te encuentren en búsquedas locales. Incluye 4-6h de formación y 4-6 semanas de soporte post-implementación.
-                                                </p>
+                                                <span class="svc-tier__includes-label">Qué incluye</span>
+                                                <ul class="svc-tier__includes">
+                                                    <li>Web profesional (2–3 págs) con CMS</li>
+                                                    <li>Motor de reservas avanzado con CRM y pagos online</li>
+                                                    <li>Recordatorios automáticos para reducir no-shows</li>
+                                                    <li>Google Business configurado y optimizado</li>
+                                                    <li>4–6h de formación + 4–6 semanas de soporte</li>
+                                                </ul>
                                             </div>
                                         </div>
                                     </div>
@@ -2793,49 +2857,47 @@
                                 <p class="svc-accordion__text">
                                     Tu equipo vive en WhatsApp, las tareas se pierden y nadie sabe quién hace qué. Centralizamos toda la operativa en un solo sitio: gestión de proyectos, documentos compartidos y automatizaciones que eliminan el trabajo repetitivo.
                                 </p>
-                                <span class="svc-block__price">Desde 800 EUR</span>
+                                <span class="svc-block__price">Desde 990 EUR</span>
+                                <span class="svc-tier__monthly" style="display:inline-block;margin-left:0.5rem">+ 100–120 EUR/mes</span>
 
-                                <div class="svc-accordion__includes">
-                                    <span class="svc-accordion__includes-label">Qué incluye</span>
-                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
-                                        <button class="svc-accordion__trigger" aria-expanded="false">
-                                            <span>Monday — gestión de proyectos</span>
-                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                        </button>
-                                        <div class="svc-accordion__panel">
-                                            <div class="svc-accordion__body">
-                                                <p class="svc-accordion__text">
-                                                    Configuración completa de Monday adaptada a tus procesos. Tableros, vistas, automatizaciones internas y permisos por equipo. Todo listo para que empieces a trabajar desde el primer día.
-                                                </p>
-                                            </div>
+                                <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                    <button class="svc-accordion__trigger" aria-expanded="false">
+                                        <span>Monday — gestión de proyectos</span>
+                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                    </button>
+                                    <div class="svc-accordion__panel">
+                                        <div class="svc-accordion__body">
+                                            <p class="svc-accordion__text">
+                                                Configuración completa de Monday adaptada a tus procesos. Tableros, vistas, automatizaciones internas y permisos por equipo. Todo listo para que empieces a trabajar desde el primer día.
+                                            </p>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
-                                        <button class="svc-accordion__trigger" aria-expanded="false">
-                                            <span>Google Workspace + Documentos</span>
-                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                        </button>
-                                        <div class="svc-accordion__panel">
-                                            <div class="svc-accordion__body">
-                                                <p class="svc-accordion__text">
-                                                    Email profesional, Drive con estructura de carpetas, permisos configurados y migración de datos. Se acabaron los documentos perdidos en WhatsApp.
-                                                </p>
-                                            </div>
+                                <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                    <button class="svc-accordion__trigger" aria-expanded="false">
+                                        <span>Google Workspace + Documentos</span>
+                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                    </button>
+                                    <div class="svc-accordion__panel">
+                                        <div class="svc-accordion__body">
+                                            <p class="svc-accordion__text">
+                                                Email profesional, Drive con estructura de carpetas, permisos configurados y migración de datos. Se acabaron los documentos perdidos en WhatsApp.
+                                            </p>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
-                                        <button class="svc-accordion__trigger" aria-expanded="false">
-                                            <span>Automatizaciones + Formación</span>
-                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                        </button>
-                                        <div class="svc-accordion__panel">
-                                            <div class="svc-accordion__body">
-                                                <p class="svc-accordion__text">
-                                                    3 flujos automatizados con Make para eliminar tareas repetitivas. Incluye 4h de formación para tu equipo y 4 semanas de soporte post-implementación.
-                                                </p>
-                                            </div>
+                                <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                    <button class="svc-accordion__trigger" aria-expanded="false">
+                                        <span>Automatizaciones + Formación</span>
+                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
+                                    </button>
+                                    <div class="svc-accordion__panel">
+                                        <div class="svc-accordion__body">
+                                            <p class="svc-accordion__text">
+                                                3 flujos automatizados con Make para eliminar tareas repetitivas. Incluye 4h de formación para tu equipo y 4 semanas de soporte post-implementación.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -2863,57 +2925,53 @@
                                     Facturas con Word, pierdes tiempo y te preocupa Hacienda. Configuramos tu facturación digital con Holded: cumplimiento VeriFactu/SII, conciliación bancaria automática y recordatorios de cobro.
                                 </p>
                                 <div class="svc-tiers">
-                                    <div class="svc-tier">
-                                        <span class="svc-tier__label">Esencial</span>
-                                        <p class="svc-tier__desc">Holded facturación + VeriFactu/SII + conciliación bancaria</p>
-                                    </div>
-                                    <div class="svc-tier svc-tier--pro">
-                                        <span class="svc-tier__label">Pro</span>
-                                        <p class="svc-tier__desc">Todo lo Esencial + landing con pasarela de pago + automatización de cobros</p>
-                                    </div>
-                                </div>
-                                <span class="svc-block__price">Desde 450 EUR</span>
-
-                                <div class="svc-accordion__includes">
-                                    <span class="svc-accordion__includes-label">Qué incluye</span>
-                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                    <div class="svc-accordion svc-accordion--tier" data-accordion>
                                         <button class="svc-accordion__trigger" aria-expanded="false">
-                                            <span>Holded — facturación completa</span>
+                                            <div class="svc-tier__info">
+                                                <span class="svc-tier__label">Esencial</span>
+                                                <p class="svc-tier__desc">Holded facturación + VeriFactu/SII + conciliación bancaria</p>
+                                            </div>
+                                            <div class="svc-tier__pricing">
+                                                <span class="svc-block__price">Desde 520 EUR</span>
+                                                <span class="svc-tier__monthly">+ 40–70 EUR/mes</span>
+                                            </div>
                                             <span class="svc-accordion__icon" aria-hidden="true"></span>
                                         </button>
                                         <div class="svc-accordion__panel">
                                             <div class="svc-accordion__body">
-                                                <p class="svc-accordion__text">
-                                                    Configuración completa de Holded: plantillas de factura personalizadas, numeración legal, catálogo de productos y conexión con tu gestor. Todo listo para facturar desde el primer día.
-                                                </p>
+                                                <span class="svc-tier__includes-label">Qué incluye</span>
+                                                <ul class="svc-tier__includes">
+                                                    <li>Holded facturación completa configurada</li>
+                                                    <li>Cumplimiento VeriFactu/SII verificado</li>
+                                                    <li>Conciliación bancaria automática</li>
+                                                    <li>Plantillas de factura personalizadas</li>
+                                                    <li>4–6h de formación + 4–6 semanas de soporte</li>
+                                                </ul>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                    <div class="svc-accordion svc-accordion--tier svc-tier--pro" data-accordion>
                                         <button class="svc-accordion__trigger" aria-expanded="false">
-                                            <span>VeriFactu/SII + Conciliación</span>
-                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                        </button>
-                                        <div class="svc-accordion__panel">
-                                            <div class="svc-accordion__body">
-                                                <p class="svc-accordion__text">
-                                                    Cumplimiento normativo configurado y verificado. Conciliación bancaria automática para que no tengas que cuadrar nada a mano. Incluye automatización de recordatorios de facturas pendientes.
-                                                </p>
+                                            <div class="svc-tier__info">
+                                                <span class="svc-tier__label">Pro</span>
+                                                <p class="svc-tier__desc">Todo lo Esencial + web con pasarela de pago + automatización de cobros</p>
                                             </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
-                                        <button class="svc-accordion__trigger" aria-expanded="false">
-                                            <span>Formación + Soporte</span>
+                                            <div class="svc-tier__pricing">
+                                                <span class="svc-block__price">Desde 1.210 EUR</span>
+                                                <span class="svc-tier__monthly">+ 50–100 EUR/mes</span>
+                                            </div>
                                             <span class="svc-accordion__icon" aria-hidden="true"></span>
                                         </button>
                                         <div class="svc-accordion__panel">
                                             <div class="svc-accordion__body">
-                                                <p class="svc-accordion__text">
-                                                    4-6h de formación para que tu equipo domine la herramienta. 4-6 semanas de soporte post-implementación para resolver dudas y ajustar lo que haga falta.
-                                                </p>
+                                                <span class="svc-tier__includes-label">Qué incluye</span>
+                                                <ul class="svc-tier__includes">
+                                                    <li>Todo lo de Esencial</li>
+                                                    <li>Web con pasarela de pago integrada</li>
+                                                    <li>Automatización de cobros y recordatorios</li>
+                                                    <li>Catálogo de productos y conexión con gestor</li>
+                                                    <li>4–6h de formación + 4–6 semanas de soporte</li>
+                                                </ul>
                                             </div>
                                         </div>
                                     </div>
@@ -2942,57 +3000,53 @@
                                     Tienes leads pero no conviertes. No haces seguimiento y las oportunidades se enfrían. Implantamos HubSpot como CRM con automatizaciones de seguimiento, plantillas de email y WhatsApp, y secuencias comerciales para que no se te escape ningún cliente.
                                 </p>
                                 <div class="svc-tiers">
-                                    <div class="svc-tier">
-                                        <span class="svc-tier__label">Esencial</span>
-                                        <p class="svc-tier__desc">HubSpot Starter + pipeline configurado + plantillas de email y WhatsApp</p>
-                                    </div>
-                                    <div class="svc-tier svc-tier--pro">
-                                        <span class="svc-tier__label">Pro</span>
-                                        <p class="svc-tier__desc">HubSpot Business + secuencias comerciales automatizadas + reporting avanzado</p>
-                                    </div>
-                                </div>
-                                <span class="svc-block__price">Desde 1.000 EUR</span>
-
-                                <div class="svc-accordion__includes">
-                                    <span class="svc-accordion__includes-label">Qué incluye</span>
-                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                    <div class="svc-accordion svc-accordion--tier" data-accordion>
                                         <button class="svc-accordion__trigger" aria-expanded="false">
-                                            <span>HubSpot CRM</span>
+                                            <div class="svc-tier__info">
+                                                <span class="svc-tier__label">Esencial</span>
+                                                <p class="svc-tier__desc">HubSpot Starter + pipeline configurado + plantillas de email y WhatsApp</p>
+                                            </div>
+                                            <div class="svc-tier__pricing">
+                                                <span class="svc-block__price">Desde 1.210 EUR</span>
+                                                <span class="svc-tier__monthly">+ 10–50 EUR/mes</span>
+                                            </div>
                                             <span class="svc-accordion__icon" aria-hidden="true"></span>
                                         </button>
                                         <div class="svc-accordion__panel">
                                             <div class="svc-accordion__body">
-                                                <p class="svc-accordion__text">
-                                                    HubSpot Starter o Business según tu volumen. Pipeline de ventas configurado con tus etapas, propiedades personalizadas y registro automático de emails. Todo adaptado a tu proceso comercial.
-                                                </p>
+                                                <span class="svc-tier__includes-label">Qué incluye</span>
+                                                <ul class="svc-tier__includes">
+                                                    <li>HubSpot Starter configurado</li>
+                                                    <li>Pipeline de ventas adaptado a tu proceso</li>
+                                                    <li>5–8 plantillas de email y WhatsApp</li>
+                                                    <li>3–5 flujos de seguimiento automatizados</li>
+                                                    <li>6–8h de formación + 4–6 semanas de soporte</li>
+                                                </ul>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
+                                    <div class="svc-accordion svc-accordion--tier svc-tier--pro" data-accordion>
                                         <button class="svc-accordion__trigger" aria-expanded="false">
-                                            <span>Automatización de seguimiento</span>
-                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                        </button>
-                                        <div class="svc-accordion__panel">
-                                            <div class="svc-accordion__body">
-                                                <p class="svc-accordion__text">
-                                                    3-5 flujos automatizados con Make para seguimiento comercial. Recordatorios de presupuestos pendientes, alertas de oportunidades frías y notificaciones al equipo.
-                                                </p>
+                                            <div class="svc-tier__info">
+                                                <span class="svc-tier__label">Pro</span>
+                                                <p class="svc-tier__desc">HubSpot Business + secuencias comerciales automatizadas + reporting avanzado</p>
                                             </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="svc-accordion svc-accordion--sub" data-accordion>
-                                        <button class="svc-accordion__trigger" aria-expanded="false">
-                                            <span>Templates + Formación</span>
+                                            <div class="svc-tier__pricing">
+                                                <span class="svc-block__price">Desde 2.640 EUR</span>
+                                                <span class="svc-tier__monthly">+ 110–140 EUR/mes</span>
+                                            </div>
                                             <span class="svc-accordion__icon" aria-hidden="true"></span>
                                         </button>
                                         <div class="svc-accordion__panel">
                                             <div class="svc-accordion__body">
-                                                <p class="svc-accordion__text">
-                                                    5-8 plantillas de email y WhatsApp listas para usar. Secuencias comerciales automatizadas en la versión Pro. 6-8h de formación y 4-6 semanas de soporte.
-                                                </p>
+                                                <span class="svc-tier__includes-label">Qué incluye</span>
+                                                <ul class="svc-tier__includes">
+                                                    <li>HubSpot Business completo</li>
+                                                    <li>Pipeline avanzado con propiedades personalizadas</li>
+                                                    <li>Secuencias comerciales automatizadas</li>
+                                                    <li>Reporting avanzado y alertas de oportunidades</li>
+                                                    <li>6–8h de formación + 4–6 semanas de soporte</li>
+                                                </ul>
                                             </div>
                                         </div>
                                     </div>
@@ -3026,13 +3080,12 @@
                         <span class="services__individual-num">01</span>
                         <h4 class="services__individual-card-title">Presencia Web</h4>
                         <ul class="services__individual-list">
-                            <li>Landing básica</li>
-                            <li>Landing Pro</li>
+                            <li>Landing</li>
+                            <li>Web</li>
                             <li>Web Profesional</li>
-                            <li>SEO local</li>
-                            <li>SEM / Google Ads</li>
+                            <li>SEO / SEM</li>
                         </ul>
-                        <span class="svc-block__price">Desde 450 EUR</span>
+                        <span class="svc-block__price">Desde 350 EUR</span>
                     </div>
                     <div class="services__individual-card">
                         <span class="services__individual-num">02</span>
@@ -3045,17 +3098,17 @@
                             <li>Dashboard ejecutivo</li>
                             <li>Cobros online</li>
                         </ul>
-                        <span class="svc-block__price">Desde 400 EUR</span>
+                        <span class="svc-block__price">Desde 210 EUR</span>
                     </div>
                     <div class="services__individual-card">
                         <span class="services__individual-num">03</span>
                         <h4 class="services__individual-card-title">Automatización + IA</h4>
                         <ul class="services__individual-list">
                             <li>Automatización por flujo</li>
-                            <li>Chatbot</li>
+                            <li>Chatbot básico / IA</li>
                             <li>IA en procesos</li>
                         </ul>
-                        <span class="svc-block__price">Desde 400 EUR</span>
+                        <span class="svc-block__price">Desde 280 EUR</span>
                     </div>
                 </div>
             </div>
