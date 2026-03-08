@@ -530,7 +530,6 @@
         .hero__descriptor {
             max-width: 420px;
             margin-left: auto;
-            color: var(--text);
             font-size: clamp(1.05rem, 1.3vw, 1.25rem);
             line-height: 1.85;
             font-weight: 300;
@@ -538,6 +537,42 @@
             animation: fadeUp 1s var(--ease-out) 0.9s forwards;
             padding-left: 1.5rem;
             border-left: 1px solid var(--border);
+        }
+
+        .hero__desc-statement {
+            margin: 0;
+            color: var(--text);
+            font-weight: 400;
+        }
+
+        .hero__desc-detail {
+            margin: 0.6rem 0 0;
+            color: var(--text-muted);
+            font-size: 0.92em;
+        }
+
+        .hero__desc-rule {
+            display: block;
+            width: 0;
+            height: 1px;
+            background: var(--accent);
+            border: none;
+            margin: 1.1rem 0;
+            animation: ruleExpand 0.8s var(--ease-out) 1.7s forwards;
+        }
+
+        @keyframes ruleExpand {
+            to { width: 2.5rem; }
+        }
+
+        .hero__desc-punch {
+            margin: 0;
+            font-style: italic;
+            font-weight: 400;
+            font-size: 1.1em;
+            line-height: 1.5;
+            letter-spacing: -0.01em;
+            color: var(--text);
         }
 
         .hero__cta {
@@ -2203,6 +2238,11 @@
                 font-size: clamp(1rem, 3.8vw, 1.1rem);
             }
 
+            .hero__desc-rule {
+                margin-left: auto;
+                margin-right: auto;
+            }
+
             .hero::after {
                 font-size: clamp(12rem, 55vw, 20rem);
                 right: 50%;
@@ -2597,12 +2637,20 @@
                         <span class="hero-line__inner">con herramientas digitales.</span>
                     </span>
                 </h1>
-                <p class="hero__descriptor">
-                    Ayudamos a PYMEs de Baleares a estructurar su operativa con
-                    herramientas digitales. Facturación electrónica, gestión de clientes,
-                    automatizaciones y dashboards de negocio. Herramientas que tu equipo
-                    usará de verdad.
-                </p>
+                <div class="hero__descriptor">
+                    <p class="hero__desc-statement">
+                        Ayudamos a PYMEs de Baleares a estructurar su operativa
+                        con herramientas digitales.
+                    </p>
+                    <p class="hero__desc-detail">
+                        Facturación electrónica, gestión de clientes,
+                        automatizaciones y dashboards de negocio.
+                    </p>
+                    <hr class="hero__desc-rule" aria-hidden="true">
+                    <p class="hero__desc-punch">
+                        Herramientas que tu equipo usará de verdad.
+                    </p>
+                </div>
                 <a href="#contacto" class="hero__cta">Hablemos</a>
             </div>
             <div class="hero__geo" aria-hidden="true">
