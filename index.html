@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="no-js">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -72,9 +72,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>document.documentElement.classList.remove('no-js');document.documentElement.classList.add('js');</script>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
 
     <!-- Custom Cursor -->
     <div class="cursor" id="cursor"></div>
@@ -83,9 +85,9 @@
     <div class="scroll-progress" aria-hidden="true"></div>
 
     <!-- Navigation -->
-    <nav class="nav" role="navigation">
+    <nav class="nav" aria-label="Navegación principal">
         <div class="container nav__inner">
-            <a href="#" class="nav__logo"><img src="icono-crux-transparente.png" alt="Crux Consulting" class="nav__logo-img" width="512" height="512"></a>
+            <a href="/" class="nav__logo"><img src="icono-crux-transparente.png" alt="Crux Consulting" class="nav__logo-img" width="512" height="512"></a>
             <a href="https://www.instagram.com/crux.mallorca" target="_blank" rel="noopener" class="nav__ig" aria-label="Instagram"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>
             <ul class="nav__links">
                 <li><a href="/servicios">Servicios</a></li>
@@ -98,7 +100,7 @@
     </nav>
 
     <!-- Mobile Menu -->
-    <nav class="mobile-menu" id="mobileMenu" aria-hidden="true" aria-label="Menú principal">
+    <nav class="mobile-menu" id="mobileMenu" aria-label="Menú móvil" hidden>
         <ul class="mobile-menu__links">
             <li><a href="/servicios">Servicios</a></li>
             <li><a href="#proceso">Proceso</a></li>
@@ -186,359 +188,97 @@
             <img class="section-media__image" src="assets/images/services-bg-fallback.jpeg" alt="" width="1600" height="1067" decoding="async" loading="lazy">
         </picture>
         <div class="container">
-            <div class="services__header reveal">
-                <h2 class="services__title">Nuestros packs</h2>
-                <p class="label">Servicios</p>
-            </div>
-
-            <div class="services__blocks">
-
-                <!-- Block 1: Motor de Reservas -->
-                <div class="svc-block reveal">
-                    <div class="svc-block__header">
-                        <span class="svc-block__number">01</span>
-                        <h3 class="svc-block__title">Motor de Reservas</h3>
-                        <span class="svc-block__badge">Esencial / Pro</span>
-                    </div>
-
-                    <div class="svc-accordion" data-accordion>
-                        <button type="button" class="svc-accordion__trigger" aria-expanded="false">
-                            <span>Que me encuentren y reserven</span>
-                            <span class="svc-accordion__icon" aria-hidden="true"></span>
-                        </button>
-                        <div class="svc-accordion__panel">
-                            <div class="svc-accordion__body">
-                                <p class="svc-accordion__text">
-                                    Pierdes reservas porque dependes de WhatsApp y llamadas. Montamos tu sistema de reservas online con web profesional, motor de reservas y Google Business optimizado. Tus clientes te encuentran y reservan sin que tú tengas que estar pendiente.
-                                </p>
-                                <div class="svc-tiers">
-                                    <div class="svc-accordion svc-accordion--tier" data-accordion>
-                                        <button type="button" class="svc-accordion__trigger" aria-expanded="false">
-                                            <div class="svc-tier__info">
-                                                <span class="svc-tier__label">Esencial</span>
-                                                <p class="svc-tier__desc">Landing + motor de reservas básico + Google Business</p>
-                                            </div>
-                                            <div class="svc-tier__pricing">
-                                                <span class="svc-block__price">Desde 810 EUR</span>
-                                                <span class="svc-tier__monthly">+ 30–90 EUR/mes</span>
-                                            </div>
-                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                        </button>
-                                        <div class="svc-accordion__panel">
-                                            <div class="svc-accordion__body">
-                                                <span class="svc-tier__includes-label">Qué incluye</span>
-                                                <ul class="svc-tier__includes">
-                                                    <li>Landing optimizada para móvil y SEO</li>
-                                                    <li>Motor de reservas básico (Checkfront, Acuity o similar)</li>
-                                                    <li>Google Business configurado y optimizado</li>
-                                                    <li>Recordatorios automáticos de reservas</li>
-                                                    <li>4–6h de formación + 4–6 semanas de soporte</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="svc-accordion svc-accordion--tier svc-tier--pro" data-accordion>
-                                        <button type="button" class="svc-accordion__trigger" aria-expanded="false">
-                                            <div class="svc-tier__info">
-                                                <span class="svc-tier__label">Pro</span>
-                                                <p class="svc-tier__desc">Web profesional (2–3 págs) + motor de reservas avanzado con CRM y pagos online</p>
-                                            </div>
-                                            <div class="svc-tier__pricing">
-                                                <span class="svc-block__price">Desde 2.640 EUR</span>
-                                                <span class="svc-tier__monthly">+ 60–180 EUR/mes</span>
-                                            </div>
-                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                        </button>
-                                        <div class="svc-accordion__panel">
-                                            <div class="svc-accordion__body">
-                                                <span class="svc-tier__includes-label">Qué incluye</span>
-                                                <ul class="svc-tier__includes">
-                                                    <li>Web profesional (2–3 págs) con CMS</li>
-                                                    <li>Motor de reservas avanzado con CRM y pagos online</li>
-                                                    <li>Recordatorios automáticos para reducir no-shows</li>
-                                                    <li>Google Business configurado y optimizado</li>
-                                                    <li>4–6h de formación + 4–6 semanas de soporte</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div class="services-showcase reveal">
+                <div class="services-showcase__intro">
+                    <p class="label"><span class="line-accent"></span>Servicios</p>
+                    <h2 class="services-showcase__title">No todos los negocios necesitan lo mismo.</h2>
+                    <p class="services-showcase__lead">Por eso reunimos nuestras soluciones en una página específica, donde cada opción se presenta con claridad.</p>
                 </div>
 
-                <!-- Block 2: Central de Operaciones -->
-                <div class="svc-block reveal">
-                    <div class="svc-block__header">
-                        <span class="svc-block__number">02</span>
-                        <h3 class="svc-block__title">Central de Operaciones</h3>
-                        <span class="svc-block__badge">Único</span>
+                <div class="services-showcase__panel">
+                    <span class="services-showcase__panel-kicker">Qué incluye esta página</span>
+                    <ul class="services-showcase__panel-list">
+                        <li>Los 4 packs explicados con claridad</li>
+                        <li>Las diferencias entre cada opción</li>
+                        <li>Servicios a medida para necesidades concretas</li>
+                        <li>El siguiente paso antes del diagnóstico</li>
+                    </ul>
+                    <div class="services-showcase__actions">
+                        <a href="/servicios" class="services-showcase__cta">Ver servicios</a>
+                        <a href="/servicios#a-la-carta" class="services-showcase__link">Ver soluciones a medida</a>
                     </div>
-
-                    <div class="svc-accordion" data-accordion>
-                        <button type="button" class="svc-accordion__trigger" aria-expanded="false">
-                            <span>Equipo coordinado, sin caos</span>
-                            <span class="svc-accordion__icon" aria-hidden="true"></span>
-                        </button>
-                        <div class="svc-accordion__panel">
-                            <div class="svc-accordion__body">
-                                <p class="svc-accordion__text">
-                                    Tu equipo vive en WhatsApp, las tareas se pierden y nadie sabe quién hace qué. Centralizamos toda la operativa en un solo sitio: gestión de proyectos, documentos compartidos y automatizaciones que eliminan el trabajo repetitivo.
-                                </p>
-                                <span class="svc-block__price">Desde 990 EUR</span>
-                                <span class="svc-tier__monthly" style="display:inline-block;margin-left:0.5rem">+ 100–120 EUR/mes</span>
-
-                                <div class="svc-accordion svc-accordion--sub" data-accordion>
-                                    <button type="button" class="svc-accordion__trigger" aria-expanded="false">
-                                        <span>Monday — gestión de proyectos</span>
-                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                    </button>
-                                    <div class="svc-accordion__panel">
-                                        <div class="svc-accordion__body">
-                                            <p class="svc-accordion__text">
-                                                Configuración completa de Monday adaptada a tus procesos. Tableros, vistas, automatizaciones internas y permisos por equipo. Todo listo para que empieces a trabajar desde el primer día.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="svc-accordion svc-accordion--sub" data-accordion>
-                                    <button type="button" class="svc-accordion__trigger" aria-expanded="false">
-                                        <span>Google Workspace + Documentos</span>
-                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                    </button>
-                                    <div class="svc-accordion__panel">
-                                        <div class="svc-accordion__body">
-                                            <p class="svc-accordion__text">
-                                                Email profesional, Drive con estructura de carpetas, permisos configurados y migración de datos. Se acabaron los documentos perdidos en WhatsApp.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="svc-accordion svc-accordion--sub" data-accordion>
-                                    <button type="button" class="svc-accordion__trigger" aria-expanded="false">
-                                        <span>Automatizaciones + Formación</span>
-                                        <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                    </button>
-                                    <div class="svc-accordion__panel">
-                                        <div class="svc-accordion__body">
-                                            <p class="svc-accordion__text">
-                                                3 flujos automatizados con Make para eliminar tareas repetitivas. Incluye 4h de formación para tu equipo y 4 semanas de soporte post-implementación.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Block 3: Facturación Digital -->
-                <div class="svc-block reveal">
-                    <div class="svc-block__header">
-                        <span class="svc-block__number">03</span>
-                        <h3 class="svc-block__title">Facturación Digital</h3>
-                        <span class="svc-block__badge">Esencial / Pro</span>
-                    </div>
-
-                    <div class="svc-accordion" data-accordion>
-                        <button type="button" class="svc-accordion__trigger" aria-expanded="false">
-                            <span>Facturar bien y cumplir normativa</span>
-                            <span class="svc-accordion__icon" aria-hidden="true"></span>
-                        </button>
-                        <div class="svc-accordion__panel">
-                            <div class="svc-accordion__body">
-                                <p class="svc-accordion__text">
-                                    Facturas con Word, pierdes tiempo y te preocupa Hacienda. Configuramos tu facturación digital con Holded: cumplimiento VeriFactu/SII, conciliación bancaria automática y recordatorios de cobro.
-                                </p>
-                                <div class="svc-tiers">
-                                    <div class="svc-accordion svc-accordion--tier" data-accordion>
-                                        <button type="button" class="svc-accordion__trigger" aria-expanded="false">
-                                            <div class="svc-tier__info">
-                                                <span class="svc-tier__label">Esencial</span>
-                                                <p class="svc-tier__desc">Holded facturación + VeriFactu/SII + conciliación bancaria</p>
-                                            </div>
-                                            <div class="svc-tier__pricing">
-                                                <span class="svc-block__price">Desde 520 EUR</span>
-                                                <span class="svc-tier__monthly">+ 40–70 EUR/mes</span>
-                                            </div>
-                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                        </button>
-                                        <div class="svc-accordion__panel">
-                                            <div class="svc-accordion__body">
-                                                <span class="svc-tier__includes-label">Qué incluye</span>
-                                                <ul class="svc-tier__includes">
-                                                    <li>Holded facturación completa configurada</li>
-                                                    <li>Cumplimiento VeriFactu/SII verificado</li>
-                                                    <li>Conciliación bancaria automática</li>
-                                                    <li>Plantillas de factura personalizadas</li>
-                                                    <li>4–6h de formación + 4–6 semanas de soporte</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="svc-accordion svc-accordion--tier svc-tier--pro" data-accordion>
-                                        <button type="button" class="svc-accordion__trigger" aria-expanded="false">
-                                            <div class="svc-tier__info">
-                                                <span class="svc-tier__label">Pro</span>
-                                                <p class="svc-tier__desc">Todo lo Esencial + web con pasarela de pago + automatización de cobros</p>
-                                            </div>
-                                            <div class="svc-tier__pricing">
-                                                <span class="svc-block__price">Desde 1.210 EUR</span>
-                                                <span class="svc-tier__monthly">+ 50–100 EUR/mes</span>
-                                            </div>
-                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                        </button>
-                                        <div class="svc-accordion__panel">
-                                            <div class="svc-accordion__body">
-                                                <span class="svc-tier__includes-label">Qué incluye</span>
-                                                <ul class="svc-tier__includes">
-                                                    <li>Todo lo de Esencial</li>
-                                                    <li>Web con pasarela de pago integrada</li>
-                                                    <li>Automatización de cobros y recordatorios</li>
-                                                    <li>Catálogo de productos y conexión con gestor</li>
-                                                    <li>4–6h de formación + 4–6 semanas de soporte</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Block 4: Control Comercial -->
-                <div class="svc-block reveal">
-                    <div class="svc-block__header">
-                        <span class="svc-block__number">04</span>
-                        <h3 class="svc-block__title">Control Comercial</h3>
-                        <span class="svc-block__badge">Esencial / Pro</span>
-                    </div>
-
-                    <div class="svc-accordion" data-accordion>
-                        <button type="button" class="svc-accordion__trigger" aria-expanded="false">
-                            <span>Que no se me escape ningún cliente</span>
-                            <span class="svc-accordion__icon" aria-hidden="true"></span>
-                        </button>
-                        <div class="svc-accordion__panel">
-                            <div class="svc-accordion__body">
-                                <p class="svc-accordion__text">
-                                    Tienes leads pero no conviertes. No haces seguimiento y las oportunidades se enfrían. Implantamos HubSpot como CRM con automatizaciones de seguimiento, plantillas de email y WhatsApp, y secuencias comerciales para que no se te escape ningún cliente.
-                                </p>
-                                <div class="svc-tiers">
-                                    <div class="svc-accordion svc-accordion--tier" data-accordion>
-                                        <button type="button" class="svc-accordion__trigger" aria-expanded="false">
-                                            <div class="svc-tier__info">
-                                                <span class="svc-tier__label">Esencial</span>
-                                                <p class="svc-tier__desc">CRM Starter + pipeline configurado + plantillas de email y WhatsApp</p>
-                                            </div>
-                                            <div class="svc-tier__pricing">
-                                                <span class="svc-block__price">Desde 1.210 EUR</span>
-                                                <span class="svc-tier__monthly">+ 10–50 EUR/mes</span>
-                                            </div>
-                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                        </button>
-                                        <div class="svc-accordion__panel">
-                                            <div class="svc-accordion__body">
-                                                <span class="svc-tier__includes-label">Qué incluye</span>
-                                                <ul class="svc-tier__includes">
-                                                    <li>HubSpot Starter configurado</li>
-                                                    <li>Pipeline de ventas adaptado a tu proceso</li>
-                                                    <li>5–8 plantillas de email y WhatsApp</li>
-                                                    <li>3–5 flujos de seguimiento automatizados</li>
-                                                    <li>6–8h de formación + 4–6 semanas de soporte</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="svc-accordion svc-accordion--tier svc-tier--pro" data-accordion>
-                                        <button type="button" class="svc-accordion__trigger" aria-expanded="false">
-                                            <div class="svc-tier__info">
-                                                <span class="svc-tier__label">Pro</span>
-                                                <p class="svc-tier__desc">HubSpot Business + secuencias comerciales automatizadas + reporting avanzado</p>
-                                            </div>
-                                            <div class="svc-tier__pricing">
-                                                <span class="svc-block__price">Desde 2.640 EUR</span>
-                                                <span class="svc-tier__monthly">+ 110–140 EUR/mes</span>
-                                            </div>
-                                            <span class="svc-accordion__icon" aria-hidden="true"></span>
-                                        </button>
-                                        <div class="svc-accordion__panel">
-                                            <div class="svc-accordion__body">
-                                                <span class="svc-tier__includes-label">Qué incluye</span>
-                                                <ul class="svc-tier__includes">
-                                                    <li>HubSpot Business completo</li>
-                                                    <li>Pipeline avanzado con propiedades personalizadas</li>
-                                                    <li>Secuencias comerciales automatizadas</li>
-                                                    <li>Reporting avanzado y alertas de oportunidades</li>
-                                                    <li>6–8h de formación + 4–6 semanas de soporte</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Asesoría y Formación incluida -->
-            <div class="services__included reveal">
-                <div class="services__included-icon" aria-hidden="true">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                </div>
-                <div class="services__included-content">
-                    <p class="services__included-title">Asesoría y formación incluida en todos los servicios</p>
-                    <p class="services__included-desc">Cada pack y servicio incluye sesiones de asesoría personalizada, formación para tu equipo y soporte post-implementación. No te dejamos solo con las herramientas: nos aseguramos de que las uséis.</p>
                 </div>
             </div>
 
-            <!-- Servicios Individuales -->
-            <div class="services__individual reveal">
-                <div class="services__individual-header">
-                    <h3 class="services__individual-title">Servicios a la carta</h3>
-                    <p class="services__individual-desc">También trabajamos por servicio individual. Si necesitas algo concreto, lo hacemos sin necesidad de contratar un pack completo.</p>
-                </div>
-                <div class="services__individual-grid">
-                    <div class="services__individual-card">
-                        <span class="services__individual-num">01</span>
-                        <h4 class="services__individual-card-title">Presencia Web</h4>
-                        <ul class="services__individual-list">
-                            <li>Landing</li>
-                            <li>Web</li>
-                            <li>Web Profesional</li>
-                            <li>SEO / SEM</li>
-                        </ul>
-                        <span class="svc-block__price">Desde 350 EUR</span>
+            <div class="services-teaser-grid">
+                <a href="/servicios#packs-overview" class="services-teaser services-teaser--packs reveal">
+                    <span class="services-teaser__eyebrow">Packs</span>
+                    <h3 class="services-teaser__title">4 packs para necesidades concretas del negocio.</h3>
+                    <p class="services-teaser__desc">En la página de servicios se presenta cada pack y sus diferencias de forma clara.</p>
+                    <div class="services-teaser__list">
+                        <span class="services-teaser__item">
+                            <strong>Motor de Reservas</strong>
+                            <span>Para captar reservas y atender solicitudes con orden.</span>
+                        </span>
+                        <span class="services-teaser__item">
+                            <strong>Central de Operaciones</strong>
+                            <span>Para organizar equipo, tareas y procesos en un mismo sistema.</span>
+                        </span>
+                        <span class="services-teaser__item">
+                            <strong>Facturación Digital</strong>
+                            <span>Para facturar, cobrar y cumplir la normativa con más control.</span>
+                        </span>
+                        <span class="services-teaser__item">
+                            <strong>Control Comercial</strong>
+                            <span>Para seguir cada oportunidad con criterio y continuidad.</span>
+                        </span>
                     </div>
-                    <div class="services__individual-card">
-                        <span class="services__individual-num">02</span>
-                        <h4 class="services__individual-card-title">Herramientas Básicas</h4>
-                        <ul class="services__individual-list">
-                            <li>CRM simple</li>
-                            <li>Holded + VeriFactu</li>
-                            <li>Monday + Workspace</li>
-                            <li>Motor de reservas</li>
-                            <li>Dashboard ejecutivo</li>
-                            <li>Cobros online</li>
-                        </ul>
-                        <span class="svc-block__price">Desde 210 EUR</span>
+                    <span class="services-teaser__footer">Ver packs <span aria-hidden="true">&rarr;</span></span>
+                </a>
+
+                <a href="/servicios#a-la-carta" class="services-teaser services-teaser--alacarte reveal">
+                    <span class="services-teaser__eyebrow">A medida</span>
+                    <h3 class="services-teaser__title">Si no es necesario un pack completo, también hay soluciones concretas.</h3>
+                    <p class="services-teaser__desc">Se define solo la pieza necesaria, con un alcance claro desde el inicio.</p>
+                    <div class="services-teaser__chips">
+                        <span>Web corporativa</span>
+                        <span>Herramientas básicas</span>
+                        <span>Automatización e IA</span>
+                        <span>Procesos internos</span>
+                        <span>Cobros online</span>
+                        <span>CRM y seguimiento</span>
+                        <span>Motor de reservas</span>
+                        <span>Facturación básica</span>
+                        <span>Pasarela de pago</span>
+                        <span>Google Business</span>
                     </div>
-                    <div class="services__individual-card">
-                        <span class="services__individual-num">03</span>
-                        <h4 class="services__individual-card-title">Automatización + IA</h4>
-                        <ul class="services__individual-list">
-                            <li>Automatización por flujo</li>
-                            <li>Chatbot básico / IA</li>
-                            <li>IA en procesos</li>
-                        </ul>
-                        <span class="svc-block__price">Desde 280 EUR</span>
+                    <span class="services-teaser__footer">Ver soluciones a medida <span aria-hidden="true">&rarr;</span></span>
+                </a>
+
+                <div class="services-proof reveal">
+                    <div class="services-proof__header">
+                        <p class="services-proof__eyebrow">Antes del diagnóstico</p>
+                        <h3 class="services-proof__title">La página de servicios permite revisar cada opción antes del siguiente paso.</h3>
                     </div>
+                    <div class="services-proof__points">
+                        <article class="services-proof__point">
+                            <span class="services-proof__point-num">01</span>
+                            <p>Permite ver qué necesidad resuelve cada solución.</p>
+                        </article>
+                        <article class="services-proof__point">
+                            <span class="services-proof__point-num">02</span>
+                            <p>Ayuda a distinguir entre pack y servicio individual.</p>
+                        </article>
+                        <article class="services-proof__point">
+                            <span class="services-proof__point-num">03</span>
+                            <p>Explica qué incluyen la asesoría, la formación y el soporte.</p>
+                        </article>
+                        <article class="services-proof__point">
+                            <span class="services-proof__point-num">04</span>
+                            <p>Facilita llegar al diagnóstico con una visión más clara.</p>
+                        </article>
+                    </div>
+                    <a href="/servicios" class="services-proof__link">Ver página completa <span aria-hidden="true">&rarr;</span></a>
                 </div>
             </div>
         </div>
@@ -637,6 +377,7 @@
             <img class="section-media__image" src="assets/images/about-bg-fallback.jpeg" alt="" width="1600" height="1215" decoding="async" loading="lazy">
         </picture>
         <div class="container">
+            <h2 class="sr-only">Sobre nosotros</h2>
             <div class="about__manifesto reveal">
                 <blockquote class="about__quote">
                     <span class="about__quote-mark">&ldquo;</span>No vendemos tecnología. Estructuramos tu negocio con herramientas
@@ -695,20 +436,21 @@
             <!-- Form system -->
             <div class="contact__form-system reveal">
                 <div class="contact__channel-btns">
-                    <button type="button" class="contact__channel-btn" data-channel="whatsapp" aria-controls="form-whatsapp" aria-expanded="false">
+                    <button type="button" class="contact__channel-btn" data-channel="whatsapp" aria-controls="contactFormPanel" aria-expanded="false" aria-pressed="false">
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                         WhatsApp
                     </button>
-                    <button type="button" class="contact__channel-btn" data-channel="email" aria-controls="form-email" aria-expanded="false">
+                    <button type="button" class="contact__channel-btn" data-channel="email" aria-controls="contactFormPanel" aria-expanded="false" aria-pressed="false">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4L12 13 2 4"/></svg>
                         Email
                     </button>
                 </div>
-                <div class="contact__form-panel" id="contactFormPanel" aria-hidden="true">
+                <div class="contact__form-panel" id="contactFormPanel">
                     <div class="contact__form-wrap">
                         <div class="contact__form-body">
+                            <p class="contact__status sr-only" id="contactStatus" role="status" aria-live="polite"></p>
                             <!-- WhatsApp form -->
-                            <form class="contact__form" id="form-whatsapp" hidden>
+                            <form class="contact__form" id="form-whatsapp">
                                 <div class="contact__field">
                                     <label class="contact__label" for="whatsapp-name">Nombre</label>
                                     <input id="whatsapp-name" name="name" type="text" class="contact__input" autocomplete="name" placeholder="Tu nombre" required>
@@ -724,7 +466,7 @@
                                 <button type="submit" class="contact__submit">Enviar por WhatsApp</button>
                             </form>
                             <!-- Email form -->
-                            <form class="contact__form" id="form-email" hidden>
+                            <form class="contact__form" id="form-email">
                                 <div class="contact__field">
                                     <label class="contact__label" for="email-name">Nombre</label>
                                     <input id="email-name" name="name" type="text" class="contact__input" autocomplete="name" placeholder="Tu nombre" required>
@@ -745,6 +487,10 @@
                             </form>
                         </div>
                     </div>
+                </div>
+                <div class="contact__fallback">
+                    <a href="https://wa.me/34692447491?text=Hola%2C%20me%20interesa%20un%20diagn%C3%B3stico%20gratuito" target="_blank" rel="noopener" class="contact__fallback-link">WhatsApp</a>
+                    <a href="https://www.instagram.com/crux.mallorca" target="_blank" rel="noopener" class="contact__fallback-link">Instagram</a>
                 </div>
             </div>
         </div>

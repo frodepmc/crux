@@ -1,28 +1,62 @@
 /* ═══════════════════════════════════════
-   CUSTOM CURSOR
+   GLOBAL SETUP
    ═══════════════════════════════════════ */
+const root = document.documentElement;
 const cursor = document.getElementById('cursor');
-let cursorX = 0, cursorY = 0;
-let currentX = 0, currentY = 0;
-let cursorRafId = null;
+const nav = document.querySelector('.nav');
+const progressBar = document.querySelector('.scroll-progress');
 const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 const hoverQuery = window.matchMedia('(hover: hover)');
+const supportsInert = 'inert' in HTMLElement.prototype;
 const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+function normalizePath(pathname) {
+    return pathname.replace(/\/index\.html$/, '/').replace(/\.html$/, '');
+}
+
+function setInertState(element, shouldBeInert) {
+    if (!element) return;
+    element.toggleAttribute('inert', shouldBeInert);
+    if (supportsInert) {
+        element.inert = shouldBeInert;
+    }
+}
+
+function getFocusableElements(container) {
+    if (!container) return [];
+    return [...container.querySelectorAll(focusableSelector)].filter((element) => !element.hidden && !element.closest('[hidden]') && !element.closest('[inert]'));
+}
+
+function prefersReducedMotion() {
+    return reducedMotionQuery.matches;
+}
+
+/* ═══════════════════════════════════════
+   CUSTOM CURSOR
+   ═══════════════════════════════════════ */
+let cursorX = 0;
+let cursorY = 0;
+let currentX = 0;
+let currentY = 0;
+let cursorRafId = null;
 
 function animateCursor() {
     const dx = cursorX - currentX;
     const dy = cursorY - currentY;
+
     currentX += dx * 0.15;
     currentY += dy * 0.15;
+
     if (cursor) {
-        cursor.style.left = currentX + 'px';
-        cursor.style.top = currentY + 'px';
+        cursor.style.left = `${currentX}px`;
+        cursor.style.top = `${currentY}px`;
     }
-    /* Stop loop once the cursor has caught up (< 0.5px delta) */
+
     if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) {
         cursorRafId = null;
         return;
     }
+
     cursorRafId = requestAnimationFrame(animateCursor);
 }
 
@@ -39,54 +73,50 @@ function stopCursorLoop() {
     }
 }
 
-/* Only activate custom cursor on devices with hover (pointer) */
-if (hoverQuery.matches && cursor) {
-    document.addEventListener('mousemove', (e) => {
-        cursorX = e.clientX;
-        cursorY = e.clientY;
+function initCustomCursor() {
+    if (!cursor || !hoverQuery.matches || prefersReducedMotion()) return;
+
+    root.classList.add('cursor-ready');
+
+    document.addEventListener('mousemove', (event) => {
+        cursorX = event.clientX;
+        cursorY = event.clientY;
+
         if (!cursor.classList.contains('is-visible')) {
             cursor.classList.add('is-visible');
         }
+
         startCursorLoop();
     });
 
     document.addEventListener('mouseleave', () => {
         cursor.classList.remove('is-visible');
+        cursor.classList.remove('is-hovering');
         stopCursorLoop();
     });
 
-    /* Hover states for interactive elements */
-    const hoverTargets = document.querySelectorAll('a, button, .flow-card');
-    hoverTargets.forEach(el => {
-        el.addEventListener('mouseenter', () => cursor.classList.add('is-hovering'));
-        el.addEventListener('mouseleave', () => cursor.classList.remove('is-hovering'));
+    document.querySelectorAll('a, button, .flow-card').forEach((element) => {
+        element.addEventListener('mouseenter', () => cursor.classList.add('is-hovering'));
+        element.addEventListener('mouseleave', () => cursor.classList.remove('is-hovering'));
     });
 }
 
-function getFocusableElements(container) {
-    return [...container.querySelectorAll(focusableSelector)].filter((el) => !el.hidden && !el.closest('[hidden]') && !el.closest('[inert]'));
-}
-
 /* ═══════════════════════════════════════
-   SCROLL PROGRESS
+   SCROLL UI
    ═══════════════════════════════════════ */
-const progressBar = document.querySelector('.scroll-progress');
-
 function updateProgress() {
     if (!progressBar) return;
+
     const scrollTop = window.scrollY;
     const docHeight = document.documentElement.scrollHeight - window.innerHeight;
     const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-    progressBar.style.width = progress + '%';
-}
 
-/* ═══════════════════════════════════════
-   NAV SCROLL STATE
-   ═══════════════════════════════════════ */
-const nav = document.querySelector('.nav');
+    progressBar.style.width = `${progress}%`;
+}
 
 function updateNav() {
     if (!nav) return;
+
     if (window.scrollY > 80) {
         nav.classList.add('is-scrolled');
     } else {
@@ -113,49 +143,125 @@ window.addEventListener('pageshow', syncScrollUi);
 /* ═══════════════════════════════════════
    SCROLL REVEAL
    ═══════════════════════════════════════ */
-const revealElements = document.querySelectorAll('.reveal');
+function initRevealAnimations() {
+    const revealElements = document.querySelectorAll('.reveal');
+    if (!revealElements.length) return;
 
-const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-            /* Stagger only among direct-child .reveal siblings, excluding
-               already-visible ones, to avoid inflated delays on nested reveals */
+    if (!('IntersectionObserver' in window) || prefersReducedMotion()) {
+        revealElements.forEach((element) => element.classList.add('is-visible'));
+        return;
+    }
+
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+
             const parent = entry.target.parentElement;
-            const directReveals = [...parent.children].filter(
-                (el) => el.classList.contains('reveal') && !el.classList.contains('is-visible')
-            );
+            const directReveals = parent
+                ? [...parent.children].filter((element) => element.classList.contains('reveal') && !element.classList.contains('is-visible'))
+                : [entry.target];
             const siblingIndex = directReveals.indexOf(entry.target);
             const delay = siblingIndex > 0 ? siblingIndex * 120 : 0;
 
-            setTimeout(() => {
+            window.setTimeout(() => {
                 entry.target.classList.add('is-visible');
             }, delay);
 
             revealObserver.unobserve(entry.target);
-        }
+        });
+    }, {
+        threshold: 0.12,
+        rootMargin: '0px 0px -60px 0px',
     });
-}, {
-    threshold: 0.12,
-    rootMargin: '0px 0px -60px 0px'
-});
 
-revealElements.forEach(el => revealObserver.observe(el));
+    revealElements.forEach((element) => revealObserver.observe(element));
+}
 
 /* ═══════════════════════════════════════
    MOBILE MENU
    ═══════════════════════════════════════ */
 const menuBtn = document.getElementById('menuBtn');
 const mobileMenu = document.getElementById('mobileMenu');
-const mobileLinks = mobileMenu.querySelectorAll('a');
-let lastFocusedElement = null;
+const mobileLinks = mobileMenu ? [...mobileMenu.querySelectorAll('a')] : [];
+const maskedPageElements = [
+    document.getElementById('main-content'),
+    document.querySelector('.footer'),
+].filter(Boolean);
 
-mobileMenu.inert = true;
+let lastFocusedElement = null;
+let mobileMenuHideTimer = null;
+
+function syncMaskedContent(isMasked) {
+    maskedPageElements.forEach((element) => {
+        setInertState(element, isMasked);
+        if (isMasked) {
+            element.setAttribute('aria-hidden', 'true');
+        } else {
+            element.removeAttribute('aria-hidden');
+        }
+    });
+}
+
+function syncMenuState(isOpen) {
+    if (!mobileMenu || !menuBtn) return;
+
+    menuBtn.setAttribute('aria-expanded', String(isOpen));
+    menuBtn.setAttribute('aria-label', isOpen ? 'Cerrar menú' : 'Abrir menú');
+    menuBtn.textContent = isOpen ? 'Cerrar' : 'Menú';
+
+    mobileMenu.setAttribute('aria-hidden', String(!isOpen));
+    setInertState(mobileMenu, !isOpen);
+    syncMaskedContent(isOpen);
+}
+
+function openMenu() {
+    if (!mobileMenu || !menuBtn || !nav) return;
+
+    lastFocusedElement = document.activeElement;
+    window.clearTimeout(mobileMenuHideTimer);
+    mobileMenu.hidden = false;
+    mobileMenu.classList.remove('is-closing');
+
+    requestAnimationFrame(() => {
+        mobileMenu.classList.add('is-open');
+    });
+
+    nav.classList.add('menu-open');
+    document.body.style.overflow = 'hidden';
+    syncMenuState(true);
+
+    const [firstLink] = getFocusableElements(mobileMenu);
+    if (firstLink) {
+        firstLink.focus();
+    }
+}
+
+function closeMenu(options = {}) {
+    const { returnFocus = true } = options;
+    if (!mobileMenu || !menuBtn || !nav) return;
+
+    mobileMenu.classList.remove('is-open');
+    mobileMenu.classList.add('is-closing');
+    nav.classList.remove('menu-open');
+    document.body.style.overflow = '';
+    syncMenuState(false);
+
+    window.clearTimeout(mobileMenuHideTimer);
+    mobileMenuHideTimer = window.setTimeout(() => {
+        mobileMenu.hidden = true;
+        mobileMenu.classList.remove('is-closing');
+    }, 650);
+
+    if (returnFocus && lastFocusedElement instanceof HTMLElement) {
+        lastFocusedElement.focus();
+    }
+}
 
 function trapMenuFocus(event) {
-    if (!mobileMenu.classList.contains('is-open') || event.key !== 'Tab') return;
+    if (!mobileMenu || !mobileMenu.classList.contains('is-open') || event.key !== 'Tab') return;
 
     const focusableElements = getFocusableElements(mobileMenu);
-    if (focusableElements.length === 0) {
+    if (!focusableElements.length) {
         event.preventDefault();
         return;
     }
@@ -172,305 +278,318 @@ function trapMenuFocus(event) {
     }
 }
 
-function openMenu() {
-    lastFocusedElement = document.activeElement;
-    mobileMenu.inert = false;
-    mobileMenu.classList.add('is-open');
-    nav.classList.add('menu-open');
-    mobileMenu.setAttribute('aria-hidden', 'false');
-    menuBtn.setAttribute('aria-expanded', 'true');
-    menuBtn.setAttribute('aria-label', 'Cerrar menú');
-    menuBtn.textContent = 'Cerrar';
-    document.body.style.overflow = 'hidden';
+function initMobileMenu() {
+    if (!menuBtn || !mobileMenu || !nav) return;
 
-    const [firstLink] = getFocusableElements(mobileMenu);
-    if (firstLink) {
-        firstLink.focus();
-    }
+    root.classList.add('nav-ready');
+    mobileMenu.hidden = true;
+    syncMenuState(false);
+
+    menuBtn.addEventListener('click', () => {
+        if (mobileMenu.classList.contains('is-open')) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    });
+
+    mobileLinks.forEach((link) => {
+        link.addEventListener('click', () => closeMenu({ returnFocus: false }));
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && mobileMenu.classList.contains('is-open')) {
+            closeMenu();
+        }
+
+        trapMenuFocus(event);
+    });
 }
-
-function closeMenu(options = {}) {
-    const { returnFocus = true } = options;
-    mobileMenu.classList.remove('is-open');
-    nav.classList.remove('menu-open');
-    mobileMenu.setAttribute('aria-hidden', 'true');
-    menuBtn.setAttribute('aria-expanded', 'false');
-    menuBtn.setAttribute('aria-label', 'Abrir menú');
-    menuBtn.textContent = 'Menú';
-    document.body.style.overflow = '';
-    mobileMenu.inert = true;
-
-    if (returnFocus && lastFocusedElement instanceof HTMLElement) {
-        lastFocusedElement.focus();
-    }
-}
-
-function toggleMenu() {
-    if (mobileMenu.classList.contains('is-open')) {
-        closeMenu();
-    } else {
-        openMenu();
-    }
-}
-
-menuBtn.addEventListener('click', toggleMenu);
-mobileLinks.forEach(link => link.addEventListener('click', () => closeMenu({ returnFocus: false })));
-
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && mobileMenu.classList.contains('is-open')) {
-        closeMenu();
-    }
-
-    trapMenuFocus(e);
-});
 
 /* ═══════════════════════════════════════
    SMOOTH SCROLL
    ═══════════════════════════════════════ */
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        const targetId = this.getAttribute('href');
-        if (targetId === '#') return;
+function initSmoothScroll() {
+    const currentPath = normalizePath(window.location.pathname);
 
-        const target = document.querySelector(targetId);
-        if (target) {
-            e.preventDefault();
-            const offset = nav.offsetHeight + 20;
+    document.querySelectorAll('a[href*="#"]').forEach((anchor) => {
+        const rawHref = anchor.getAttribute('href');
+        if (!rawHref) return;
+
+        const url = new URL(rawHref, window.location.href);
+        const hash = url.hash;
+        if (!hash || hash === '#') return;
+        if (url.origin !== window.location.origin) return;
+        if (normalizePath(url.pathname) !== currentPath) return;
+
+        anchor.addEventListener('click', (event) => {
+            const target = document.querySelector(hash);
+            if (!target) return;
+
+            event.preventDefault();
+            const offset = nav ? nav.offsetHeight + 20 : 20;
             const targetPosition = target.getBoundingClientRect().top + window.scrollY - offset;
 
             window.scrollTo({
                 top: targetPosition,
-                behavior: reducedMotionQuery.matches ? 'auto' : 'smooth'
+                behavior: prefersReducedMotion() ? 'auto' : 'smooth',
             });
-        }
+        });
     });
-});
+}
 
 /* ═══════════════════════════════════════
    ACCORDIONS
    ═══════════════════════════════════════ */
-/* Row-split: position horizontal diagonal at the actual row boundary */
 function updateRowSplit() {
     const grid = document.querySelector('.services__blocks');
     if (!grid) return;
+
     const firstBlock = grid.querySelector('.svc-block:nth-child(1)');
     const secondBlock = grid.querySelector('.svc-block:nth-child(2)');
     if (!firstBlock || !secondBlock) return;
+
     const gridRect = grid.getBoundingClientRect();
     const row1Bottom = Math.max(
         firstBlock.getBoundingClientRect().bottom,
         secondBlock.getBoundingClientRect().bottom
     );
     const splitPx = row1Bottom - gridRect.top;
-    grid.style.setProperty('--row-split', splitPx + 'px');
+
+    grid.style.setProperty('--row-split', `${splitPx}px`);
 }
 
 let accordionIndex = 0;
 
-function syncAccordionState(acc) {
-    const trigger = acc.querySelector(':scope > .svc-accordion__trigger');
-    const panel = acc.querySelector(':scope > .svc-accordion__panel');
+function syncAccordionState(accordion) {
+    const trigger = accordion.querySelector(':scope > .svc-accordion__trigger');
+    const panel = accordion.querySelector(':scope > .svc-accordion__panel');
     if (!trigger || !panel) return;
 
-    const isOpen = acc.classList.contains('is-open');
+    const isOpen = accordion.classList.contains('is-open');
     trigger.setAttribute('aria-expanded', String(isOpen));
     panel.setAttribute('aria-hidden', String(!isOpen));
-    panel.inert = !isOpen;
+    setInertState(panel, !isOpen);
 }
 
-document.querySelectorAll('[data-accordion]').forEach(acc => {
-    const trigger = acc.querySelector(':scope > .svc-accordion__trigger');
-    const panel = acc.querySelector(':scope > .svc-accordion__panel');
-    if (!trigger || !panel) return;
+function initAccordions() {
+    document.querySelectorAll('[data-accordion]').forEach((accordion) => {
+        const trigger = accordion.querySelector(':scope > .svc-accordion__trigger');
+        const panel = accordion.querySelector(':scope > .svc-accordion__panel');
+        if (!trigger || !panel) return;
 
-    accordionIndex += 1;
-    const triggerId = trigger.id || `accordion-trigger-${accordionIndex}`;
-    const panelId = panel.id || `accordion-panel-${accordionIndex}`;
+        accordionIndex += 1;
+        const triggerId = trigger.id || `accordion-trigger-${accordionIndex}`;
+        const panelId = panel.id || `accordion-panel-${accordionIndex}`;
 
-    trigger.id = triggerId;
-    trigger.setAttribute('aria-controls', panelId);
+        trigger.id = triggerId;
+        trigger.setAttribute('aria-controls', panelId);
 
-    panel.id = panelId;
-    panel.setAttribute('role', 'region');
-    panel.setAttribute('aria-labelledby', triggerId);
+        panel.id = panelId;
+        panel.setAttribute('role', 'region');
+        panel.setAttribute('aria-labelledby', triggerId);
 
-    syncAccordionState(acc);
+        syncAccordionState(accordion);
 
-    trigger.addEventListener('click', () => {
-        acc.classList.toggle('is-open');
-        syncAccordionState(acc);
-        setTimeout(updateRowSplit, 460);
+        trigger.addEventListener('click', () => {
+            accordion.classList.toggle('is-open');
+            syncAccordionState(accordion);
+            window.setTimeout(updateRowSplit, 460);
+        });
     });
-});
-
-function handleResize() {
-    updateRowSplit();
-    syncScrollUi();
-
-    if (window.innerWidth > 480 && mobileMenu.classList.contains('is-open')) {
-        closeMenu({ returnFocus: false });
-    }
 }
-
-// Initial + resize (debounced)
-updateRowSplit();
-syncScrollUi();
-
-let resizeTimer;
-window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(handleResize, 150);
-});
 
 /* ═══════════════════════════════════════
    CONTACT FORM CHANNEL TOGGLE
    ═══════════════════════════════════════ */
 const contactPanel = document.getElementById('contactFormPanel');
-const channelButtons = document.querySelectorAll('.contact__channel-btn');
-const contactForms = document.querySelectorAll('.contact__form');
+const channelButtons = [...document.querySelectorAll('.contact__channel-btn')];
+const contactForms = [...document.querySelectorAll('.contact__form')];
+const contactStatus = document.getElementById('contactStatus');
+const contactFallback = document.querySelector('.contact__fallback');
 
-if (contactPanel) {
-    function setActiveChannel(channel, options = {}) {
-        const { shouldFocus = false } = options;
-        const isOpen = Boolean(channel);
+function announceContactStatus(message) {
+    if (!contactStatus) return;
+    contactStatus.textContent = '';
+    requestAnimationFrame(() => {
+        contactStatus.textContent = message;
+    });
+}
 
-        channelButtons.forEach((button) => {
-            const active = button.dataset.channel === channel;
-            button.classList.toggle('is-active', active);
-            button.setAttribute('aria-expanded', String(active));
-        });
+function showContactFallback() {
+    if (contactFallback) {
+        contactFallback.classList.add('is-visible');
+    }
+}
 
-        contactForms.forEach((form) => {
-            form.hidden = form.id !== `form-${channel}`;
-        });
+function getRequestedChannel() {
+    const channel = new URLSearchParams(window.location.search).get('canal');
+    return channel === 'email' || channel === 'whatsapp' ? channel : null;
+}
 
-        contactPanel.classList.toggle('is-open', isOpen);
-        contactPanel.setAttribute('aria-hidden', String(!isOpen));
-        contactPanel.inert = !isOpen;
+function setActiveChannel(channel, options = {}) {
+    if (!contactPanel) return;
 
-        if (isOpen && shouldFocus) {
-            const activeForm = document.getElementById(`form-${channel}`);
-            const firstField = activeForm ? activeForm.querySelector(focusableSelector) : null;
-            if (firstField instanceof HTMLElement) {
-                firstField.focus();
-            }
+    const { shouldFocus = false } = options;
+    const isOpen = Boolean(channel);
+
+    channelButtons.forEach((button) => {
+        const active = button.dataset.channel === channel;
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-expanded', String(active));
+        button.setAttribute('aria-pressed', String(active));
+    });
+
+    contactForms.forEach((form) => {
+        const active = form.id === `form-${channel}`;
+        form.classList.toggle('is-active', active);
+        form.setAttribute('aria-hidden', String(!active));
+    });
+
+    contactPanel.classList.toggle('is-open', isOpen);
+    contactPanel.setAttribute('aria-hidden', String(!isOpen));
+    setInertState(contactPanel, !isOpen);
+
+    if (isOpen && shouldFocus) {
+        const activeForm = document.getElementById(`form-${channel}`);
+        const firstField = activeForm ? activeForm.querySelector(focusableSelector) : null;
+        if (firstField instanceof HTMLElement) {
+            firstField.focus();
         }
     }
+}
 
-    channelButtons.forEach((btn) => {
-        btn.addEventListener('click', () => {
-            const nextChannel = btn.classList.contains('is-active') ? null : btn.dataset.channel;
+function initContactForms() {
+    if (!contactPanel || !channelButtons.length || !contactForms.length) return;
+
+    root.classList.add('contact-ready');
+    channelButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            const nextChannel = button.classList.contains('is-active') ? null : button.dataset.channel;
             setActiveChannel(nextChannel, { shouldFocus: Boolean(nextChannel) });
         });
     });
 
-    setActiveChannel(null);
+    setActiveChannel(getRequestedChannel(), { shouldFocus: false });
 }
 
 /* ═══════════════════════════════════════
    FORM SUBMISSIONS
    ═══════════════════════════════════════ */
+function setButtonState(button, state, originalText) {
+    if (!button) return;
 
-/* ─── EmailJS Init ─── */
-if (typeof emailjs !== 'undefined') {
-    emailjs.init('Jx7AidbORhprabBNA');
-}
-
-/* ─── Button state helper ─── */
-function setButtonState(btn, state, originalText) {
-    btn.classList.remove('contact__submit--sending', 'contact__submit--success', 'contact__submit--error');
+    button.classList.remove('contact__submit--sending', 'contact__submit--success', 'contact__submit--error');
 
     switch (state) {
         case 'sending':
-            btn.disabled = true;
-            btn.classList.add('contact__submit--sending');
-            btn.textContent = 'Enviando...';
+            button.disabled = true;
+            button.classList.add('contact__submit--sending');
+            button.textContent = 'Enviando...';
+            break;
+        case 'opening':
+            button.disabled = true;
+            button.classList.add('contact__submit--sending');
+            button.textContent = 'Abriendo WhatsApp...';
+            window.setTimeout(() => {
+                button.disabled = false;
+                button.classList.remove('contact__submit--sending');
+                button.textContent = originalText;
+            }, 2500);
             break;
         case 'success':
-            btn.disabled = true;
-            btn.classList.add('contact__submit--success');
-            btn.textContent = 'Enviado \u2714';
-            setTimeout(() => {
-                btn.disabled = false;
-                btn.classList.remove('contact__submit--success');
-                btn.textContent = originalText;
+            button.disabled = true;
+            button.classList.add('contact__submit--success');
+            button.textContent = 'Enviado \u2714';
+            window.setTimeout(() => {
+                button.disabled = false;
+                button.classList.remove('contact__submit--success');
+                button.textContent = originalText;
             }, 3000);
             break;
         case 'error':
-            btn.disabled = false;
-            btn.classList.add('contact__submit--error');
-            btn.textContent = 'Error \u2014 Reintentar';
-            setTimeout(() => {
-                btn.classList.remove('contact__submit--error');
-                btn.textContent = originalText;
+            button.disabled = false;
+            button.classList.add('contact__submit--error');
+            button.textContent = 'Error \u2014 Reintentar';
+            window.setTimeout(() => {
+                button.classList.remove('contact__submit--error');
+                button.textContent = originalText;
             }, 4000);
             break;
         default:
-            btn.disabled = false;
-            btn.textContent = originalText;
+            button.disabled = false;
+            button.textContent = originalText;
     }
 }
 
-/* ─── WhatsApp form ─── */
+if (typeof window.emailjs !== 'undefined') {
+    window.emailjs.init('Jx7AidbORhprabBNA');
+}
+
 const whatsappForm = document.getElementById('form-whatsapp');
 if (whatsappForm) {
-    whatsappForm.addEventListener('submit', function (e) {
-        e.preventDefault();
+    whatsappForm.addEventListener('submit', function (event) {
+        event.preventDefault();
 
         const name = this.querySelector('[name="name"]').value.trim();
         const phone = this.querySelector('[name="phone"]').value.trim();
         const message = this.querySelector('[name="message"]').value.trim();
+        const button = this.querySelector('.contact__submit');
+        const originalText = 'Enviar por WhatsApp';
 
         if (!name || !phone) return;
 
         let text = '*Nuevo contacto desde la web CRUX*\n\n'
-            + '*Nombre:* ' + name + '\n'
-            + '*Teléfono:* ' + phone;
+            + `*Nombre:* ${name}\n`
+            + `*Teléfono:* ${phone}`;
 
         if (message) {
-            text += '\n*Proyecto:* ' + message;
+            text += `\n*Proyecto:* ${message}`;
         }
 
-        /* Use a hidden link + click instead of window.open to avoid popup blockers */
-        const waUrl = 'https://wa.me/34692447491?text=' + encodeURIComponent(text);
-        const waLink = document.createElement('a');
-        waLink.href = waUrl;
-        waLink.target = '_blank';
-        waLink.rel = 'noopener';
-        waLink.click();
+        const waUrl = `https://wa.me/34692447491?text=${encodeURIComponent(text)}`;
+        const popup = window.open(waUrl, '_blank');
 
-        /* Visual feedback */
-        const btn = this.querySelector('.contact__submit');
-        setButtonState(btn, 'success', 'Enviar por WhatsApp');
-        this.reset();
+        if (popup) {
+            popup.opener = null;
+            setButtonState(button, 'opening', originalText);
+            announceContactStatus('Se ha abierto WhatsApp en una pestaña nueva.');
+            this.reset();
+        } else {
+            showContactFallback();
+            setButtonState(button, 'error', originalText);
+            announceContactStatus('No se pudo abrir WhatsApp automáticamente. Puedes usar los enlaces directos debajo.');
+        }
     });
 }
 
-/* ─── Email form (EmailJS) ─── */
-/* NOTE: EmailJS public key, service ID, and template ID below are client-side
-   credentials. Rate limiting must be configured in the EmailJS dashboard. */
 const emailForm = document.getElementById('form-email');
 if (emailForm) {
-    emailForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
+    emailForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
 
-        const btn = this.querySelector('.contact__submit');
+        const button = this.querySelector('.contact__submit');
         const originalText = 'Enviar email';
 
-        if (typeof emailjs === 'undefined') {
-            setButtonState(btn, 'error', originalText);
+        if (typeof window.emailjs === 'undefined') {
+            showContactFallback();
+            setButtonState(button, 'error', originalText);
+            announceContactStatus('El envío por email no está disponible ahora mismo. Puedes continuar por WhatsApp o Instagram.');
             return;
         }
 
-        setButtonState(btn, 'sending', originalText);
+        setButtonState(button, 'sending', originalText);
 
         try {
-            await emailjs.sendForm('service_5ir3mca', 'template_97d0r04', this);
-            setButtonState(btn, 'success', originalText);
+            await window.emailjs.sendForm('service_5ir3mca', 'template_97d0r04', this);
+            setButtonState(button, 'success', originalText);
+            announceContactStatus('El formulario se ha enviado correctamente.');
             this.reset();
-        } catch (err) {
-            console.error('EmailJS error:', err);
-            setButtonState(btn, 'error', originalText);
+        } catch (error) {
+            console.error('EmailJS error:', error);
+            showContactFallback();
+            setButtonState(button, 'error', originalText);
+            announceContactStatus('No se pudo enviar el email. Puedes continuar por WhatsApp o Instagram.');
         }
     });
 }
@@ -478,11 +597,46 @@ if (emailForm) {
 /* ═══════════════════════════════════════
    ACTIVE NAV LINK
    ═══════════════════════════════════════ */
-const currentPath = window.location.pathname.replace(/\/index\.html$/, '/').replace(/\.html$/, '');
-document.querySelectorAll('.nav__links a, .mobile-menu__links a').forEach((link) => {
-    const linkPath = new URL(link.href, window.location.origin).pathname.replace(/\/index\.html$/, '/').replace(/\.html$/, '');
-    if (linkPath === currentPath && !link.getAttribute('href').startsWith('#')) {
-        link.classList.add('is-current');
-        link.setAttribute('aria-current', 'page');
+function initActiveNavLink() {
+    const currentPath = normalizePath(window.location.pathname);
+
+    document.querySelectorAll('.nav__links a, .mobile-menu__links a').forEach((link) => {
+        const linkPath = normalizePath(new URL(link.href, window.location.origin).pathname);
+        if (linkPath === currentPath && !link.getAttribute('href').startsWith('#')) {
+            link.classList.add('is-current');
+            link.setAttribute('aria-current', 'page');
+        }
+    });
+}
+
+/* ═══════════════════════════════════════
+   RESIZE
+   ═══════════════════════════════════════ */
+let resizeTimer;
+
+function handleResize() {
+    updateRowSplit();
+    syncScrollUi();
+
+    if (mobileMenu && mobileMenu.classList.contains('is-open') && window.innerWidth > 480) {
+        closeMenu({ returnFocus: false });
     }
+}
+
+window.addEventListener('resize', () => {
+    window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(handleResize, 150);
 });
+
+/* ═══════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════ */
+initCustomCursor();
+initRevealAnimations();
+initMobileMenu();
+initSmoothScroll();
+initAccordions();
+initContactForms();
+initActiveNavLink();
+updateRowSplit();
+syncScrollUi();
