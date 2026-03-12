@@ -329,41 +329,43 @@ const contactPanel = document.getElementById('contactFormPanel');
 const channelButtons = document.querySelectorAll('.contact__channel-btn');
 const contactForms = document.querySelectorAll('.contact__form');
 
-function setActiveChannel(channel, options = {}) {
-    const { shouldFocus = false } = options;
-    const isOpen = Boolean(channel);
+if (contactPanel) {
+    function setActiveChannel(channel, options = {}) {
+        const { shouldFocus = false } = options;
+        const isOpen = Boolean(channel);
 
-    channelButtons.forEach((button) => {
-        const active = button.dataset.channel === channel;
-        button.classList.toggle('is-active', active);
-        button.setAttribute('aria-expanded', String(active));
-    });
+        channelButtons.forEach((button) => {
+            const active = button.dataset.channel === channel;
+            button.classList.toggle('is-active', active);
+            button.setAttribute('aria-expanded', String(active));
+        });
 
-    contactForms.forEach((form) => {
-        form.hidden = form.id !== `form-${channel}`;
-    });
+        contactForms.forEach((form) => {
+            form.hidden = form.id !== `form-${channel}`;
+        });
 
-    contactPanel.classList.toggle('is-open', isOpen);
-    contactPanel.setAttribute('aria-hidden', String(!isOpen));
-    contactPanel.inert = !isOpen;
+        contactPanel.classList.toggle('is-open', isOpen);
+        contactPanel.setAttribute('aria-hidden', String(!isOpen));
+        contactPanel.inert = !isOpen;
 
-    if (isOpen && shouldFocus) {
-        const activeForm = document.getElementById(`form-${channel}`);
-        const firstField = activeForm ? activeForm.querySelector(focusableSelector) : null;
-        if (firstField instanceof HTMLElement) {
-            firstField.focus();
+        if (isOpen && shouldFocus) {
+            const activeForm = document.getElementById(`form-${channel}`);
+            const firstField = activeForm ? activeForm.querySelector(focusableSelector) : null;
+            if (firstField instanceof HTMLElement) {
+                firstField.focus();
+            }
         }
     }
-}
 
-channelButtons.forEach((btn) => {
-    btn.addEventListener('click', () => {
-        const nextChannel = btn.classList.contains('is-active') ? null : btn.dataset.channel;
-        setActiveChannel(nextChannel, { shouldFocus: Boolean(nextChannel) });
+    channelButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const nextChannel = btn.classList.contains('is-active') ? null : btn.dataset.channel;
+            setActiveChannel(nextChannel, { shouldFocus: Boolean(nextChannel) });
+        });
     });
-});
 
-setActiveChannel(null);
+    setActiveChannel(null);
+}
 
 /* ═══════════════════════════════════════
    FORM SUBMISSIONS
@@ -472,3 +474,15 @@ if (emailForm) {
         }
     });
 }
+
+/* ═══════════════════════════════════════
+   ACTIVE NAV LINK
+   ═══════════════════════════════════════ */
+const currentPath = window.location.pathname.replace(/\/index\.html$/, '/').replace(/\.html$/, '');
+document.querySelectorAll('.nav__links a, .mobile-menu__links a').forEach((link) => {
+    const linkPath = new URL(link.href, window.location.origin).pathname.replace(/\/index\.html$/, '/').replace(/\.html$/, '');
+    if (linkPath === currentPath && !link.getAttribute('href').startsWith('#')) {
+        link.classList.add('is-current');
+        link.setAttribute('aria-current', 'page');
+    }
+});

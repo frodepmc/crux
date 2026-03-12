@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicios de Digitalización para PYMEs | CRUX Consulting</title>
+    <meta name="description" content="Packs de digitalización operativa para PYMEs en Baleares: motor de reservas, facturación digital, control comercial y operaciones. Desde 520 EUR con asesoría incluida.">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#F2EFE9">
+    <link rel="canonical" href="https://cruxmallorca.es/servicios">
+    <meta property="og:title" content="Servicios | CRUX Consulting — Digitalización para PYMEs">
+    <meta property="og:description" content="Packs de digitalización operativa para PYMEs en Baleares. Motor de reservas, facturación, CRM y automatizaciones. Desde 520 EUR.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://cruxmallorca.es/servicios">
+    <meta property="og:image" content="https://cruxmallorca.es/assets/images/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="CRUX Consulting">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Servicios | CRUX Consulting">
+    <meta name="twitter:description" content="Packs de digitalización operativa para PYMEs en Baleares. Desde 520 EUR con asesoría incluida.">
+    <meta name="twitter:image" content="https://cruxmallorca.es/assets/images/og-image.jpg">
+    <link rel="icon" href="favicon.ico" sizes="48x48">
+    <link rel="icon" type="image/png" href="assets/icons/icon-192.png" sizes="192x192">
+    <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+    <link rel="manifest" href="site.webmanifest">
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Service",
+            "serviceType": "Consultoría de digitalización operativa",
+            "provider": {
+                "@type": "LocalBusiness",
+                "@id": "https://cruxmallorca.es/#organization",
+                "name": "CRUX Consulting"
+            },
+            "areaServed": {
+                "@type": "Place",
+                "name": "Islas Baleares, España"
+            },
+            "hasOfferCatalog": {
+                "@type": "OfferCatalog",
+                "name": "Packs de Digitalización",
+                "itemListElement": [
+                    {
+                        "@type": "Offer",
+                        "name": "Motor de Reservas — Esencial",
+                        "price": "810",
+                        "priceCurrency": "EUR",
+                        "description": "Landing + motor de reservas básico + Google Business"
+                    },
+                    {
+                        "@type": "Offer",
+                        "name": "Motor de Reservas — Pro",
+                        "price": "2640",
+                        "priceCurrency": "EUR",
+                        "description": "Web profesional + motor avanzado con CRM y pagos online"
+                    },
+                    {
+                        "@type": "Offer",
+                        "name": "Central de Operaciones",
+                        "price": "990",
+                        "priceCurrency": "EUR",
+                        "description": "Monday + Google Workspace + automatizaciones con Make"
+                    },
+                    {
+                        "@type": "Offer",
+                        "name": "Facturación Digital — Esencial",
+                        "price": "520",
+                        "priceCurrency": "EUR",
+                        "description": "Holded facturación + VeriFactu/SII + conciliación bancaria"
+                    },
+                    {
+                        "@type": "Offer",
+                        "name": "Facturación Digital — Pro",
+                        "price": "1210",
+                        "priceCurrency": "EUR",
+                        "description": "Todo Esencial + web con pasarela de pago + automatización de cobros"
+                    },
+                    {
+                        "@type": "Offer",
+                        "name": "Control Comercial — Esencial",
+                        "price": "1210",
+                        "priceCurrency": "EUR",
+                        "description": "HubSpot CRM Starter + pipeline + plantillas de email y WhatsApp"
+                    },
+                    {
+                        "@type": "Offer",
+                        "name": "Control Comercial — Pro",
+                        "price": "2640",
+                        "priceCurrency": "EUR",
+                        "description": "HubSpot Business + secuencias comerciales + reporting avanzado"
+                    }
+                ]
+            }
+        }
+    </script>
+
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src https://api.emailjs.com; frame-src 'none'; object-src 'none'; base-uri 'self'">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+    <!-- Custom Cursor -->
+    <div class="cursor" id="cursor"></div>
+
+    <!-- Scroll Progress -->
+    <div class="scroll-progress" aria-hidden="true"></div>
+
+    <!-- Navigation -->
+    <nav class="nav" role="navigation">
+        <div class="container nav__inner">
+            <a href="/" class="nav__logo"><img src="icono-crux-transparente.png" alt="Crux Consulting" class="nav__logo-img" width="512" height="512"></a>
+            <a href="https://www.instagram.com/crux.mallorca" target="_blank" rel="noopener" class="nav__ig" aria-label="Instagram"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>
+            <ul class="nav__links">
+                <li><a href="/servicios">Servicios</a></li>
+                <li><a href="/#proceso">Proceso</a></li>
+                <li><a href="/#nosotros">Nosotros</a></li>
+                <li><a href="/#contacto">Contacto</a></li>
+            </ul>
+            <button type="button" class="nav__menu-btn" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu" id="menuBtn">Menú</button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <nav class="mobile-menu" id="mobileMenu" aria-hidden="true" aria-label="Menú principal">
+        <ul class="mobile-menu__links">
+            <li><a href="/servicios">Servicios</a></li>
+            <li><a href="/#proceso">Proceso</a></li>
+            <li><a href="/#nosotros">Nosotros</a></li>
+            <li><a href="/#contacto">Contacto</a></li>
+        </ul>
+    </nav>
+
+    <main id="main-content">
+
+    <!-- ═══════════════════════════════════════
+         SECTION 1: SERVICES HERO
+         ═══════════════════════════════════════ -->
+    <section class="svc-hero">
+        <picture class="section-media section-media--services" aria-hidden="true">
+            <source type="image/webp" srcset="assets/images/services-bg-960.webp 960w, assets/images/services-bg-1600.webp 1600w" sizes="100vw">
+            <img class="section-media__image" src="assets/images/services-bg-fallback.jpeg" alt="" width="1600" height="1067" decoding="async" fetchpriority="high">
+        </picture>
+        <div class="container svc-hero__inner">
+            <div class="svc-hero__content">
+                <p class="label svc-hero__label">
+                    <span class="line-accent"></span>
+                    Servicios
+                </p>
+                <h1 class="svc-hero__heading">
+                    <span class="hero-line"><span class="hero-line__inner">Soluciones reales</span></span>
+                    <span class="hero-line"><span class="hero-line__inner svc-hero__heading--accent">para negocios reales.</span></span>
+                </h1>
+                <p class="svc-hero__desc">
+                    Cada pack nace de un problema concreto que hemos visto en decenas de PYMEs
+                    de Baleares. No vendemos software: estructuramos tu operativa con herramientas
+                    que tu equipo usará de verdad.
+                </p>
+                <div class="svc-hero__actions">
+                    <a href="#packs-overview" class="svc-hero__cta">Ver packs</a>
+                    <a href="https://wa.me/34692447491?text=Hola%2C%20me%20interesa%20un%20diagn%C3%B3stico%20gratuito" target="_blank" rel="noopener" class="svc-hero__cta svc-hero__cta--secondary">Diagnóstico gratuito</a>
+                </div>
+            </div>
+            <div class="svc-hero__geo" aria-hidden="true">
+                <div class="svc-hero__node svc-hero__node--top"></div>
+                <div class="svc-hero__node svc-hero__node--right"></div>
+                <div class="svc-hero__node svc-hero__node--bottom"></div>
+                <div class="svc-hero__node svc-hero__node--left"></div>
+                <div class="svc-hero__connector svc-hero__connector--v"></div>
+                <div class="svc-hero__connector svc-hero__connector--h"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════
+         SECTION 2: DIVIDER
+         ═══════════════════════════════════════ -->
+    <div class="section-divider" aria-hidden="true">
+        <div class="section-divider__line"></div>
+        <div class="section-divider__diamond"></div>
+        <div class="section-divider__line"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         SECTION 3: PACKS OVERVIEW
+         ═══════════════════════════════════════ -->
+    <section class="packs-overview section-padding" id="packs-overview">
+        <div class="container">
+            <div class="packs-overview__header reveal">
+                <h2 class="packs-overview__title">Nuestros packs</h2>
+                <p class="label">4 soluciones llave en mano</p>
+            </div>
+            <div class="packs-overview__grid">
+                <a href="#motor-de-reservas" class="pack-card reveal">
+                    <span class="pack-card__number">01</span>
+                    <h3 class="pack-card__title">Motor de Reservas</h3>
+                    <p class="pack-card__problem">Pierdes reservas porque dependes de WhatsApp y llamadas.</p>
+                    <span class="pack-card__price">Desde 810 EUR</span>
+                    <span class="pack-card__link">Ver detalle <span aria-hidden="true">&rarr;</span></span>
+                </a>
+                <a href="#central-de-operaciones" class="pack-card reveal">
+                    <span class="pack-card__number">02</span>
+                    <h3 class="pack-card__title">Central de Operaciones</h3>
+                    <p class="pack-card__problem">Tu equipo vive en WhatsApp y las tareas se pierden.</p>
+                    <span class="pack-card__price">Desde 990 EUR</span>
+                    <span class="pack-card__link">Ver detalle <span aria-hidden="true">&rarr;</span></span>
+                </a>
+                <a href="#facturacion-digital" class="pack-card reveal">
+                    <span class="pack-card__number">03</span>
+                    <h3 class="pack-card__title">Facturación Digital</h3>
+                    <p class="pack-card__problem">Facturas con Word, pierdes tiempo y te preocupa Hacienda.</p>
+                    <span class="pack-card__price">Desde 520 EUR</span>
+                    <span class="pack-card__link">Ver detalle <span aria-hidden="true">&rarr;</span></span>
+                </a>
+                <a href="#control-comercial" class="pack-card reveal">
+                    <span class="pack-card__number">04</span>
+                    <h3 class="pack-card__title">Control Comercial</h3>
+                    <p class="pack-card__problem">Tienes leads pero no conviertes. Las oportunidades se enfrían.</p>
+                    <span class="pack-card__price">Desde 1.210 EUR</span>
+                    <span class="pack-card__link">Ver detalle <span aria-hidden="true">&rarr;</span></span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════
+         SECTION 4: MOTOR DE RESERVAS
+         ═══════════════════════════════════════ -->
+    <section class="pack-detail section-padding" id="motor-de-reservas">
+        <div class="container">
+            <div class="pack-detail__grid">
+                <div class="pack-detail__narrative reveal">
+                    <p class="label"><span class="line-accent"></span>Pack 01</p>
+                    <h2 class="pack-detail__title">Motor de Reservas</h2>
+                    <p class="pack-detail__subtitle">Que te encuentren y reserven sin que tengas que estar pendiente.</p>
+                    <p class="pack-detail__problem"><strong>El problema:</strong> Pierdes reservas porque dependes de WhatsApp y llamadas. No tienes presencia online y tus clientes no pueden reservar fuera de horario.</p>
+                    <p class="pack-detail__solution-label"><strong>Lo que montamos:</strong></p>
+                    <ul class="pack-detail__checklist">
+                        <li>Web profesional optimizada para SEO y móvil</li>
+                        <li>Motor de reservas integrado con calendario</li>
+                        <li>Google Business configurado y optimizado</li>
+                        <li>Recordatorios automáticos para reducir no-shows</li>
+                        <li>Formación para que tu equipo lo gestione</li>
+                    </ul>
+                </div>
+                <div class="pack-detail__tiers reveal">
+                    <div class="tier-card">
+                        <span class="tier-card__label">Esencial</span>
+                        <p class="tier-card__desc">Landing + motor de reservas básico + Google Business</p>
+                        <div class="tier-card__pricing">
+                            <span class="tier-card__price">Desde 810 EUR</span>
+                            <span class="tier-card__monthly">+ 30–90 EUR/mes</span>
+                        </div>
+                        <ul class="tier-card__features">
+                            <li>Landing optimizada para móvil y SEO</li>
+                            <li>Motor de reservas básico (Checkfront, Acuity o similar)</li>
+                            <li>Google Business configurado y optimizado</li>
+                            <li>Recordatorios automáticos de reservas</li>
+                            <li>4–6h de formación + 4–6 semanas de soporte</li>
+                        </ul>
+                        <a href="https://wa.me/34692447491?text=Hola%2C%20me%20interesa%20el%20pack%20Motor%20de%20Reservas%20%E2%80%93%20Esencial" target="_blank" rel="noopener" class="tier-card__cta">Elegir Esencial</a>
+                    </div>
+                    <div class="tier-card tier-card--pro">
+                        <span class="tier-card__badge">Recomendado</span>
+                        <span class="tier-card__label">Pro</span>
+                        <p class="tier-card__desc">Web profesional (2–3 págs) + motor avanzado con CRM y pagos online</p>
+                        <div class="tier-card__pricing">
+                            <span class="tier-card__price">Desde 2.640 EUR</span>
+                            <span class="tier-card__monthly">+ 60–180 EUR/mes</span>
+                        </div>
+                        <ul class="tier-card__features">
+                            <li>Web profesional (2–3 págs) con CMS</li>
+                            <li>Motor de reservas avanzado con CRM y pagos online</li>
+                            <li>Recordatorios automáticos para reducir no-shows</li>
+                            <li>Google Business configurado y optimizado</li>
+                            <li>4–6h de formación + 4–6 semanas de soporte</li>
+                        </ul>
+                        <a href="https://wa.me/34692447491?text=Hola%2C%20me%20interesa%20el%20pack%20Motor%20de%20Reservas%20%E2%80%93%20Pro" target="_blank" rel="noopener" class="tier-card__cta">Elegir Pro</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════
+         SECTION 5: CENTRAL DE OPERACIONES
+         ═══════════════════════════════════════ -->
+    <section class="pack-detail pack-detail--alt section-padding" id="central-de-operaciones">
+        <div class="container">
+            <div class="pack-detail__grid pack-detail--reverse">
+                <div class="pack-detail__narrative reveal">
+                    <p class="label"><span class="line-accent"></span>Pack 02</p>
+                    <h2 class="pack-detail__title">Central de Operaciones</h2>
+                    <p class="pack-detail__subtitle">Equipo coordinado, sin caos.</p>
+                    <p class="pack-detail__problem"><strong>El problema:</strong> Tu equipo vive en WhatsApp, las tareas se pierden y nadie sabe quién hace qué. Cada uno con su sistema y la información repartida en mil sitios.</p>
+                    <p class="pack-detail__solution-label"><strong>Lo que montamos:</strong></p>
+                    <ul class="pack-detail__checklist">
+                        <li>Monday configurado para tus procesos con tableros y automatizaciones</li>
+                        <li>Google Workspace con email profesional, Drive y permisos</li>
+                        <li>3 flujos automatizados con Make</li>
+                        <li>4h de formación para tu equipo</li>
+                        <li>4 semanas de soporte post-implementación</li>
+                    </ul>
+                </div>
+                <div class="pack-detail__tiers pack-detail__tiers--single reveal">
+                    <div class="tier-card tier-card--unique">
+                        <span class="tier-card__label">Pack Único</span>
+                        <p class="tier-card__desc">Monday + Google Workspace + automatizaciones con Make</p>
+                        <div class="tier-card__pricing">
+                            <span class="tier-card__price">Desde 990 EUR</span>
+                            <span class="tier-card__monthly">+ 100–120 EUR/mes</span>
+                        </div>
+                        <ul class="tier-card__features">
+                            <li>Monday completo: tableros, vistas, automatizaciones y permisos</li>
+                            <li>Google Workspace: email profesional, Drive, carpetas y migración</li>
+                            <li>3 flujos automatizados con Make</li>
+                            <li>4h de formación para tu equipo</li>
+                            <li>4 semanas de soporte post-implementación</li>
+                        </ul>
+                        <a href="https://wa.me/34692447491?text=Hola%2C%20me%20interesa%20el%20pack%20Central%20de%20Operaciones" target="_blank" rel="noopener" class="tier-card__cta">Elegir este pack</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════
+         SECTION 6: FACTURACIÓN DIGITAL
+         ═══════════════════════════════════════ -->
+    <section class="pack-detail section-padding" id="facturacion-digital">
+        <div class="container">
+            <div class="pack-detail__grid">
+                <div class="pack-detail__narrative reveal">
+                    <p class="label"><span class="line-accent"></span>Pack 03</p>
+                    <h2 class="pack-detail__title">Facturación Digital</h2>
+                    <p class="pack-detail__subtitle">Facturar bien y cumplir normativa.</p>
+                    <p class="pack-detail__problem"><strong>El problema:</strong> Facturas con Word, pierdes tiempo y te preocupa Hacienda. No tienes conciliación bancaria y los cobros se te escapan.</p>
+                    <p class="pack-detail__solution-label"><strong>Lo que montamos:</strong></p>
+                    <ul class="pack-detail__checklist">
+                        <li>Holded facturación completa configurada</li>
+                        <li>Cumplimiento VeriFactu/SII verificado</li>
+                        <li>Conciliación bancaria automática</li>
+                        <li>Plantillas de factura personalizadas</li>
+                        <li>Formación y soporte incluido</li>
+                    </ul>
+                </div>
+                <div class="pack-detail__tiers reveal">
+                    <div class="tier-card">
+                        <span class="tier-card__label">Esencial</span>
+                        <p class="tier-card__desc">Holded facturación + VeriFactu/SII + conciliación bancaria</p>
+                        <div class="tier-card__pricing">
+                            <span class="tier-card__price">Desde 520 EUR</span>
+                            <span class="tier-card__monthly">+ 40–70 EUR/mes</span>
+                        </div>
+                        <ul class="tier-card__features">
+                            <li>Holded facturación completa configurada</li>
+                            <li>Cumplimiento VeriFactu/SII verificado</li>
+                            <li>Conciliación bancaria automática</li>
+                            <li>Plantillas de factura personalizadas</li>
+                            <li>4–6h de formación + 4–6 semanas de soporte</li>
+                        </ul>
+                        <a href="https://wa.me/34692447491?text=Hola%2C%20me%20interesa%20el%20pack%20Facturaci%C3%B3n%20Digital%20%E2%80%93%20Esencial" target="_blank" rel="noopener" class="tier-card__cta">Elegir Esencial</a>
+                    </div>
+                    <div class="tier-card tier-card--pro">
+                        <span class="tier-card__badge">Recomendado</span>
+                        <span class="tier-card__label">Pro</span>
+                        <p class="tier-card__desc">Todo lo Esencial + web con pasarela de pago + automatización de cobros</p>
+                        <div class="tier-card__pricing">
+                            <span class="tier-card__price">Desde 1.210 EUR</span>
+                            <span class="tier-card__monthly">+ 50–100 EUR/mes</span>
+                        </div>
+                        <ul class="tier-card__features">
+                            <li>Todo lo de Esencial</li>
+                            <li>Web con pasarela de pago integrada</li>
+                            <li>Automatización de cobros y recordatorios</li>
+                            <li>Catálogo de productos y conexión con gestor</li>
+                            <li>4–6h de formación + 4–6 semanas de soporte</li>
+                        </ul>
+                        <a href="https://wa.me/34692447491?text=Hola%2C%20me%20interesa%20el%20pack%20Facturaci%C3%B3n%20Digital%20%E2%80%93%20Pro" target="_blank" rel="noopener" class="tier-card__cta">Elegir Pro</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════
+         SECTION 7: CONTROL COMERCIAL
+         ═══════════════════════════════════════ -->
+    <section class="pack-detail pack-detail--alt section-padding" id="control-comercial">
+        <div class="container">
+            <div class="pack-detail__grid pack-detail--reverse">
+                <div class="pack-detail__narrative reveal">
+                    <p class="label"><span class="line-accent"></span>Pack 04</p>
+                    <h2 class="pack-detail__title">Control Comercial</h2>
+                    <p class="pack-detail__subtitle">Que no se te escape ningún cliente.</p>
+                    <p class="pack-detail__problem"><strong>El problema:</strong> Tienes leads pero no conviertes. No haces seguimiento y las oportunidades se enfrían. No sabes cuánto vendes ni de dónde vienen tus clientes.</p>
+                    <p class="pack-detail__solution-label"><strong>Lo que montamos:</strong></p>
+                    <ul class="pack-detail__checklist">
+                        <li>HubSpot CRM configurado con pipeline de ventas</li>
+                        <li>Plantillas de email y WhatsApp personalizadas</li>
+                        <li>Flujos de seguimiento automatizados</li>
+                        <li>Reporting y alertas de oportunidades</li>
+                        <li>Formación completa para tu equipo comercial</li>
+                    </ul>
+                </div>
+                <div class="pack-detail__tiers reveal">
+                    <div class="tier-card">
+                        <span class="tier-card__label">Esencial</span>
+                        <p class="tier-card__desc">CRM Starter + pipeline configurado + plantillas de email y WhatsApp</p>
+                        <div class="tier-card__pricing">
+                            <span class="tier-card__price">Desde 1.210 EUR</span>
+                            <span class="tier-card__monthly">+ 10–50 EUR/mes</span>
+                        </div>
+                        <ul class="tier-card__features">
+                            <li>HubSpot Starter configurado</li>
+                            <li>Pipeline de ventas adaptado a tu proceso</li>
+                            <li>5–8 plantillas de email y WhatsApp</li>
+                            <li>3–5 flujos de seguimiento automatizados</li>
+                            <li>6–8h de formación + 4–6 semanas de soporte</li>
+                        </ul>
+                        <a href="https://wa.me/34692447491?text=Hola%2C%20me%20interesa%20el%20pack%20Control%20Comercial%20%E2%80%93%20Esencial" target="_blank" rel="noopener" class="tier-card__cta">Elegir Esencial</a>
+                    </div>
+                    <div class="tier-card tier-card--pro">
+                        <span class="tier-card__badge">Recomendado</span>
+                        <span class="tier-card__label">Pro</span>
+                        <p class="tier-card__desc">HubSpot Business + secuencias comerciales automatizadas + reporting avanzado</p>
+                        <div class="tier-card__pricing">
+                            <span class="tier-card__price">Desde 2.640 EUR</span>
+                            <span class="tier-card__monthly">+ 110–140 EUR/mes</span>
+                        </div>
+                        <ul class="tier-card__features">
+                            <li>HubSpot Business completo</li>
+                            <li>Pipeline avanzado con propiedades personalizadas</li>
+                            <li>Secuencias comerciales automatizadas</li>
+                            <li>Reporting avanzado y alertas de oportunidades</li>
+                            <li>6–8h de formación + 4–6 semanas de soporte</li>
+                        </ul>
+                        <a href="https://wa.me/34692447491?text=Hola%2C%20me%20interesa%20el%20pack%20Control%20Comercial%20%E2%80%93%20Pro" target="_blank" rel="noopener" class="tier-card__cta">Elegir Pro</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════
+         SECTION 8: ASESORÍA BANNER
+         ═══════════════════════════════════════ -->
+    <section class="asesoria-banner">
+        <div class="container">
+            <div class="asesoria-banner__header reveal">
+                <svg class="asesoria-banner__icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <h3 class="asesoria-banner__title">Asesoría y formación incluida en todos los servicios</h3>
+            </div>
+            <div class="asesoria-banner__points reveal">
+                <div class="asesoria-banner__point">
+                    <span class="asesoria-banner__point-title">Sesiones personalizadas</span>
+                    <p class="asesoria-banner__point-desc">4–6h de asesoría one-on-one para definir la mejor solución para tu negocio.</p>
+                </div>
+                <div class="asesoria-banner__point">
+                    <span class="asesoria-banner__point-title">Formación para tu equipo</span>
+                    <p class="asesoria-banner__point-desc">Workshops prácticos para que tu equipo arranque seguro desde el primer día.</p>
+                </div>
+                <div class="asesoria-banner__point">
+                    <span class="asesoria-banner__point-title">Soporte post-implementación</span>
+                    <p class="asesoria-banner__point-desc">4–6 semanas de acompañamiento y soporte directo por WhatsApp.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════
+         SECTION 9: A LA CARTE + CTA
+         ═══════════════════════════════════════ -->
+    <section class="alacarte section-padding" id="a-la-carta">
+        <div class="container">
+            <div class="alacarte__header reveal">
+                <h2 class="alacarte__title">Servicios a la carta</h2>
+                <p class="label">Individual</p>
+                <p class="alacarte__desc">¿No necesitas un pack completo? Trabajamos servicio a servicio. Si necesitas algo concreto, lo hacemos.</p>
+            </div>
+            <div class="alacarte__grid">
+                <div class="alacarte__card reveal">
+                    <span class="alacarte__num">01</span>
+                    <h3 class="alacarte__card-title">Presencia Web</h3>
+                    <p class="alacarte__card-desc">Tu primera impresión digital. Desde landing hasta web profesional con SEO.</p>
+                    <ul class="alacarte__list">
+                        <li>Landing</li>
+                        <li>Web (2–3 págs)</li>
+                        <li>Web Profesional</li>
+                        <li>SEO / SEM</li>
+                    </ul>
+                    <span class="alacarte__price">Desde 350 EUR</span>
+                    <a href="https://wa.me/34692447491?text=Hola%2C%20me%20interesa%20el%20servicio%20de%20Presencia%20Web" target="_blank" rel="noopener" class="alacarte__cta">Consultar <span aria-hidden="true">&rarr;</span></a>
+                </div>
+                <div class="alacarte__card reveal">
+                    <span class="alacarte__num">02</span>
+                    <h3 class="alacarte__card-title">Herramientas Básicas</h3>
+                    <p class="alacarte__card-desc">Las herramientas que necesitas para gestionar el día a día de tu negocio.</p>
+                    <ul class="alacarte__list">
+                        <li>CRM simple</li>
+                        <li>Holded + VeriFactu</li>
+                        <li>Monday + Workspace</li>
+                        <li>Motor de reservas</li>
+                        <li>Dashboard ejecutivo</li>
+                        <li>Cobros online</li>
+                    </ul>
+                    <span class="alacarte__price">Desde 210 EUR</span>
+                    <a href="https://wa.me/34692447491?text=Hola%2C%20me%20interesa%20el%20servicio%20de%20Herramientas%20B%C3%A1sicas" target="_blank" rel="noopener" class="alacarte__cta">Consultar <span aria-hidden="true">&rarr;</span></a>
+                </div>
+                <div class="alacarte__card reveal">
+                    <span class="alacarte__num">03</span>
+                    <h3 class="alacarte__card-title">Automatización + IA</h3>
+                    <p class="alacarte__card-desc">Elimina tareas repetitivas y deja que la IA trabaje por ti.</p>
+                    <ul class="alacarte__list">
+                        <li>Automatización por flujo</li>
+                        <li>Chatbot básico / IA</li>
+                        <li>IA en procesos</li>
+                    </ul>
+                    <span class="alacarte__price">Desde 280 EUR</span>
+                    <a href="https://wa.me/34692447491?text=Hola%2C%20me%20interesa%20el%20servicio%20de%20Automatizaci%C3%B3n%20%2B%20IA" target="_blank" rel="noopener" class="alacarte__cta">Consultar <span aria-hidden="true">&rarr;</span></a>
+                </div>
+            </div>
+
+            <!-- Closing CTA -->
+            <div class="svc-cta reveal">
+                <img src="logo-crux.png" alt="" class="svc-cta__logo" width="800" height="800" aria-hidden="true">
+                <h2 class="svc-cta__heading">Diagnóstico gratuito.<br><em>¿Empezamos?</em></h2>
+                <p class="svc-cta__text">Analizamos tu negocio, detectamos los puntos de dolor y te proponemos un plan concreto. Sin compromiso.</p>
+                <div class="svc-cta__actions">
+                    <a href="https://wa.me/34692447491?text=Hola%2C%20me%20interesa%20un%20diagn%C3%B3stico%20gratuito" target="_blank" rel="noopener" class="svc-cta__btn svc-cta__btn--primary">Hablar por WhatsApp</a>
+                    <a href="/#contacto" class="svc-cta__btn">Enviar email</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer__inner">
+            <div class="footer__left">
+                <span class="footer__logo">CRUX Consulting</span>
+                <span class="footer__copy">&copy; 2026</span>
+            </div>
+            <ul class="footer__social">
+                <li><a href="https://www.instagram.com/crux.mallorca" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg> Instagram</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <script src="assets/js/main.js" defer></script>
+</body>
+</html>
