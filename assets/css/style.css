@@ -666,9 +666,9 @@ textarea:focus-visible {
 .hero__brand-mark {
     display: block;
     position: absolute;
-    left: var(--gutter);
-    bottom: 4rem;
-    width: clamp(158px, 15.75vw, 248px);
+    left: calc(var(--gutter) * 0.58);
+    bottom: 2.35rem;
+    width: clamp(111px, 11vw, 174px);
     height: auto;
     opacity: 0.27;
     pointer-events: none;
