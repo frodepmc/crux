@@ -668,7 +668,7 @@ textarea:focus-visible {
     position: absolute;
     left: calc(var(--gutter) * 0.32);
     bottom: 1.1rem;
-    width: clamp(111px, 11vw, 174px);
+    width: clamp(83px, 8.25vw, 131px);
     height: auto;
     opacity: 0.27;
     pointer-events: none;
