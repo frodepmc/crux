@@ -2418,16 +2418,40 @@ textarea:focus-visible {
 
 .contact__inner {
     display: grid;
-    grid-template-columns: auto 1fr 1.15fr;
+    grid-template-columns: minmax(0, 1.22fr) minmax(260px, 31rem);
     align-items: center;
     gap: clamp(2rem, 4vw, 4rem);
     position: relative;
     z-index: 1;
 }
 
+.contact__intro {
+    display: grid;
+    grid-template-columns: clamp(104px, 9.5vw, 148px) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(1rem, 1.9vw, 1.65rem);
+    padding: clamp(1.2rem, 2.2vw, 1.9rem);
+    border: 1px solid rgba(56, 105, 171, 0.16);
+    background: rgba(242, 239, 233, 0.68);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    position: relative;
+    overflow: hidden;
+}
+
+.contact__intro::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: clamp(88px, 14vw, 132px);
+    height: 1px;
+    background: var(--accent);
+}
+
 /* ─── Logo seal ─── */
 .contact__logo {
-    width: clamp(125px, 13vw, 189px);
+    width: min(100%, clamp(104px, 9.5vw, 148px));
     height: auto;
     opacity: 0.8;
     transition: opacity 0.4s ease;
@@ -2440,6 +2464,10 @@ textarea:focus-visible {
 /* ─── Text block ─── */
 .contact__text {
     align-self: center;
+    min-width: 0;
+    max-width: 32rem;
+    padding-left: clamp(1rem, 1.8vw, 1.5rem);
+    border-left: 1px solid rgba(56, 105, 171, 0.14);
 }
 
 .contact__question {
@@ -2453,8 +2481,9 @@ textarea:focus-visible {
     font-family: var(--font-display);
     font-style: italic;
     font-weight: 400;
-    font-size: clamp(3.5rem, 8vw, 7rem);
-    line-height: 1;
+    font-size: clamp(2.85rem, 4vw, 4.75rem);
+    line-height: 0.96;
+    letter-spacing: -0.04em;
     color: var(--bg-accent);
 }
 
@@ -2469,6 +2498,8 @@ textarea:focus-visible {
 
 /* ─── Form System ─── */
 .contact__form-system {
+    width: min(100%, 31rem);
+    justify-self: end;
     border: 1px solid var(--border-strong);
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(10px);
@@ -2484,7 +2515,7 @@ textarea:focus-visible {
     background: transparent;
     border: none;
     border-bottom: 1px solid var(--border);
-    padding: clamp(1.1rem, 1.8vw, 1.5rem) clamp(1.5rem, 2.5vw, 2rem);
+    padding: clamp(0.9rem, 1.2vw, 1.08rem) clamp(1rem, 1.45vw, 1.2rem);
     color: var(--text-muted);
     font-family: var(--font-body);
     font-size: 0.65rem;
@@ -3105,9 +3136,21 @@ html.no-js .nav__menu-btn {
         text-align: center;
     }
 
+    .contact__intro {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+        gap: 1.25rem;
+    }
+
     .contact__logo {
         justify-self: center;
         width: 158px;
+    }
+
+    .contact__text {
+        padding-left: 0;
+        border-left: none;
     }
 
     .contact__heading {
@@ -3115,6 +3158,8 @@ html.no-js .nav__menu-btn {
     }
 
     .contact__form-system {
+        width: 100%;
+        justify-self: stretch;
         text-align: left;
     }
 
@@ -3438,7 +3483,7 @@ html.no-js .nav__menu-btn {
 
     /* Contact — better proportions */
     .contact__heading {
-        font-size: 6rem;
+        font-size: 5.2rem;
     }
 
     .contact__subtext {
