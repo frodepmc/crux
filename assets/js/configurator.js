@@ -688,6 +688,10 @@
         // Sidebar handle (mobile drawer)
         const handle = document.getElementById('configuratorHandle');
         const sidebar = document.getElementById('configuratorSidebar');
+        // On mobile, move sidebar to <body> to escape .services-backdrop stacking context
+        if (sidebar && window.innerWidth <= 900) {
+            document.body.appendChild(sidebar);
+        }
         if (handle && sidebar) {
             handle.addEventListener('click', () => {
                 const open = sidebar.classList.toggle('is-open');
@@ -731,6 +735,13 @@
             resizeTimer = setTimeout(() => {
             const isDrawer = window.innerWidth <= 900;
             if (isDrawer !== lastWasDrawer && sidebar) {
+                // Move sidebar DOM: body (mobile) or back to configurator layout (desktop)
+                if (isDrawer) {
+                    document.body.appendChild(sidebar);
+                } else {
+                    const layout = document.querySelector('.configurator__layout');
+                    if (layout) layout.appendChild(sidebar);
+                }
                 sidebar.classList.add('is-transitioning');
                 sidebar.classList.remove('is-open');
                 if (handle) handle.setAttribute('aria-expanded', 'false');
