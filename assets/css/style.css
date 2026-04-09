@@ -3565,10 +3565,7 @@ html.no-js .nav__menu-btn {
 }
 
 .svc-hero__inner {
-    display: grid;
-    grid-template-columns: 3fr 2fr;
-    gap: clamp(2rem, 4vw, 4rem);
-    align-items: center;
+    display: block;
 }
 
 .svc-hero__label {
@@ -3579,44 +3576,29 @@ html.no-js .nav__menu-btn {
     margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
 }
 
-.svc-hero__heading .hero-line__inner {
+.svc-hero__heading .hero-line__inner,
+.svc-hero__heading .hero-line:nth-child(1) .hero-line__inner,
+.svc-hero__heading .hero-line:nth-child(2) .hero-line__inner {
     font-size: clamp(2.4rem, 5vw, 4.5rem);
     font-weight: 300;
     line-height: 1.08;
     letter-spacing: -0.02em;
 }
 
+.svc-hero__heading .hero-line:nth-child(2) .hero-line__inner.svc-hero__heading--accent,
 .svc-hero__heading--accent {
     font-style: italic;
     font-weight: 400;
     color: var(--accent);
+    font-family: var(--font-display);
 }
 
 .svc-hero__bottom {
-    display: flex;
-    align-items: flex-start;
-    gap: clamp(2rem, 3vw, 3.5rem);
-    overflow: visible;
-}
-
-.svc-hero__brand-mark {
-    display: block;
-    flex-shrink: 0;
-    width: clamp(140px, 14vw, 220px);
-    height: auto;
-    opacity: 0.22;
-    pointer-events: none;
-    user-select: none;
-    margin-top: 0.25rem;
-    margin-left: clamp(1rem, 3vw, 3rem);
+    margin-top: clamp(1.5rem, 3vh, 2.5rem);
 }
 
 .svc-hero__bottom-content {
-    flex: 1;
     min-width: 0;
-    margin-left: clamp(1rem, 5vw, 5rem);
-    margin-top: clamp(-4rem, -5vw, -2rem);
-    margin-right: clamp(-4rem, -8vw, -2rem);
 }
 
 .svc-hero__desc {
@@ -4044,9 +4026,30 @@ html.no-js .nav__menu-btn {
 
 /* ─── Asesoría Banner ─── */
 .asesoria-banner {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     background: var(--accent);
     color: #fff;
     padding: clamp(3rem, 7vh, 5rem) 0;
+}
+
+.asesoria-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(56, 105, 171, 0.9) 0%, rgba(56, 105, 171, 0.82) 55%, rgba(28, 56, 96, 0.78) 100%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.section-media--asesoria .section-media__image {
+    object-position: center 42%;
+}
+
+.asesoria-banner > :not(.section-media) {
+    position: relative;
+    z-index: 1;
 }
 
 .asesoria-banner__header {
@@ -4215,6 +4218,28 @@ html.no-js .nav__menu-btn {
 /* ─── Closing CTA ─── */
 .svc-cta {
     position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: clamp(2.5rem, 5vh, 4.5rem) clamp(1.5rem, 4vw, 3.5rem);
+    border: 1px solid var(--border);
+}
+
+.svc-cta::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, rgba(242, 239, 233, 0.92) 0%, rgba(242, 239, 233, 0.84) 45%, rgba(242, 239, 233, 0.9) 100%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.section-media--cta .section-media__image {
+    object-position: 35% center;
+}
+
+.svc-cta > :not(.section-media) {
+    position: relative;
+    z-index: 1;
 }
 
 .svc-cta__inner {
