@@ -59,79 +59,110 @@ html {
     justify-content: center;
 }
 
-/* ─── Alacarte branches (collapsible) ─── */
+/* ─── Alacarte branch cards + expand panel ─── */
 .alacarte__branches {
     display: flex;
     flex-direction: column;
-    gap: clamp(1rem, 2vw, 1.5rem);
 }
-.alacarte__branch {
-    border: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.3);
+.alacarte__branch-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(0.8rem, 1.2vw, 1.2rem);
 }
-.alacarte__branch.is-open {
-    background: rgba(255, 255, 255, 0.45);
-}
-.alacarte__branch-header {
+.alacarte__branch-card {
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-    width: 100%;
-    padding: clamp(1.1rem, 2vw, 1.5rem) clamp(1.2rem, 2vw, 1.8rem);
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: clamp(1.2rem, 2vw, 1.6rem);
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.35);
     cursor: pointer;
-    background: none;
-    border: none;
     font: inherit;
     color: inherit;
     text-align: left;
-    transition: background 0.3s ease;
-}
-.alacarte__branch-header:hover {
-    background: rgba(56, 105, 171, 0.04);
-}
-.alacarte__branch-icon {
-    flex-shrink: 0;
-    width: 20px;
-    height: 20px;
     position: relative;
-    transition: transform 0.4s var(--ease-out);
+    transition: transform 0.3s var(--ease-out), border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
 }
-.alacarte__branch-icon::before,
-.alacarte__branch-icon::after {
+.alacarte__branch-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+.alacarte__branch-card:active {
+    transform: scale(0.97);
+    transition-duration: 0.1s;
+}
+.alacarte__branch-card:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+}
+.alacarte__branch-card.is-active {
+    border-color: rgba(56, 105, 171, 0.55);
+    background: rgba(56, 105, 171, 0.06);
+    box-shadow: 0 8px 24px rgba(56, 105, 171, 0.08);
+    transform: none;
+}
+.alacarte__branch-card.is-active::after {
     content: '';
     position: absolute;
-    background: var(--accent);
-    border-radius: 1px;
-    transition: transform 0.4s var(--ease-out), opacity 0.3s ease;
-}
-.alacarte__branch-icon::before {
-    width: 14px; height: 1.5px;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-}
-.alacarte__branch-icon::after {
-    width: 1.5px; height: 14px;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-}
-.alacarte__branch.is-open .alacarte__branch-icon::after {
-    transform: translate(-50%, -50%) rotate(90deg);
-    opacity: 0;
+    bottom: -9px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 9px solid transparent;
+    border-right: 9px solid transparent;
+    border-top: 9px solid rgba(56, 105, 171, 0.55);
+    z-index: 2;
 }
 .alacarte__branch-title {
     font-family: var(--font-display);
-    font-size: clamp(1.05rem, 1.4vw, 1.2rem);
+    font-size: clamp(1rem, 1.3vw, 1.15rem);
     font-weight: 500;
     color: var(--text);
 }
 .alacarte__branch-desc {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--text-muted);
     font-style: italic;
+    line-height: 1.5;
+}
+.alacarte__branch-count {
+    margin-top: auto;
+    padding-top: 0.5rem;
+    font-family: var(--font-brand);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+/* Shared expand panel below cards */
+.alacarte__branch-expand {
+    position: relative;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s var(--ease-out);
+}
+.alacarte__branch-expand.is-open {
+    max-height: var(--expand-h, 500px);
+    margin-top: clamp(0.8rem, 1.2vw, 1.2rem);
+    border-top: 2px solid rgba(56, 105, 171, 0.2);
+    padding-top: clamp(0.8rem, 1.2vw, 1rem);
+}
+.alacarte__branch-panel {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+.alacarte__branch-panel.is-visible {
+    position: relative;
+    visibility: visible;
+    pointer-events: auto;
 }
 .alacarte__branch-items {
-    padding: clamp(0.8rem, 1.2vw, 1.2rem) clamp(1.2rem, 2vw, 1.8rem) clamp(1rem, 1.5vw, 1.4rem);
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: clamp(0.8rem, 1.2vw, 1rem);
@@ -198,46 +229,9 @@ button.alacarte__cta:active {
     transform: scale(0.97);
 }
 
-/* Accordion body: height animated via JS-set --branch-h */
-.alacarte__branch-body {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.5s var(--ease-out);
-    -webkit-mask-image: none;
-    mask-image: none;
-}
-.alacarte__branch.is-open .alacarte__branch-body {
-    max-height: var(--branch-h, 600px);
-}
-
-/* Peek state: partial reveal with fade mask */
-.alacarte__branch.is-peeking .alacarte__branch-body {
-    max-height: 90px;
-    -webkit-mask-image: linear-gradient(to bottom, black 10%, transparent 95%);
-    mask-image: linear-gradient(to bottom, black 10%, transparent 95%);
-}
-/* Transition from peek → open: mask dissolves, height grows */
-.alacarte__branch.is-peeking.is-open .alacarte__branch-body {
-    max-height: var(--branch-h, 600px);
-    -webkit-mask-image: none;
-    mask-image: none;
-    transition: max-height 0.5s var(--ease-out), mask-image 0.4s ease 0.1s, -webkit-mask-image 0.4s ease 0.1s;
-}
-
-/* Scroll hint bounce */
-@keyframes peekNudge {
-    0%, 100% { transform: translateY(0); }
-    30%      { transform: translateY(-5px); }
-    50%      { transform: translateY(-2px); }
-}
-.alacarte__branch.is-nudging {
-    animation: peekNudge 0.6s var(--ease-out) 1;
-}
-
 @media (max-width: 700px) {
-    .alacarte__branch-header {
-        flex-direction: column;
-        gap: 0.3rem;
+    .alacarte__branch-cards {
+        grid-template-columns: 1fr;
     }
     .alacarte__branch-items {
         grid-template-columns: 1fr;

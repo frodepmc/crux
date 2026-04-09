@@ -808,71 +808,51 @@
         observer.observe(section);
     }
 
-    // ── Branch accordion + peek ────────────────────────
-    function initBranchAccordion() {
-        const branches = document.querySelectorAll('.alacarte__branch[data-branch]');
-        if (!branches.length) return;
+    // ── Branch cards + inline expand ───────────────────
+    function initBranchCards() {
+        const cards = document.querySelectorAll('.alacarte__branch-card');
+        const expand = document.getElementById('branch-expand');
+        const panels = document.querySelectorAll('.alacarte__branch-panel');
+        if (!cards.length || !expand) return;
 
-        branches.forEach(branch => {
-            const header = branch.querySelector('.alacarte__branch-header');
-            const body = branch.querySelector('.alacarte__branch-body');
-            if (!header || !body) return;
+        cards.forEach(card => {
+            card.addEventListener('click', () => {
+                const branch = card.dataset.branch;
+                const wasActive = card.classList.contains('is-active');
 
-            // Measure real content height and set as CSS variable
-            function updateHeight() {
-                branch.style.setProperty('--branch-h', body.scrollHeight + 'px');
-            }
+                // Deactivate all cards
+                cards.forEach(c => {
+                    c.classList.remove('is-active');
+                    c.setAttribute('aria-expanded', 'false');
+                });
 
-            header.addEventListener('click', () => {
-                const wasPeeking = branch.classList.contains('is-peeking');
-                const isOpen = branch.classList.contains('is-open');
+                // Hide all panels
+                panels.forEach(p => p.classList.remove('is-visible'));
 
-                if (wasPeeking) {
-                    // Peek → fully open (don't close, just reveal)
-                    branch.classList.remove('is-peeking');
-                    branch.classList.add('is-open');
-                    header.setAttribute('aria-expanded', 'true');
-                    updateHeight();
-                } else if (isOpen) {
-                    // Open → close
-                    branch.classList.remove('is-open');
-                    header.setAttribute('aria-expanded', 'false');
-                } else {
-                    // Closed → open
-                    updateHeight();
-                    branch.classList.add('is-open');
-                    header.setAttribute('aria-expanded', 'true');
+                if (wasActive) {
+                    // Close expand
+                    expand.classList.remove('is-open');
+                    return;
+                }
+
+                // Show target panel + measure height
+                const panel = document.querySelector(`[data-panel="${branch}"]`);
+                panel.classList.add('is-visible');
+                expand.style.setProperty('--expand-h', panel.scrollHeight + 20 + 'px');
+
+                // Activate card + open expand
+                card.classList.add('is-active');
+                card.setAttribute('aria-expanded', 'true');
+                expand.classList.add('is-open');
+
+                // Scroll to panel on mobile
+                if (window.innerWidth <= 700) {
+                    setTimeout(() => {
+                        expand.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 200);
                 }
             });
         });
-
-        // First branch starts in peek state (rAF ensures base state paints first)
-        const first = branches[0];
-        if (first) {
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    const body = first.querySelector('.alacarte__branch-body');
-                    first.classList.add('is-peeking');
-                    if (body) first.style.setProperty('--branch-h', body.scrollHeight + 'px');
-                });
-            });
-        }
-
-        // Scroll-triggered nudge on first branch (one-shot)
-        if (!prefersReducedMotion() && first) {
-            const observer = new IntersectionObserver((entries) => {
-                if (!entries[0].isIntersecting) return;
-                observer.disconnect();
-                setTimeout(() => {
-                    if (!first.classList.contains('is-peeking')) return;
-                    first.classList.add('is-nudging');
-                    first.addEventListener('animationend', () => {
-                        first.classList.remove('is-nudging');
-                    }, { once: true });
-                }, 800);
-            }, { threshold: 0.2 });
-            observer.observe(first);
-        }
     }
 
     // ── Legacy hash redirect ──────────────────────────
@@ -892,7 +872,7 @@
         wireConfigurator();
         handleLegacyHashes();
         initDrawerHint();
-        initBranchAccordion();
+        initBranchCards();
     }
 
     if (document.readyState === 'loading') {

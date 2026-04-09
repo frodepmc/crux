@@ -315,15 +315,27 @@
                 <p class="label">A la carta</p>
                 <p class="alacarte__desc">Servicios que apoyan cualquier proyecto. Se añaden al configurador o se contratan sueltos.</p>
             </div>
-            <div class="alacarte__branches">
-                <!-- Rama 1: Marca y contenido -->
-                <div class="alacarte__branch reveal" data-branch="marca">
-                    <button type="button" class="alacarte__branch-header" aria-expanded="false" aria-controls="branch-marca">
+            <div class="alacarte__branches reveal">
+                <div class="alacarte__branch-cards">
+                    <button type="button" class="alacarte__branch-card" data-branch="marca" aria-expanded="false" aria-controls="branch-expand">
                         <span class="alacarte__branch-title">Marca y contenido</span>
                         <span class="alacarte__branch-desc">Identidad, voz y alcance de tu proyecto</span>
-                        <span class="alacarte__branch-icon" aria-hidden="true"></span>
+                        <span class="alacarte__branch-count">3 servicios</span>
                     </button>
-                    <div class="alacarte__branch-body" id="branch-marca">
+                    <button type="button" class="alacarte__branch-card" data-branch="visibilidad" aria-expanded="false" aria-controls="branch-expand">
+                        <span class="alacarte__branch-title">Visibilidad y captación</span>
+                        <span class="alacarte__branch-desc">Que te encuentren y conviertan</span>
+                        <span class="alacarte__branch-count">4 servicios</span>
+                    </button>
+                    <button type="button" class="alacarte__branch-card" data-branch="soporte" aria-expanded="false" aria-controls="branch-expand">
+                        <span class="alacarte__branch-title">Soporte y cumplimiento</span>
+                        <span class="alacarte__branch-desc">Que funcione, seguro y legal</span>
+                        <span class="alacarte__branch-count">3 servicios</span>
+                    </button>
+                </div>
+
+                <div class="alacarte__branch-expand" id="branch-expand">
+                    <div class="alacarte__branch-panel" data-panel="marca">
                         <div class="alacarte__branch-items">
                             <div class="alacarte__item">
                                 <div class="alacarte__item-info">
@@ -351,16 +363,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Rama 2: Visibilidad y captación -->
-                <div class="alacarte__branch reveal" data-branch="visibilidad">
-                    <button type="button" class="alacarte__branch-header" aria-expanded="false" aria-controls="branch-visibilidad">
-                        <span class="alacarte__branch-title">Visibilidad y captación</span>
-                        <span class="alacarte__branch-desc">Que te encuentren y conviertan</span>
-                        <span class="alacarte__branch-icon" aria-hidden="true"></span>
-                    </button>
-                    <div class="alacarte__branch-body" id="branch-visibilidad">
+                    <div class="alacarte__branch-panel" data-panel="visibilidad">
                         <div class="alacarte__branch-items">
                             <div class="alacarte__item">
                                 <div class="alacarte__item-info">
@@ -396,16 +399,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Rama 3: Soporte y cumplimiento -->
-                <div class="alacarte__branch reveal" data-branch="soporte">
-                    <button type="button" class="alacarte__branch-header" aria-expanded="false" aria-controls="branch-soporte">
-                        <span class="alacarte__branch-title">Soporte y cumplimiento</span>
-                        <span class="alacarte__branch-desc">Que funcione, seguro y legal</span>
-                        <span class="alacarte__branch-icon" aria-hidden="true"></span>
-                    </button>
-                    <div class="alacarte__branch-body" id="branch-soporte">
+                    <div class="alacarte__branch-panel" data-panel="soporte">
                         <div class="alacarte__branch-items">
                             <div class="alacarte__item">
                                 <div class="alacarte__item-info">
