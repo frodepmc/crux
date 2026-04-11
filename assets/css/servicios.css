@@ -750,14 +750,13 @@ ul.asesoria-banner__points {
     border-left: 3px solid #c19030;
     border-radius: 2px;
 }
-/* Discovery badge on module cards */
-.configurator__item--module.has-discovery-badge::after {
+/* Discovery badge on module cards — inline, not absolute */
+.configurator__item--module.has-discovery-badge .configurator__item-name::before {
     content: 'Discovery';
-    position: absolute;
-    top: 0.5rem;
-    left: 0.7rem;
+    display: inline-block;
+    vertical-align: middle;
     font-family: var(--font-brand);
-    font-size: 0.55rem;
+    font-size: 0.52rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -765,6 +764,7 @@ ul.asesoria-banner__points {
     background: rgba(220, 158, 51, 0.18);
     padding: 0.15rem 0.45rem;
     border-radius: 2px;
+    margin-right: 0.5rem;
 }
 .configurator__sidebar-discovery-title {
     font-family: var(--font-brand);
