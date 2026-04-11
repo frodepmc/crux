@@ -809,6 +809,49 @@
     }
 
     // ── Branch cards + inline expand ───────────────────
+    // ── Track splitter (Web / Consultoría) ─────────────
+    function initTrackSplitter() {
+        const trackBtns = document.querySelectorAll('[data-track-btn]');
+        const tracks = document.querySelectorAll('[data-track]');
+        if (!trackBtns.length || !tracks.length) return;
+
+        function activateTrack(target, scroll) {
+            trackBtns.forEach(b => {
+                const isMatch = b.dataset.trackBtn === target;
+                b.classList.toggle('is-active', isMatch);
+                b.setAttribute('aria-expanded', String(isMatch));
+            });
+            tracks.forEach(t => {
+                t.classList.toggle('is-visible', t.dataset.track === target);
+            });
+            history.replaceState(null, '', `#${target}`);
+            if (scroll) {
+                const activeTrack = document.querySelector(`[data-track="${target}"].is-visible`);
+                if (activeTrack) {
+                    const navH = 70;
+                    const top = activeTrack.getBoundingClientRect().top + window.scrollY - navH - 10;
+                    window.scrollTo({ top, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+                }
+            }
+        }
+
+        trackBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                activateTrack(btn.dataset.trackBtn, true);
+            });
+        });
+
+        // Deep link from URL hash
+        const hash = window.location.hash.replace('#', '');
+        if (hash === 'consultoria') {
+            activateTrack('consultoria', false);
+        }
+        // Legacy hash support
+        if (['motor-de-reservas', 'central-de-operaciones', 'facturacion-digital', 'control-comercial'].includes(hash)) {
+            activateTrack('consultoria', false);
+        }
+    }
+
     function initBranchCards() {
         const cards = document.querySelectorAll('.alacarte__branch-card');
         const expand = document.getElementById('branch-expand');
@@ -873,6 +916,7 @@
         handleLegacyHashes();
         initDrawerHint();
         initBranchCards();
+        initTrackSplitter();
     }
 
     if (document.readyState === 'loading') {
