@@ -785,10 +785,6 @@ textarea:focus-visible {
 }
 
 .services-showcase {
-    display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
-    gap: clamp(1.5rem, 3vw, 3rem);
-    align-items: start;
     margin-bottom: clamp(3rem, 6vh, 5rem);
 }
 
@@ -838,7 +834,7 @@ textarea:focus-visible {
     transform: scaleX(0);
     transition: transform 0.8s var(--ease-out) 0.1s;
 }
-.services-showcase.is-visible .services-showcase__panel::before {
+.services-showcase__panel.is-visible::before {
     transform: scaleX(1);
 }
 
@@ -988,16 +984,16 @@ textarea:focus-visible {
     from { opacity: 0; transform: translateX(-15px); }
     to   { opacity: 1; transform: translateX(0); }
 }
-.services-showcase.is-visible .panel-path:nth-child(1) {
+.services-showcase__panel.is-visible .panel-path:nth-child(1) {
     animation: panelPathSlideIn 0.5s var(--ease-out) 0.15s both;
 }
-.services-showcase.is-visible .panel-paths__divider {
+.services-showcase__panel.is-visible .panel-paths__divider {
     animation: panelPathSlideIn 0.4s var(--ease-out) 0.3s both;
 }
-.services-showcase.is-visible .panel-path:nth-child(3) {
+.services-showcase__panel.is-visible .panel-path:nth-child(3) {
     animation: panelPathSlideIn 0.5s var(--ease-out) 0.4s both;
 }
-.services-showcase.is-visible .panel-extras {
+.services-showcase__panel.is-visible .panel-extras {
     animation: panelPathSlideIn 0.4s var(--ease-out) 0.55s both;
 }
 
@@ -1053,7 +1049,7 @@ textarea:focus-visible {
 
 .services-teaser-grid {
     display: grid;
-    grid-template-columns: 1.12fr 0.88fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: clamp(1rem, 2vw, 2rem);
 }
 
@@ -3428,16 +3424,16 @@ html.no-js .nav__menu-btn {
         width: clamp(280px, 35vw, 420px);
     }
 
-    .services-showcase {
-        grid-template-columns: 1fr;
-    }
-
     .services-showcase__title {
         max-width: 14ch;
     }
 
     .services-teaser-grid {
         grid-template-columns: 1fr 1fr;
+    }
+
+    .services-teaser-grid > .services-showcase__panel {
+        grid-column: 1 / -1;
     }
 
     .projects__intro {
