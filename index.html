@@ -379,96 +379,110 @@
         </div>
     </section>
 
-    <!-- Proceso — Infographic -->
+    <!-- Proceso — Architectural Timeline -->
     <section class="work section-padding" id="proceso">
         <picture class="section-media section-media--work" aria-hidden="true">
             <img class="section-media__image" src="assets/images/work-process-bg.jpeg" alt="" width="4000" height="6000" decoding="async" loading="lazy">
         </picture>
         <div class="container">
             <div class="work__header reveal">
+                <p class="label"><span class="line-accent"></span>Proceso</p>
                 <h2 class="work__title">Cómo trabajamos</h2>
-                <p class="label">Proceso</p>
+                <p class="work__subtitle">Cuatro fases. Un objetivo: que tu equipo use las herramientas de verdad.</p>
             </div>
-            <div class="flowchart">
-                <!-- Arrow into Phase 01 -->
-                <div class="flow-arrow reveal"><div class="flow-arrow__line"></div><div class="flow-arrow__head"></div></div>
 
-                <!-- Phase 01 -->
-                <div class="flow-card reveal">
-                    <span class="flow-card__num">Fase 01</span>
-                    <h3 class="flow-card__title">Diagnóstico</h3>
-                    <div class="flow-card__rule"></div>
-                    <p class="flow-card__desc">Nos sentamos contigo, entendemos cómo funciona tu negocio y detectamos dónde pierdes tiempo y dinero. Sin compromiso, sin jerga técnica.</p>
+            <div class="process" id="processTimeline">
+                <div class="process__rail" aria-hidden="true">
+                    <div class="process__rail-track"></div>
+                    <div class="process__rail-fill"></div>
                 </div>
 
-                <!-- Fork 01 → pills -->
-                <div class="flow-fork reveal"><div class="flow-fork__arm flow-fork__arm--left"></div><div class="flow-fork__arm flow-fork__arm--right"></div></div>
-                <div class="flow-pills reveal">
-                    <span class="flow-pill">Análisis</span>
-                    <span class="flow-pill">Oportunidades</span>
+                <article class="process__phase reveal">
+                    <div class="process__phase-head">
+                        <span class="process__watermark" aria-hidden="true">01</span>
+                        <div class="process__diamond"></div>
+                        <div class="process__stem"></div>
+                    </div>
+                    <div class="process__card">
+                        <span class="process__phase-label">Fase 01</span>
+                        <h3 class="process__phase-title">Diagnóstico</h3>
+                        <div class="process__phase-rule"></div>
+                        <p class="process__phase-desc">Nos sentamos contigo, entendemos cómo funciona tu negocio y detectamos dónde pierdes tiempo y dinero. Sin compromiso, sin jerga técnica.</p>
+                        <div class="process__tags">
+                            <span class="process__tag">Análisis</span>
+                            <span class="process__tag">Oportunidades</span>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="process__phase reveal">
+                    <div class="process__phase-head">
+                        <span class="process__watermark" aria-hidden="true">02</span>
+                        <div class="process__diamond"></div>
+                        <div class="process__stem"></div>
+                    </div>
+                    <div class="process__card">
+                        <span class="process__phase-label">Fase 02</span>
+                        <h3 class="process__phase-title">Plan de acción</h3>
+                        <div class="process__phase-rule"></div>
+                        <p class="process__phase-desc">Te proponemos exactamente qué hacer, en qué orden, con qué herramientas y a qué coste. Una hoja de ruta clara, sin sorpresas.</p>
+                        <div class="process__tags">
+                            <span class="process__tag">Hoja de ruta</span>
+                            <span class="process__tag">Priorización</span>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="process__phase reveal">
+                    <div class="process__phase-head">
+                        <span class="process__watermark" aria-hidden="true">03</span>
+                        <div class="process__diamond"></div>
+                        <div class="process__stem"></div>
+                    </div>
+                    <div class="process__card">
+                        <span class="process__phase-label">Fase 03</span>
+                        <h3 class="process__phase-title">Implementación</h3>
+                        <div class="process__phase-rule"></div>
+                        <p class="process__phase-desc">Configuramos las herramientas, migramos tus datos y formamos a tu equipo. No nos vamos hasta que todo funciona y todos saben usarlo.</p>
+                        <div class="process__tags">
+                            <span class="process__tag">Configuración</span>
+                            <span class="process__tag">Formación</span>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="process__phase reveal">
+                    <div class="process__phase-head">
+                        <span class="process__watermark" aria-hidden="true">04</span>
+                        <div class="process__diamond"></div>
+                        <div class="process__stem"></div>
+                    </div>
+                    <div class="process__card">
+                        <span class="process__phase-label">Fase 04</span>
+                        <h3 class="process__phase-title">Acompañamiento</h3>
+                        <div class="process__phase-rule"></div>
+                        <p class="process__phase-desc">Seguimos contigo. Revisamos métricas, ajustamos lo que haga falta y te ayudamos a sacarle el máximo partido a cada herramienta.</p>
+                        <div class="process__tags">
+                            <span class="process__tag">Métricas</span>
+                            <span class="process__tag">Soporte</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <div class="process__outcome reveal">
+                <div class="process__outcome-inner">
+                    <span class="process__outcome-text">Resultados</span>
                 </div>
+            </div>
 
-                <!-- Merge → Phase 02 -->
-                <div class="flow-merge reveal"><div class="flow-merge__arm flow-merge__arm--left"></div><div class="flow-merge__arm flow-merge__arm--right"></div></div>
-
-                <!-- Phase 02 -->
-                <div class="flow-card reveal">
-                    <span class="flow-card__num">Fase 02</span>
-                    <h3 class="flow-card__title">Plan de acción</h3>
-                    <div class="flow-card__rule"></div>
-                    <p class="flow-card__desc">Te proponemos exactamente qué hacer, en qué orden, con qué herramientas y a qué coste. Una hoja de ruta clara, sin sorpresas.</p>
-                </div>
-
-                <!-- Fork 02 → pills -->
-                <div class="flow-fork reveal"><div class="flow-fork__arm flow-fork__arm--left"></div><div class="flow-fork__arm flow-fork__arm--right"></div></div>
-                <div class="flow-pills reveal">
-                    <span class="flow-pill">Hoja de ruta</span>
-                    <span class="flow-pill">Priorización</span>
-                </div>
-
-                <!-- Merge → Phase 03 -->
-                <div class="flow-merge reveal"><div class="flow-merge__arm flow-merge__arm--left"></div><div class="flow-merge__arm flow-merge__arm--right"></div></div>
-
-                <!-- Phase 03 -->
-                <div class="flow-card reveal">
-                    <span class="flow-card__num">Fase 03</span>
-                    <h3 class="flow-card__title">Implementación</h3>
-                    <div class="flow-card__rule"></div>
-                    <p class="flow-card__desc">Configuramos las herramientas, migramos tus datos y formamos a tu equipo. No nos vamos hasta que todo funciona y todos saben usarlo.</p>
-                </div>
-
-                <!-- Fork 03 → pills -->
-                <div class="flow-fork reveal"><div class="flow-fork__arm flow-fork__arm--left"></div><div class="flow-fork__arm flow-fork__arm--right"></div></div>
-                <div class="flow-pills reveal">
-                    <span class="flow-pill">Configuración</span>
-                    <span class="flow-pill">Formación</span>
-                </div>
-
-                <!-- Merge → Phase 04 -->
-                <div class="flow-merge reveal"><div class="flow-merge__arm flow-merge__arm--left"></div><div class="flow-merge__arm flow-merge__arm--right"></div></div>
-
-                <!-- Phase 04 -->
-                <div class="flow-card reveal">
-                    <span class="flow-card__num">Fase 04</span>
-                    <h3 class="flow-card__title">Acompañamiento</h3>
-                    <div class="flow-card__rule"></div>
-                    <p class="flow-card__desc">Seguimos contigo. Revisamos métricas, ajustamos lo que haga falta y te ayudamos a sacarle el máximo partido a cada herramienta. Soporte continuo por WhatsApp.</p>
-                </div>
-
-                <!-- Final arrow + outcome -->
-                <div class="flow-arrow reveal"><div class="flow-arrow__line"></div><div class="flow-arrow__head"></div></div>
-                <div class="flow-outcome reveal">
-                    <span class="flow-outcome__text">Resultados</span>
-                </div>
-
-                <div class="flow-cta reveal">
-                    <a href="/servicios#web" class="flow-cta__link">
-                        Diseño web <span aria-hidden="true">&rarr;</span>
-                    </a>
-                    <a href="/servicios#consultoria" class="flow-cta__link">
-                        Consultoría digital <span aria-hidden="true">&rarr;</span>
-                    </a>
-                </div>
+            <div class="process__cta reveal">
+                <a href="/servicios#web" class="process__cta-link">
+                    Diseño web <span aria-hidden="true">&rarr;</span>
+                </a>
+                <a href="/servicios#consultoria" class="process__cta-link">
+                    Consultoría digital <span aria-hidden="true">&rarr;</span>
+                </a>
             </div>
         </div>
     </section>

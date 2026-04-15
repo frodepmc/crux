@@ -718,6 +718,37 @@ window.addEventListener('resize', () => {
 });
 
 /* ═══════════════════════════════════════
+   PROCESS TIMELINE
+   ═══════════════════════════════════════ */
+function initProcessTimeline() {
+    const timeline = document.getElementById('processTimeline');
+    if (!timeline || !('IntersectionObserver' in window)) return;
+
+    const phases = [...timeline.querySelectorAll('.process__phase')];
+
+    const timelineObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (!entry.isIntersecting || timeline.classList.contains('is-animated')) return;
+
+            timeline.classList.add('is-animated');
+
+            phases.forEach((phase, index) => {
+                window.setTimeout(() => {
+                    phase.classList.add('is-pulsed');
+                }, 400 + index * 450);
+            });
+
+            timelineObserver.unobserve(timeline);
+        });
+    }, {
+        threshold: 0.2,
+        rootMargin: '0px 0px -80px 0px',
+    });
+
+    timelineObserver.observe(timeline);
+}
+
+/* ═══════════════════════════════════════
    INIT
    ═══════════════════════════════════════ */
 initCustomCursor();
@@ -727,6 +758,7 @@ initSmoothScroll();
 initProjectLightbox();
 initAccordions();
 initContactForms();
+initProcessTimeline();
 initActiveNavLink();
 updateRowSplit();
 syncScrollUi();

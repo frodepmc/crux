@@ -2281,7 +2281,7 @@ textarea:focus-visible {
 }
 
 /* ═══════════════════════════════════════
-   NUESTRO TRABAJO — FLOWCHART INFOGRAPHIC
+   PROCESS — Architectural Timeline
    ═══════════════════════════════════════ */
 .work {
     position: relative;
@@ -2296,7 +2296,6 @@ textarea:focus-visible {
     z-index: 2;
 }
 
-/* Dark overlay to keep readability */
 .work::after {
     content: '';
     position: absolute;
@@ -2307,7 +2306,6 @@ textarea:focus-visible {
     z-index: 0;
 }
 
-/* Subtle grid texture on dark bg */
 .work::before {
     content: '';
     position: absolute;
@@ -2320,311 +2318,353 @@ textarea:focus-visible {
     z-index: 1;
 }
 
-/* ─── Header ─── */
 .work__header {
     text-align: center;
-    margin-bottom: clamp(1.4rem, 3.5vh, 2.4rem);
+    margin-bottom: clamp(3rem, 6vh, 5rem);
     position: relative;
 }
 
 .work__header .label {
     color: var(--accent-deep);
+    justify-content: center;
+}
+
+.work__header .label::before {
+    background: var(--accent-deep);
+}
+
+.work__header .line-accent {
+    background: var(--accent-deep);
 }
 
 .work__title {
     font-family: var(--font-display);
     font-style: italic;
     font-weight: 400;
-    font-size: clamp(2.2rem, 5vw, 4rem);
-    line-height: 1.15;
+    font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+    line-height: 1.1;
     color: #fff;
-    margin-bottom: 0.5rem;
+    margin-top: 0.6rem;
+    margin-bottom: 0.8rem;
 }
 
-/* ─── Flowchart Container ─── */
-.flowchart {
-    --flow-branch-offset: 25%;
-    max-width: 800px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-}
-
-/* ─── Arrow Connector ─── */
-.flow-arrow {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-    padding: 0.4rem 0;
-}
-
-.flowchart > .flow-arrow:first-child {
-    padding-top: 0;
-}
-
-.flow-arrow__line {
-    width: 1px;
-    height: 22px;
-    background: rgba(255,255,255,0.25);
-}
-
-.flow-arrow__head {
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 7px solid rgba(255,255,255,0.25);
-}
-
-/* ─── Phase Card ─── */
-.flow-card {
-    background: #fff;
-    border-radius: 14px;
-    padding: clamp(1.8rem, 3vw, 2.5rem) clamp(2rem, 4vw, 3rem);
-    width: 100%;
-    max-width: 580px;
-    text-align: center;
-    position: relative;
-    transition: transform 0.4s var(--ease-out), box-shadow 0.4s ease;
-    cursor: none;
-}
-
-.flow-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-}
-
-.flow-card__num {
-    font-family: var(--font-brand);
-    font-size: 0.6rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.25em;
-    color: var(--accent);
-    margin-bottom: 0.6rem;
-    display: block;
-}
-
-.flow-card__title {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-weight: 400;
-    font-size: clamp(1.5rem, 2.5vw, 2rem);
-    color: var(--bg-accent);
-    margin-bottom: 1rem;
-    line-height: 1.2;
-}
-
-.flow-card__rule {
-    width: 35px;
-    height: 2px;
-    background: var(--accent);
-    margin: 0 auto 1rem;
-    border-radius: 1px;
-}
-
-.flow-card__desc {
-    font-size: clamp(0.8rem, 0.95vw, 0.9rem);
-    color: var(--text-muted);
-    line-height: 1.8;
-    max-width: 420px;
+.work__subtitle {
+    font-size: clamp(0.88rem, 1vw, 1rem);
+    color: rgba(255,255,255,0.5);
+    font-weight: 300;
+    line-height: 1.7;
+    max-width: 480px;
     margin: 0 auto;
 }
 
-/* ─── Fork: arrow splits into two paths ─── */
-.flow-fork {
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    position: relative;
-    width: 100%;
-    max-width: 580px;
-    height: 50px;
-}
-
-/* Central vertical stem */
-.flow-fork::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 1px;
-    height: 18px;
-    background: rgba(255,255,255,0.25);
-    transform: translateX(-50%);
-}
-
-/* Horizontal crossbar */
-.flow-fork::after {
-    content: '';
-    position: absolute;
-    top: 18px;
-    left: var(--flow-branch-offset);
-    right: var(--flow-branch-offset);
-    height: 1px;
-    background: rgba(255,255,255,0.25);
-}
-
-.flow-fork__arm {
-    position: absolute;
-    top: 18px;
-    width: 1px;
-    height: 32px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.flow-fork__arm::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    width: 0;
-    height: 0;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 6px solid rgba(255,255,255,0.25);
-}
-
-.flow-fork__arm--left {
-    left: var(--flow-branch-offset);
-    background: rgba(255,255,255,0.25);
-    transform: translateX(-50%);
-}
-
-.flow-fork__arm--right {
-    right: var(--flow-branch-offset);
-    background: rgba(255,255,255,0.25);
-    transform: translateX(50%);
-}
-
-/* ─── Sub-node pills (keywords for each phase) ─── */
-.flow-pills {
+/* ─── Process Grid ─── */
+.process {
+    --rail-y: clamp(42px, 5.5vw, 58px);
+    --diamond-size: 12px;
+    --stem-h: clamp(18px, 2.5vw, 26px);
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    justify-items: center;
-    gap: clamp(1rem, 4vw, 4rem);
-    width: 100%;
-    max-width: 580px;
-}
-
-.flow-pill {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 10px;
-    padding: 0.7rem 1.5rem;
-    font-family: var(--font-brand);
-    font-size: 0.7rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: rgba(255,255,255,0.7);
-    transition: background 0.3s ease, border-color 0.3s ease;
-    white-space: nowrap;
-    justify-self: center;
-    min-width: clamp(6.8rem, 12vw, 8.8rem);
-    text-align: center;
-}
-
-.flow-pill:hover {
-    background: rgba(255,255,255,0.12);
-    border-color: rgba(255,255,255,0.2);
-}
-
-/* ─── Merge: two paths converge back ─── */
-.flow-merge {
-    display: flex;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(0.8rem, 1.5vw, 1.5rem);
     position: relative;
-    width: 100%;
-    max-width: 580px;
-    height: 50px;
 }
 
-.flow-merge__arm {
+/* ─── Connecting Rail ─── */
+.process__rail {
     position: absolute;
-    top: 0;
-    width: 1px;
-    height: 22px;
-    background: rgba(255,255,255,0.25);
-}
-
-.flow-merge__arm--left {
-    left: var(--flow-branch-offset);
-    transform: translateX(-50%);
-}
-
-.flow-merge__arm--right {
-    right: var(--flow-branch-offset);
-    transform: translateX(50%);
-}
-
-/* Horizontal merge bar */
-.flow-merge::before {
-    content: '';
-    position: absolute;
-    top: 22px;
-    left: var(--flow-branch-offset);
-    right: var(--flow-branch-offset);
+    top: var(--rail-y);
+    left: 12.5%;
+    right: 12.5%;
     height: 1px;
-    background: rgba(255,255,255,0.25);
-}
-
-/* Final stem down + arrow */
-.flow-merge::after {
-    content: '';
-    position: absolute;
-    top: 22px;
-    left: 50%;
-    width: 1px;
-    height: 28px;
-    background: rgba(255,255,255,0.25);
-    transform: translateX(-50%);
-}
-
-/* ─── Dashed decorative side lines ─── */
-.flowchart::before,
-.flowchart::after {
-    content: '';
-    position: absolute;
-    top: 15%;
-    bottom: 15%;
-    width: 1px;
-    border-left: 1px dashed rgba(255,255,255,0.06);
+    z-index: 1;
     pointer-events: none;
 }
 
-.flowchart::before { left: 5%; }
-.flowchart::after { right: 5%; }
-
-/* ─── Final outcome node ─── */
-.flow-outcome {
-    background: var(--accent);
-    border-radius: 14px;
-    padding: 1.5rem 3rem;
-    text-align: center;
-    margin-bottom: 0.5rem;
+.process__rail-track {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.08);
 }
 
-.flow-outcome__text {
+.process__rail-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-deep), var(--accent), var(--accent-deep));
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 2.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.process.is-animated .process__rail-fill {
+    transform: scaleX(1);
+}
+
+/* ─── Phase ─── */
+.process__phase {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.process__phase-head {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: calc(var(--rail-y) + var(--diamond-size) / 2 + var(--stem-h) + 6px);
+    flex-shrink: 0;
+}
+
+/* Oversized watermark */
+.process__watermark {
+    position: absolute;
+    top: -0.15em;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-display);
+    font-size: clamp(3.2rem, 5.5vw, 5rem);
+    font-weight: 300;
+    font-style: italic;
+    color: rgba(255,255,255,0.06);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    pointer-events: none;
+    user-select: none;
+    transition: color 0.6s ease;
+    white-space: nowrap;
+}
+
+.process__phase:hover .process__watermark {
+    color: rgba(120, 183, 238, 0.12);
+}
+
+/* Diamond node */
+.process__diamond {
+    position: absolute;
+    top: calc(var(--rail-y) - var(--diamond-size) / 2);
+    left: 50%;
+    width: var(--diamond-size);
+    height: var(--diamond-size);
+    background: var(--accent);
+    transform: translateX(-50%) rotate(45deg);
+    z-index: 3;
+    box-shadow: 0 0 0 3px rgba(120, 183, 238, 0.15);
+    transition: box-shadow 0.5s ease;
+}
+
+.process__phase:hover .process__diamond {
+    box-shadow: 0 0 0 8px rgba(120, 183, 238, 0.12), 0 0 24px rgba(120, 183, 238, 0.25);
+}
+
+@keyframes diamondPulse {
+    0% { box-shadow: 0 0 0 3px rgba(120, 183, 238, 0.15), 0 0 0 3px rgba(120, 183, 238, 0.4); }
+    100% { box-shadow: 0 0 0 3px rgba(120, 183, 238, 0.15), 0 0 0 18px rgba(120, 183, 238, 0); }
+}
+
+.process__phase.is-pulsed .process__diamond {
+    animation: diamondPulse 0.8s ease-out 1;
+}
+
+/* Vertical stem */
+.process__stem {
+    position: absolute;
+    top: calc(var(--rail-y) + var(--diamond-size) / 2 + 2px);
+    left: 50%;
+    width: 1px;
+    height: var(--stem-h);
+    background: rgba(255,255,255,0.12);
+    transform: translateX(-50%);
+}
+
+/* ─── Glass Card ─── */
+.process__card {
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+    padding: clamp(1.4rem, 2.2vw, 2rem);
+    width: 100%;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.5s var(--ease-out), border-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+/* Hover glow */
+.process__card::before {
+    content: '';
+    position: absolute;
+    inset: -60%;
+    background: radial-gradient(circle at center, rgba(120, 183, 238, 0.1) 0%, transparent 55%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Blueprint grid on hover */
+.process__card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(120, 183, 238, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(120, 183, 238, 0.025) 1px, transparent 1px);
+    background-size: 18px 18px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 0;
+}
+
+.process__phase:hover .process__card {
+    transform: translateY(-6px);
+    border-color: rgba(120, 183, 238, 0.2);
+    box-shadow: 0 28px 72px rgba(0,0,0,0.25), 0 0 0 1px rgba(120, 183, 238, 0.08);
+}
+
+.process__phase:hover .process__card::before,
+.process__phase:hover .process__card::after {
+    opacity: 1;
+}
+
+.process__card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.process__phase-label {
+    font-family: var(--font-brand);
+    font-size: 0.58rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--accent-deep);
+    display: block;
+    margin-bottom: 0.55rem;
+}
+
+.process__phase-title {
     font-family: var(--font-display);
     font-style: italic;
-    font-size: clamp(1.6rem, 3vw, 2.2rem);
-    color: #fff;
     font-weight: 400;
+    font-size: clamp(1.2rem, 1.8vw, 1.55rem);
+    color: #fff;
+    margin-bottom: 0.7rem;
+    line-height: 1.2;
 }
 
-/* ─── Process CTA (after Resultados) ─── */
-.flow-cta {
+.process__phase-rule {
+    width: 28px;
+    height: 2px;
+    background: var(--accent);
+    margin: 0 auto 0.7rem;
+    border-radius: 1px;
+    opacity: 0.5;
+    transition: width 0.4s var(--ease-out), opacity 0.3s ease;
+}
+
+.process__phase:hover .process__phase-rule {
+    width: 50px;
+    opacity: 0.8;
+}
+
+.process__phase-desc {
+    font-family: var(--font-body);
+    font-size: clamp(0.76rem, 0.85vw, 0.86rem);
+    color: rgba(255,255,255,0.55);
+    line-height: 1.75;
+    margin-bottom: 1rem;
+    font-weight: 300;
+}
+
+.process__tags {
+    display: flex;
+    gap: 0.35rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.process__tag {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 4px;
+    padding: 0.3rem 0.65rem;
+    font-family: var(--font-brand);
+    font-size: 0.56rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.45);
+    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.process__phase:hover .process__tag {
+    background: rgba(120, 183, 238, 0.08);
+    border-color: rgba(120, 183, 238, 0.2);
+    color: rgba(255,255,255,0.7);
+}
+
+/* ─── Outcome ─── */
+.process__outcome {
+    margin-top: clamp(2.5rem, 5vh, 4rem);
+    text-align: center;
+}
+
+.process__outcome-inner {
+    display: inline-block;
+    background: var(--accent);
+    border-radius: 14px;
+    padding: 1.3rem 3.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.process__outcome-inner::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    animation: outcomeShimmer 3s ease-in-out 2.5s infinite;
+    pointer-events: none;
+}
+
+@keyframes outcomeShimmer {
+    0% { left: -100%; }
+    50% { left: 150%; }
+    100% { left: 150%; }
+}
+
+.process__outcome-text {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.5rem, 2.8vw, 2rem);
+    color: #fff;
+    font-weight: 400;
+    position: relative;
+    z-index: 1;
+}
+
+/* ─── CTA ─── */
+.process__cta {
     display: flex;
     justify-content: center;
     gap: 1rem;
     flex-wrap: wrap;
     margin-top: clamp(1.5rem, 3vh, 2.5rem);
 }
-.flow-cta__link {
+
+.process__cta-link {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -2636,38 +2676,29 @@ textarea:focus-visible {
     color: #fff;
     text-decoration: none;
     padding: 0.9rem 2.2rem;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    transition: background 0.3s ease, border-color 0.3s ease;
-}
-.flow-cta__link:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s var(--ease-out);
 }
 
-/* ─── Staggered reveals ─── */
-.flowchart .reveal {
-    transition-property: opacity, transform;
-    transition-duration: 0.6s, 0.6s;
-    transition-timing-function: var(--ease-out), var(--ease-out);
+.process__cta-link:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
 }
 
-.flowchart .reveal:nth-child(1) { transition-delay: 0s; }
-.flowchart .reveal:nth-child(2) { transition-delay: 0.04s; }
-.flowchart .reveal:nth-child(3) { transition-delay: 0.08s; }
-.flowchart .reveal:nth-child(4) { transition-delay: 0.12s; }
-.flowchart .reveal:nth-child(5) { transition-delay: 0.16s; }
-.flowchart .reveal:nth-child(6) { transition-delay: 0.2s; }
-.flowchart .reveal:nth-child(7) { transition-delay: 0.24s; }
-.flowchart .reveal:nth-child(8) { transition-delay: 0.28s; }
-.flowchart .reveal:nth-child(9) { transition-delay: 0.32s; }
-.flowchart .reveal:nth-child(10) { transition-delay: 0.36s; }
-.flowchart .reveal:nth-child(11) { transition-delay: 0.4s; }
-.flowchart .reveal:nth-child(12) { transition-delay: 0.44s; }
-.flowchart .reveal:nth-child(13) { transition-delay: 0.48s; }
-.flowchart .reveal:nth-child(14) { transition-delay: 0.52s; }
-.flowchart .reveal:nth-child(15) { transition-delay: 0.56s; }
-.flowchart .reveal:nth-child(16) { transition-delay: 0.6s; }
-.flowchart .reveal:nth-child(17) { transition-delay: 0.64s; }
+/* ─── Process reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+    .process__rail-fill {
+        transition: none;
+        transform: scaleX(1);
+    }
+    .process__phase.is-pulsed .process__diamond {
+        animation: none;
+    }
+    .process__outcome-inner::after {
+        animation: none;
+    }
+}
 
 /* ═══════════════════════════════════════
    ABOUT / MANIFESTO
@@ -3407,19 +3438,15 @@ html.no-js .nav__menu-btn {
         max-width: none;
     }
 
-    /* Flowchart compresses on tablet */
-    .flowchart {
-        max-width: 500px;
+    /* Process grid: 2-col on tablet */
+    .process {
+        grid-template-columns: repeat(2, 1fr);
     }
-
-    .flow-card {
-        padding: 1.5rem 1.8rem;
-    }
-
-    .flowchart::before,
-    .flowchart::after {
-        display: none;
-    }
+    .process__rail { display: none; }
+    .process__phase-head { height: auto; margin-bottom: 0.5rem; }
+    .process__watermark { position: relative; top: auto; left: auto; transform: none; font-size: 2.5rem; }
+    .process__diamond { position: relative; top: auto; left: auto; transform: rotate(45deg); margin: 0.4rem auto; }
+    .process__stem { display: none; }
 
     .services__blocks {
         grid-template-columns: 1fr 1fr;
@@ -3549,33 +3576,19 @@ html.no-js .nav__menu-btn {
         display: none;
     }
 
-    /* Mobile flowchart: tighter, narrower pills */
-    .flowchart {
-        max-width: 100%;
+    /* Mobile process: single column */
+    .process {
+        grid-template-columns: 1fr;
+        gap: clamp(1.2rem, 3vw, 1.8rem);
     }
-
-    .flow-card {
-        padding: 1.3rem 1.2rem;
-        border-radius: 10px;
-    }
-
-    .flow-card__title {
-        font-size: clamp(1.2rem, 5vw, 1.6rem);
-    }
-
-    .flow-pills {
-        gap: 1rem;
-    }
-
-    .flow-pill {
-        padding: 0.5rem 1rem;
-        font-size: 0.6rem;
-    }
-
-    .flow-outcome {
-        padding: 1.2rem 2rem;
-        border-radius: 10px;
-    }
+    .process__rail { display: none; }
+    .process__phase-head { height: auto; margin-bottom: 0.3rem; }
+    .process__watermark { position: relative; top: auto; left: auto; transform: none; font-size: 2.8rem; }
+    .process__diamond { position: relative; top: auto; left: auto; transform: rotate(45deg); margin: 0.3rem auto; }
+    .process__stem { display: none; }
+    .process__card { max-width: 420px; margin: 0 auto; }
+    .process__phase-title { font-size: clamp(1.2rem, 5vw, 1.6rem); }
+    .process__outcome-inner { padding: 1.1rem 2rem; border-radius: 10px; }
 
     .projects__title {
         max-width: 15ch;
@@ -3945,37 +3958,13 @@ html.no-js .nav__menu-btn {
         font-size: 0.92rem;
     }
 
-    /* Process — wider flowchart and cards */
-    .flowchart {
-        max-width: 920px;
+    /* Process — more breathing room on wide screens */
+    .process {
+        gap: clamp(1.5rem, 2vw, 2rem);
     }
-
-    .flow-card {
-        max-width: 680px;
-        padding: 2.8rem 3.5rem;
-    }
-
-    .flow-card__title {
-        font-size: 2rem;
-    }
-
-    .flow-card__desc {
-        font-size: 0.95rem;
-        max-width: 480px;
-    }
-
-    .flow-pills {
-        max-width: 680px;
-    }
-
-    .flow-fork,
-    .flow-merge {
-        max-width: 680px;
-    }
-
-    .flow-outcome {
-        padding: 1.8rem 3.5rem;
-    }
+    .process__phase-title { font-size: 1.7rem; }
+    .process__phase-desc { font-size: 0.92rem; }
+    .process__outcome-inner { padding: 1.5rem 4rem; }
 
     /* Quote — larger text */
     .about__quote {
@@ -4032,22 +4021,11 @@ html.no-js .nav__menu-btn {
         max-width: 480px;
     }
 
-    .flowchart {
-        max-width: 1000px;
+    .process {
+        gap: 2.5rem;
     }
-
-    .flow-card {
-        max-width: 740px;
-    }
-
-    .flow-pills {
-        max-width: 740px;
-    }
-
-    .flow-fork,
-    .flow-merge {
-        max-width: 740px;
-    }
+    .process__watermark { font-size: 5.5rem; }
+    .process__phase-title { font-size: 1.8rem; }
 
     .about__quote {
         max-width: 1050px;
