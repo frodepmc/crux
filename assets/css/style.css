@@ -243,7 +243,7 @@ textarea:focus-visible {
 }
 
 .section-media--projects .section-media__image {
-    object-position: center 62%;
+    object-position: center top;
 }
 
 /* ═══════════════════════════════════════
@@ -448,7 +448,7 @@ textarea:focus-visible {
     position: absolute;
     inset: 0;
     background: var(--bg);
-    opacity: 0.45;
+    opacity: 0.28;
     pointer-events: none;
     z-index: 0;
 }
@@ -1431,16 +1431,7 @@ textarea:focus-visible {
 }
 
 .projects::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-        linear-gradient(180deg, rgba(242, 239, 233, 0.74) 0%, rgba(242, 239, 233, 0.56) 20%, rgba(242, 239, 233, 0.42) 100%),
-        linear-gradient(90deg, rgba(56, 105, 171, 0.04) 1px, transparent 1px);
-    background-size: auto, 160px 100%;
-    opacity: 1;
-    pointer-events: none;
-    z-index: 0;
+    display: none;
 }
 
 .projects > .container {
