@@ -610,6 +610,7 @@ textarea:focus-visible {
     z-index: 2;
     opacity: 0;
     animation: fadeIn 1.5s var(--ease-out) 0.6s forwards;
+    pointer-events: none;
 }
 
 .hero__geo-ring {
