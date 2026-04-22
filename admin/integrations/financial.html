@@ -549,36 +549,98 @@
       );
     }
 
-    /* Select armonizado — para filtros y campos de tabla */
-    function SelectField({ value, onChange, options, size, style, ariaLabel }) {
+    /* Select custom — dropdown 100% CRUX, sin <select> nativo (que al abrirse quedaba
+       feo en blanco/sistema). Panel flotante con mismo look que CategoriaInput. */
+    function SelectField({ value, onChange, options, size, style, ariaLabel, renderOption, chevronColor }) {
       size = size || "sm";
-      var s = size === "xs" ? { padding: "4px 22px 4px 8px", fontSize: 10 }
-           : size === "md" ? { padding: "7px 26px 7px 10px", fontSize: 12 }
-           : { padding: "5px 24px 5px 9px", fontSize: 11 };
-      return React.createElement("select", {
-        value: value,
-        onChange: function(e) { onChange(e.target.value); },
-        "aria-label": ariaLabel,
-        style: Object.assign({
-          background: C.bg + " url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'><path d='M1 1L5 5L9 1' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>\") no-repeat right 8px center",
-          backgroundSize: "10px 6px",
-          color: C.text,
-          border: "1px solid " + C.border,
-          borderRadius: 6,
-          fontFamily: font,
-          fontWeight: 600,
-          cursor: "pointer",
-          appearance: "none",
-          WebkitAppearance: "none",
-          MozAppearance: "none",
-          outline: "none",
-          transition: "border-color 0.15s",
-        }, s, style || {}),
-        onFocus: function(e) { e.target.style.borderColor = C.accent; },
-        onBlur: function(e) { e.target.style.borderColor = C.border; }
-      }, options.map(function(o) {
-        return React.createElement("option", { key: o.value, value: o.value, style: { background: C.surface, color: C.text } }, o.label);
-      }));
+      var [open, setOpen] = useState(false);
+      var ref = useRef(null);
+
+      useEffect(function() {
+        if (!open) return undefined;
+        var handler = function(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+        document.addEventListener("mousedown", handler);
+        return function() { document.removeEventListener("mousedown", handler); };
+      }, [open]);
+
+      var current = options.find(function(o) { return o.value === value; }) || options[0] || { value: "", label: "—" };
+
+      var sz = size === "xs" ? { padding: "4px 24px 4px 8px", fontSize: 10, minHeight: 22 }
+            : size === "md" ? { padding: "7px 28px 7px 10px", fontSize: 12, minHeight: 30 }
+            : { padding: "5px 26px 5px 9px", fontSize: 11, minHeight: 26 };
+
+      var chevron = chevronColor || (style && style.color) || C.textDim;
+      var chevronSvg = "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'><path d='M1 1L5 5L9 1' stroke='" + encodeURIComponent(chevron) + "' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>\")";
+
+      return React.createElement("div", { ref: ref, style: { position: "relative", display: "inline-block", width: (style && style.width) || "auto" } },
+        React.createElement("button", {
+          type: "button",
+          onClick: function() { setOpen(!open); },
+          "aria-label": ariaLabel,
+          "aria-expanded": open,
+          "aria-haspopup": "listbox",
+          style: Object.assign({
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            background: C.bg,
+            color: C.text,
+            border: "1px solid " + (open ? C.accent : C.border),
+            borderRadius: 6,
+            fontFamily: font,
+            fontWeight: 600,
+            cursor: "pointer",
+            outline: "none",
+            textAlign: "left",
+            width: "100%",
+            transition: "border-color 0.15s, background 0.15s",
+            backgroundImage: chevronSvg,
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "right 8px center",
+            backgroundSize: "10px 6px",
+            lineHeight: 1.2,
+          }, sz, style || {})
+        }, renderOption ? renderOption(current, true) : React.createElement("span", { style: { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, current.label)),
+        open && React.createElement("div", {
+          role: "listbox",
+          style: {
+            position: "absolute",
+            top: "calc(100% + 4px)",
+            left: 0,
+            minWidth: "100%",
+            background: C.surface,
+            border: "1px solid " + C.borderLight,
+            borderRadius: 6,
+            boxShadow: "0 10px 28px rgba(0,0,0,0.45)",
+            zIndex: 60,
+            maxHeight: 260,
+            overflowY: "auto",
+            padding: "4px 0",
+          }
+        }, options.map(function(o) {
+          var activo = o.value === value;
+          return React.createElement("div", {
+            key: o.value,
+            role: "option",
+            "aria-selected": activo,
+            onMouseDown: function(e) { e.preventDefault(); onChange(o.value); setOpen(false); },
+            onMouseEnter: function(e) { if (!activo) { e.currentTarget.style.background = "rgba(56,105,171,0.08)"; e.currentTarget.style.color = C.text; } },
+            onMouseLeave: function(e) { if (!activo) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.textSec; } },
+            style: {
+              padding: "8px 14px",
+              fontSize: 11,
+              fontFamily: font,
+              color: activo ? C.accent2 : C.textSec,
+              background: activo ? C.accentGlow : "transparent",
+              cursor: "pointer",
+              transition: "background 0.1s, color 0.1s",
+              fontWeight: activo ? 700 : 500,
+              letterSpacing: 0.2,
+              whiteSpace: "nowrap",
+            }
+          }, renderOption ? renderOption(o, false) : o.label);
+        }))
+      );
     }
 
     /* Input de categoría con dropdown custom de sugerencias (reemplaza <datalist> nativo).
@@ -1011,7 +1073,7 @@
           onFocus: function(e) { e.target.style.borderColor = C.accent; },
           onBlur: function(e) { e.target.style.borderColor = "transparent"; }
         }),
-        /* Tipo — SelectField inline coloreado por tono */
+        /* Tipo — SelectField inline coloreado por tono del tipo */
         React.createElement("div", { style: { padding: "0 4px 0 0" } },
           React.createElement(SelectField, {
             value: m.tipo,
@@ -1019,8 +1081,9 @@
             options: tipoOpts,
             size: "xs",
             ariaLabel: "Tipo de movimiento",
+            chevronColor: tone,
             style: {
-              backgroundColor: "transparent",
+              background: "transparent",
               borderColor: "transparent",
               color: tone,
               fontWeight: 700,
@@ -1028,10 +1091,6 @@
               textTransform: "uppercase",
               letterSpacing: 0.3,
               width: "100%",
-              backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'><path d='M1 1L5 5L9 1' stroke='" + encodeURIComponent(tone) + "' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>\")",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "right 6px center",
-              backgroundSize: "10px 6px",
             }
           })
         ),
@@ -2347,7 +2406,14 @@
       ];
 
       var periodLabel = cliVistaAnual ? "Anual " + cliAnyo : MESES_FULL[cliMes] + " " + cliAnyo;
-      var estadoColor = function(e) { return e === "activo" ? C.green : e === "inactivo" ? C.textDim : C.amber; };
+      /* Estados: activo (verde), inactivo (gris), riesgo (ámbar), finalizado (azul accent) */
+      var estadoColor = function(e) {
+        if (e === "activo") return C.green;
+        if (e === "inactivo") return C.textDim;
+        if (e === "riesgo") return C.amber;
+        if (e === "finalizado") return C.accent2;
+        return C.textDim;
+      };
       var isAnual = cliVistaAnual;
 
       return (
@@ -2443,25 +2509,27 @@
                     <span style={{ textAlign: "center", fontSize: 10, color: C.textDim, fontFamily: mono }}>{c.fechaAlta ? fmtFechaES(c.fechaAlta) : "—"}</span>
                     {/* Último servicio (derivado) */}
                     <span style={{ textAlign: "center", fontSize: 10, color: C.textDim, fontFamily: mono }}>{c.ultimoServicio ? fmtFechaES(c.ultimoServicio) : "—"}</span>
-                    {/* Estado editable (meta) */}
+                    {/* Estado editable (meta) — Finalizado marca un cliente cuyo trabajo ha concluido. */}
                     <SelectField
                       value={c.estado || "activo"}
                       onChange={function(v) { setMeta(c.nombre, "estado", v); }}
                       size="xs"
                       ariaLabel="Estado del cliente"
-                      options={[{ value: "activo", label: "Activo" }, { value: "inactivo", label: "Inactivo" }, { value: "riesgo", label: "Riesgo" }]}
+                      chevronColor={ec}
+                      options={[
+                        { value: "activo", label: "Activo" },
+                        { value: "inactivo", label: "Inactivo" },
+                        { value: "riesgo", label: "Riesgo" },
+                        { value: "finalizado", label: "Finalizado" },
+                      ]}
                       style={{
-                        backgroundColor: "transparent",
+                        background: "transparent",
                         borderColor: "transparent",
                         color: ec,
                         fontWeight: 700,
                         fontSize: 10,
                         textTransform: "uppercase",
                         letterSpacing: 0.3,
-                        backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'><path d='M1 1L5 5L9 1' stroke='" + encodeURIComponent(ec) + "' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>\")",
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "right 6px center",
-                        backgroundSize: "10px 6px",
                       }}
                     />
                     {/* Delete — doble clic para confirmar (borra metadata + movimientos asociados) */}
