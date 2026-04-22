@@ -25,17 +25,23 @@
         document.body.appendChild(veil);
       });
 
+      // Dev-only bypass: en localhost + ?__preview, saltar verificación (coherente con admin.js)
+      var isLocal = /^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(window.location.hostname);
+      var wantsPreview = new URLSearchParams(window.location.search).has('__preview');
+      var reveal = function () {
+        var s = document.getElementById('crux-admin-guard-style');
+        if (s) s.remove();
+        var v = document.getElementById('crux-guard-veil');
+        if (v) v.remove();
+      };
+      if (isLocal && wantsPreview) { reveal(); return; }
+
       fetch('/api/auth/verify', { method: 'GET', credentials: 'same-origin', cache: 'no-store' })
         .then(function (r) {
           if (!r.ok) throw new Error('unauth');
           return r.json();
         })
-        .then(function () {
-          var s = document.getElementById('crux-admin-guard-style');
-          if (s) s.remove();
-          var v = document.getElementById('crux-guard-veil');
-          if (v) v.remove();
-        })
+        .then(reveal)
         .catch(function () {
           window.location.replace('/admin');
         });
@@ -242,8 +248,8 @@
     }
 
     /* ─── PDF Export ─── */
-    var TAB_NAMES = { kpi: "Resumen Ejecutivo", pyl: "P&L", costes: "Costes", cash: "Cash Flow", clientes: "Clientes", unit: "Unit Economics", escenarios: "Escenarios", estrategico: "Estratégico", checklist: "Checklist" };
-    var TAB_SLUGS = { kpi: "resumen-ejecutivo", pyl: "pyl", costes: "costes", cash: "cash-flow", clientes: "clientes", unit: "unit-economics", escenarios: "escenarios", estrategico: "estrategico", checklist: "checklist" };
+    var TAB_NAMES = { kpi: "Resumen Ejecutivo", movimientos: "Movimientos", pyl: "P&L", costes: "Costes", cash: "Cash Flow", clientes: "Clientes", unit: "Unit Economics", escenarios: "Escenarios", estrategico: "Estratégico", checklist: "Checklist" };
+    var TAB_SLUGS = { kpi: "resumen-ejecutivo", movimientos: "movimientos", pyl: "pyl", costes: "costes", cash: "cash-flow", clientes: "clientes", unit: "unit-economics", escenarios: "escenarios", estrategico: "estrategico", checklist: "checklist" };
     window.__cruxActiveTab = "kpi";
 
     function createPdfHeader(tabName) {
@@ -483,6 +489,185 @@
       return <div style={{ fontSize: 11, fontWeight: 600, color: C.textDim, letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 14 }}>{children}</div>;
     }
 
+    /* ═══════════════════════════════════════════════════════════════
+       SISTEMA UNIFICADO DE BOTONES — tokens + componente Btn
+       ─────────────────────────────────────────────────────────────── */
+    var BTN_BASE = {
+      fontFamily: font,
+      borderRadius: 6,
+      cursor: "pointer",
+      transition: "background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+      whiteSpace: "nowrap",
+      userSelect: "none",
+    };
+    var BTN_SIZES = {
+      xs: { padding: "4px 8px",  fontSize: 10, fontWeight: 700, letterSpacing: 0.3 },
+      sm: { padding: "6px 12px", fontSize: 11, fontWeight: 700, letterSpacing: 0.3 },
+      md: { padding: "8px 14px", fontSize: 12, fontWeight: 600, letterSpacing: 0.2 },
+    };
+    var BTN_VARIANTS = {
+      /* Primary: CTAs principales (añadir, exportar, entrar a sub-vista) — glow azul accent */
+      primary:  { bg: C.accentGlow, color: C.accent,  border: C.accentMuted,  hoverBg: C.accentGlow2, hoverColor: C.accent2, hoverBorder: C.accent },
+      /* Secondary: acciones neutras (filtros, toggles, navegación secundaria) */
+      secondary:{ bg: "transparent", color: C.textSec, border: C.border,      hoverBg: "rgba(255,255,255,0.03)", hoverColor: C.text,  hoverBorder: C.borderLight },
+      /* Ghost: acciones inline dentro de tablas — sin chrome hasta hover */
+      ghost:    { bg: "transparent", color: C.textDim, border: "transparent", hoverBg: "rgba(56,105,171,0.08)", hoverColor: C.text, hoverBorder: C.border },
+      /* Danger: borrado, acciones destructivas */
+      danger:   { bg: "transparent", color: C.textDim, border: "transparent", hoverBg: "rgba(201,112,100,0.12)", hoverColor: C.red, hoverBorder: "transparent" },
+      /* Accent: variante con color del "tipo" de movimiento (ingreso verde / coste_dir azul / opex ámbar) */
+      accent:   { bg: "transparent", color: C.accent,  border: C.accentMuted, hoverBg: C.accentGlow,  hoverColor: C.accent2, hoverBorder: C.accent },
+    };
+
+    function Btn({ variant, size, tone, style, children, ...rest }) {
+      variant = variant || "primary";
+      size = size || "sm";
+      var v = BTN_VARIANTS[variant] || BTN_VARIANTS.primary;
+      var s = BTN_SIZES[size] || BTN_SIZES.sm;
+      /* tone override: permite forzar un color base (por ej. el del tipo del movimiento) */
+      var baseColor  = tone || v.color;
+      var baseBorder = tone ? tone + "55" : v.border;
+      var baseBg     = tone ? tone + "15" : v.bg;
+      var hoverColor = tone || v.hoverColor;
+      var hoverBorder= tone || v.hoverBorder;
+      var hoverBg    = tone ? tone + "25" : v.hoverBg;
+      var [hover, setHover] = useState(false);
+      return (
+        React.createElement("button", Object.assign({}, rest, {
+          onMouseEnter: function(e) { setHover(true); if (rest.onMouseEnter) rest.onMouseEnter(e); },
+          onMouseLeave: function(e) { setHover(false); if (rest.onMouseLeave) rest.onMouseLeave(e); },
+          style: Object.assign({}, BTN_BASE, s, {
+            background: hover ? hoverBg : baseBg,
+            color: hover ? hoverColor : baseColor,
+            border: "1px solid " + (hover ? hoverBorder : baseBorder),
+            textTransform: variant === "ghost" || variant === "danger" ? "none" : "uppercase",
+          }, style || {})
+        }), children)
+      );
+    }
+
+    /* Select armonizado — para filtros y campos de tabla */
+    function SelectField({ value, onChange, options, size, style, ariaLabel }) {
+      size = size || "sm";
+      var s = size === "xs" ? { padding: "4px 22px 4px 8px", fontSize: 10 }
+           : size === "md" ? { padding: "7px 26px 7px 10px", fontSize: 12 }
+           : { padding: "5px 24px 5px 9px", fontSize: 11 };
+      return React.createElement("select", {
+        value: value,
+        onChange: function(e) { onChange(e.target.value); },
+        "aria-label": ariaLabel,
+        style: Object.assign({
+          background: C.bg + " url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'><path d='M1 1L5 5L9 1' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>\") no-repeat right 8px center",
+          backgroundSize: "10px 6px",
+          color: C.text,
+          border: "1px solid " + C.border,
+          borderRadius: 6,
+          fontFamily: font,
+          fontWeight: 600,
+          cursor: "pointer",
+          appearance: "none",
+          WebkitAppearance: "none",
+          MozAppearance: "none",
+          outline: "none",
+          transition: "border-color 0.15s",
+        }, s, style || {}),
+        onFocus: function(e) { e.target.style.borderColor = C.accent; },
+        onBlur: function(e) { e.target.style.borderColor = C.border; }
+      }, options.map(function(o) {
+        return React.createElement("option", { key: o.value, value: o.value, style: { background: C.surface, color: C.text } }, o.label);
+      }));
+    }
+
+    /* Input de categoría con dropdown custom de sugerencias (reemplaza <datalist> nativo).
+       Permite texto libre + lista de sugerencias del tipo activo. Estilo CRUX. */
+    function CategoriaInput({ tipo, value, onChange, placeholder, style }) {
+      var [focused, setFocused] = useState(false);
+      var [query, setQuery] = useState("");
+      var containerRef = useRef(null);
+      var sugerencias = React.useMemo(function() {
+        var base = CATEGORIAS[tipo] || [];
+        if (!focused || !query) return base.slice();
+        var q = query.toLowerCase();
+        return base.filter(function(c) { return c.toLowerCase().indexOf(q) !== -1; });
+      }, [tipo, focused, query]);
+
+      /* Cierra al clicar fuera */
+      useEffect(function() {
+        if (!focused) return undefined;
+        var handler = function(e) {
+          if (containerRef.current && !containerRef.current.contains(e.target)) setFocused(false);
+        };
+        document.addEventListener("mousedown", handler);
+        return function() { document.removeEventListener("mousedown", handler); };
+      }, [focused]);
+
+      return React.createElement("div", { ref: containerRef, style: { position: "relative", width: "100%" } },
+        React.createElement("input", {
+          type: "text",
+          value: focused ? query : (value || ""),
+          placeholder: placeholder || "Categoría…",
+          onFocus: function() { setQuery(value || ""); setFocused(true); },
+          onChange: function(e) { setQuery(e.target.value); onChange(e.target.value); },
+          onKeyDown: function(e) {
+            if (e.key === "Enter") { setFocused(false); e.target.blur(); }
+            if (e.key === "Escape") { setFocused(false); e.target.blur(); }
+          },
+          style: Object.assign({
+            background: "transparent",
+            border: "1px solid " + (focused ? C.accent : "transparent"),
+            borderRadius: 4,
+            color: C.text,
+            fontFamily: font,
+            fontSize: 12,
+            fontWeight: 500,
+            padding: "5px 8px",
+            width: "100%",
+            outline: "none",
+            transition: "border-color 0.15s",
+          }, style || {})
+        }),
+        focused && sugerencias.length > 0 && React.createElement("div", {
+          style: {
+            position: "absolute",
+            top: "calc(100% + 2px)",
+            left: 0,
+            right: 0,
+            minWidth: 180,
+            background: C.surface,
+            border: "1px solid " + C.borderLight,
+            borderRadius: 6,
+            boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
+            zIndex: 50,
+            maxHeight: 180,
+            overflowY: "auto",
+            padding: "4px 0",
+          }
+        }, sugerencias.map(function(c) {
+          var activo = c === value;
+          return React.createElement("div", {
+            key: c,
+            onMouseDown: function(e) { e.preventDefault(); onChange(c); setQuery(c); setFocused(false); },
+            style: {
+              padding: "7px 12px",
+              fontSize: 11,
+              fontFamily: font,
+              color: activo ? C.accent2 : C.textSec,
+              background: activo ? C.accentGlow : "transparent",
+              cursor: "pointer",
+              transition: "background 0.1s, color 0.1s",
+              fontWeight: activo ? 700 : 500,
+              letterSpacing: 0.2,
+            },
+            onMouseEnter: function(e) { if (!activo) { e.target.style.background = "rgba(56,105,171,0.08)"; e.target.style.color = C.text; } },
+            onMouseLeave: function(e) { if (!activo) { e.target.style.background = "transparent"; e.target.style.color = C.textSec; } }
+          }, c);
+        }))
+      );
+    }
+
     /* ═══════════ PRINT VIEW SYSTEM ═══════════ */
     var P = {
       pad: 16, cardPad: 12, cardRadius: 8, cardBorder: "#2D4868", gap: 10,
@@ -541,20 +726,11 @@
     }
 
     /* ─── Default Data ─── */
+    /* ingresos/costesDirectos/opex son sobrescritos por pylDerived (mes seleccionado) o pylBaseline (3m avg).
+       Los campos del state que sí se editan son los de presupuesto. */
     const defaultPYL = {
-      ingresos: 58000, costesDirectos: 24940, opex: 22500,
+      ingresos: 0, costesDirectos: 0, opex: 0,
       ingresosPresup: 55000, costesPresup: 24200, opexPresup: 23000,
-      costesDesglose: [
-        { concepto: "Subcontratación", importe: 12000 },
-        { concepto: "Materiales", importe: 8000 },
-        { concepto: "Otros directos", importe: 4940 },
-      ],
-      opexDesglose: [
-        { concepto: "Alquiler oficina", importe: 3000 },
-        { concepto: "Software y herramientas", importe: 2500 },
-        { concepto: "Marketing", importe: 5000 },
-        { concepto: "Salarios administrativos", importe: 12000 },
-      ],
     };
 
     const defaultAging = [
@@ -605,31 +781,12 @@
       { ingresos: 0, costes: 0, opex: 0 }, { ingresos: 0, costes: 0, opex: 0 }, { ingresos: 0, costes: 0, opex: 0 },
       { ingresos: 0, costes: 0, opex: 0 }, { ingresos: 0, costes: 0, opex: 0 }, { ingresos: 0, costes: 0, opex: 0 },
     ]; };
+    /* pylMensual: solo persistimos campos manuales (anyo histórico y prevYear).
+       datos/opexPorMes/costesDirPorMes son derivados de movimientos en runtime.
+       Los campos per-mes (cajaPorMes, agingPorMes, forecastPorAnyo, clientesPorMes) ya no se usan. */
     const defaultPylMensual = {
       anyo: 2026,
-      datos: {
-        2026: [
-          { ingresos: 54000, costes: 23200, opex: 21000 },
-          { ingresos: 55500, costes: 23600, opex: 21200 },
-          { ingresos: 56000, costes: 24000, opex: 21500 },
-          { ingresos: 56500, costes: 23800, opex: 21800 },
-          { ingresos: 57000, costes: 24200, opex: 22000 },
-          { ingresos: 57500, costes: 24500, opex: 22200 },
-          { ingresos: 58000, costes: 24940, opex: 22500 },
-          { ingresos: 0, costes: 0, opex: 0 },
-          { ingresos: 0, costes: 0, opex: 0 },
-          { ingresos: 0, costes: 0, opex: 0 },
-          { ingresos: 0, costes: 0, opex: 0 },
-          { ingresos: 0, costes: 0, opex: 0 },
-        ],
-      },
       prevYear: { ingresos: 620000, costes: 270000, opex: 245000 },
-      opexPorMes: {},
-      costesDirPorMes: {},
-      clientesPorMes: {},
-      agingPorMes: {},
-      cajaPorMes: {},
-      forecastPorAnyo: {},
     };
 
     const defaultEstrategico = {
@@ -653,8 +810,171 @@
       { item: "Forecast trimestral con 3 escenarios", done: false },
     ];
 
+    /* ── Libro de Movimientos — source of truth para P&L/Costes ──
+       Cada entrada representa un apunte contable simplificado con fecha real.
+       Los totales mensuales (ingresos, costes directos, OPEX) se derivan
+       automáticamente de este array. Los presupuestos y la comparativa YoY
+       siguen siendo editables aparte. */
+    const defaultMovimientos = [
+      /* ── Enero 2026 — cierre agregado ── */
+      { id: "mv-0101", fecha: "2026-01-31", tipo: "ingreso",   categoria: "Consultoría",     concepto: "Igualas mensuales — enero",           importe: 54000, cliente: "Varios" },
+      { id: "mv-0102", fecha: "2026-01-28", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Subcontratación enero",               importe: 12000, cliente: "" },
+      { id: "mv-0103", fecha: "2026-01-20", tipo: "coste_dir", categoria: "Materiales",      concepto: "Materiales y hosting enero",          importe: 7200,  cliente: "" },
+      { id: "mv-0104", fecha: "2026-01-15", tipo: "coste_dir", categoria: "Otros directos",  concepto: "Otros costes directos enero",         importe: 4000,  cliente: "" },
+      { id: "mv-0105", fecha: "2026-01-05", tipo: "opex",      categoria: "Alquiler",        concepto: "Alquiler oficina — enero",            importe: 3000,  cliente: "" },
+      { id: "mv-0106", fecha: "2026-01-05", tipo: "opex",      categoria: "Software",        concepto: "Suscripciones SaaS — enero",          importe: 2300,  cliente: "" },
+      { id: "mv-0107", fecha: "2026-01-10", tipo: "opex",      categoria: "Marketing",       concepto: "Marketing y ads — enero",             importe: 4200,  cliente: "" },
+      { id: "mv-0108", fecha: "2026-01-28", tipo: "opex",      categoria: "Salarios",        concepto: "Salarios administrativos — enero",    importe: 11500, cliente: "" },
+
+      /* ── Febrero 2026 ── */
+      { id: "mv-0201", fecha: "2026-02-28", tipo: "ingreso",   categoria: "Consultoría",     concepto: "Igualas mensuales — febrero",         importe: 55500, cliente: "Varios" },
+      { id: "mv-0202", fecha: "2026-02-26", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Subcontratación febrero",             importe: 12200, cliente: "" },
+      { id: "mv-0203", fecha: "2026-02-18", tipo: "coste_dir", categoria: "Materiales",      concepto: "Materiales y hosting febrero",        importe: 7500,  cliente: "" },
+      { id: "mv-0204", fecha: "2026-02-15", tipo: "coste_dir", categoria: "Otros directos",  concepto: "Otros costes directos febrero",       importe: 3900,  cliente: "" },
+      { id: "mv-0205", fecha: "2026-02-05", tipo: "opex",      categoria: "Alquiler",        concepto: "Alquiler oficina — febrero",          importe: 3000,  cliente: "" },
+      { id: "mv-0206", fecha: "2026-02-05", tipo: "opex",      categoria: "Software",        concepto: "Suscripciones SaaS — febrero",        importe: 2400,  cliente: "" },
+      { id: "mv-0207", fecha: "2026-02-10", tipo: "opex",      categoria: "Marketing",       concepto: "Marketing y ads — febrero",           importe: 4200,  cliente: "" },
+      { id: "mv-0208", fecha: "2026-02-27", tipo: "opex",      categoria: "Salarios",        concepto: "Salarios administrativos — febrero",  importe: 11600, cliente: "" },
+
+      /* ── Marzo 2026 ── */
+      { id: "mv-0301", fecha: "2026-03-31", tipo: "ingreso",   categoria: "Consultoría",     concepto: "Igualas mensuales — marzo",           importe: 56000, cliente: "Varios" },
+      { id: "mv-0302", fecha: "2026-03-27", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Subcontratación marzo",               importe: 12400, cliente: "" },
+      { id: "mv-0303", fecha: "2026-03-18", tipo: "coste_dir", categoria: "Materiales",      concepto: "Materiales y hosting marzo",          importe: 7700,  cliente: "" },
+      { id: "mv-0304", fecha: "2026-03-15", tipo: "coste_dir", categoria: "Otros directos",  concepto: "Otros costes directos marzo",         importe: 3900,  cliente: "" },
+      { id: "mv-0305", fecha: "2026-03-05", tipo: "opex",      categoria: "Alquiler",        concepto: "Alquiler oficina — marzo",            importe: 3000,  cliente: "" },
+      { id: "mv-0306", fecha: "2026-03-05", tipo: "opex",      categoria: "Software",        concepto: "Suscripciones SaaS — marzo",          importe: 2500,  cliente: "" },
+      { id: "mv-0307", fecha: "2026-03-10", tipo: "opex",      categoria: "Marketing",       concepto: "Marketing y ads — marzo",             importe: 4200,  cliente: "" },
+      { id: "mv-0308", fecha: "2026-03-28", tipo: "opex",      categoria: "Salarios",        concepto: "Salarios administrativos — marzo",    importe: 11800, cliente: "" },
+
+      /* ── Abril 2026 — mes en curso, detalle realista ── */
+      { id: "mv-0401", fecha: "2026-04-03", tipo: "ingreso",   categoria: "Consultoría",     concepto: "Iguala abril — Cliente A",                   importe: 18500, cliente: "Cliente A" },
+      { id: "mv-0402", fecha: "2026-04-08", tipo: "ingreso",   categoria: "Proyecto",        concepto: "Hito 2 web corporativa — Cliente B",         importe: 12000, cliente: "Cliente B" },
+      { id: "mv-0403", fecha: "2026-04-15", tipo: "ingreso",   categoria: "Consultoría",     concepto: "Iguala abril — Cliente C",                   importe: 14200, cliente: "Cliente C" },
+      { id: "mv-0404", fecha: "2026-04-18", tipo: "ingreso",   categoria: "Proyecto",        concepto: "Landing page entregada — Cliente D",         importe: 8500,  cliente: "Cliente D" },
+      { id: "mv-0405", fecha: "2026-04-05", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Freelance diseño — proyecto Cliente B",      importe: 4200,  cliente: "Cliente B" },
+      { id: "mv-0406", fecha: "2026-04-12", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Freelance dev — proyecto Cliente D",         importe: 3600,  cliente: "Cliente D" },
+      { id: "mv-0407", fecha: "2026-04-15", tipo: "coste_dir", categoria: "Materiales",      concepto: "Hosting y dominios — Q2",                    importe: 480,   cliente: "" },
+      { id: "mv-0408", fecha: "2026-04-02", tipo: "opex",      categoria: "Alquiler",        concepto: "Alquiler oficina Palma — abril",             importe: 3000,  cliente: "" },
+      { id: "mv-0409", fecha: "2026-04-03", tipo: "opex",      categoria: "Software",        concepto: "Suscripciones SaaS — abril",                 importe: 2450,  cliente: "" },
+      { id: "mv-0410", fecha: "2026-04-10", tipo: "opex",      categoria: "Marketing",       concepto: "Ads LinkedIn — campaña Q2",                  importe: 1800,  cliente: "" },
+      { id: "mv-0411", fecha: "2026-04-17", tipo: "opex",      categoria: "Marketing",       concepto: "Rediseño materiales comerciales",            importe: 2400,  cliente: "" },
+      { id: "mv-0412", fecha: "2026-04-30", tipo: "opex",      categoria: "Salarios",        concepto: "Salarios administrativos — abril",           importe: 11900, cliente: "" },
+    ];
+
+    /* Catálogo sugerido de categorías por tipo — no limita (el usuario puede escribir libre) */
+    const CATEGORIAS = {
+      ingreso:   ["Consultoría", "Proyecto", "Iguala mensual", "Formación", "Subvención", "Otros ingresos"],
+      coste_dir: ["Subcontratación", "Materiales", "Licencias/Hosting", "Comisiones", "Otros directos"],
+      opex:      ["Alquiler", "Software", "Marketing", "Salarios", "Gestoría/Legal", "Suministros", "Viajes", "Formación interna", "Otros OPEX"],
+    };
+
+    const TIPO_LABEL = { ingreso: "Ingreso", coste_dir: "Coste directo", opex: "OPEX" };
+    const TIPO_COLOR = { ingreso: "#4FA68C", coste_dir: "#3869AB", opex: "#AB8338" };
+
+    /* Helpers: parsear fecha ISO + utilidades de derivación */
+    function parseFechaISO(f) {
+      if (!f || typeof f !== "string") return null;
+      var parts = f.slice(0, 10).split("-");
+      if (parts.length !== 3) return null;
+      var y = Number(parts[0]), m = Number(parts[1]), d = Number(parts[2]);
+      if (!y || !m || !d) return null;
+      return { year: y, month: m - 1, day: d };
+    }
+    function fmtFechaES(f) {
+      var p = parseFechaISO(f);
+      if (!p) return f || "—";
+      return String(p.day).padStart(2, "0") + "-" + String(p.month + 1).padStart(2, "0") + "-" + p.year;
+    }
+    function todayISO() {
+      var d = new Date();
+      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+    function movsDelPeriodo(movs, year, month) {
+      return movs.filter(function(m) {
+        var p = parseFechaISO(m.fecha);
+        if (!p) return false;
+        if (month === null || month === undefined) return p.year === year;
+        return p.year === year && p.month === month;
+      });
+    }
+    function totalesPeriodo(movs, year, month) {
+      var ms = movsDelPeriodo(movs, year, month);
+      var sum = function(tipo) { return ms.filter(function(m) { return m.tipo === tipo; }).reduce(function(s, m) { return s + Number(m.importe || 0); }, 0); };
+      return { ingresos: sum("ingreso"), costes: sum("coste_dir"), opex: sum("opex") };
+    }
+    function derivarDatosAnyo(movs, year) {
+      var arr = []; for (var mn = 0; mn < 12; mn++) { arr.push(totalesPeriodo(movs, year, mn)); } return arr;
+    }
+    function derivarDesgloseCategoria(movs, year, month, tipo) {
+      var ms = movsDelPeriodo(movs, year, month).filter(function(m) { return m.tipo === tipo; });
+      var map = {};
+      ms.forEach(function(m) {
+        var k = m.categoria || "Sin categoría";
+        if (!map[k]) map[k] = 0;
+        map[k] += Number(m.importe || 0);
+      });
+      return Object.keys(map).map(function(k) { return { concepto: k, importe: map[k] }; })
+        .sort(function(a, b) { return b.importe - a.importe; });
+    }
+    function nuevoMovId() { return "mv-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6); }
+
+    /* ── Clientes derivados de movimientos ──
+       A partir de los ingresos con `cliente` no vacío, computa fact/fechaAlta/ultimoServicio.
+       Los campos manuales (margen, estado, notas) se conservan en `clientesMeta`
+       (array indexado por nombre). Un cliente aparece si tiene movimientos O si existe en la meta. */
+    function clientesDelPeriodo(movs, clientesMeta, year, month) {
+      /* Colecta todos los clientes conocidos */
+      var nombres = {};
+      movs.forEach(function(m) { if (m.tipo === "ingreso" && m.cliente) nombres[m.cliente] = true; });
+      (clientesMeta || []).forEach(function(c) { if (c && c.nombre) nombres[c.nombre] = true; });
+
+      return Object.keys(nombres).map(function(nombre) {
+        var ingresosCliente = movs.filter(function(m) { return m.tipo === "ingreso" && m.cliente === nombre; });
+        /* Fact del periodo (mes concreto o año entero si month == null) */
+        var deriv = ingresosCliente.filter(function(m) {
+          var p = parseFechaISO(m.fecha); if (!p) return false;
+          if (month === null || month === undefined) return p.year === year;
+          return p.year === year && p.month === month;
+        });
+        var fact = deriv.reduce(function(s, m) { return s + Number(m.importe || 0); }, 0);
+        /* Fechas: de toda la historia, no solo del periodo */
+        var fechas = ingresosCliente.map(function(m) { return m.fecha; }).filter(Boolean).sort();
+        var meta = (clientesMeta || []).find(function(c) { return c && c.nombre === nombre; }) || {};
+        return {
+          nombre: nombre,
+          fact: fact,
+          margen: Number(meta.margen || 0),
+          fechaAlta: fechas[0] || meta.fechaAlta || "",
+          ultimoServicio: fechas[fechas.length - 1] || meta.ultimoServicio || "",
+          estado: meta.estado || "activo",
+          notas: meta.notas || "",
+        };
+      });
+    }
+
+    /* Promedio mensual de los últimos N meses con datos (hacia atrás desde (anyo, mes)). */
+    function promedioMensual(movs, tipo, anyo, mes, nMeses) {
+      nMeses = nMeses || 3;
+      var serie = [];
+      /* Escanea hasta 12 meses hacia atrás para encontrar N con datos. */
+      for (var i = 0; i < 12 && serie.length < nMeses; i++) {
+        var d = new Date(anyo, mes - i, 1);
+        var t = totalesPeriodo(movs, d.getFullYear(), d.getMonth());
+        var val;
+        if (tipo === "gastos") val = t.costes + t.opex;
+        else if (tipo === "ingreso") val = t.ingresos;
+        else if (tipo === "neto") val = t.ingresos - t.costes - t.opex;
+        else val = 0;
+        /* Solo cuenta meses con actividad (evita diluir el promedio con ceros de meses futuros vacíos). */
+        if (t.ingresos > 0 || t.costes > 0 || t.opex > 0) serie.push(val);
+      }
+      if (serie.length === 0) return 0;
+      return serie.reduce(function(s, v) { return s + v; }, 0) / serie.length;
+    }
+
     const tabs = [
       { id: "kpi", label: "Resumen Ejecutivo" },
+      { id: "movimientos", label: "Movimientos" },
       { id: "pyl", label: "P&L" },
       { id: "costes", label: "Costes" },
       { id: "cash", label: "Cash Flow" },
@@ -665,10 +985,299 @@
       { id: "checklist", label: "Checklist" },
     ];
 
+    /* Row de una tabla de movimientos — extraída para poder tener estado local (dropdown + confirm) */
+    function MovimientoRow({ m, idx, total, tone, updateMov, updateMovTipo, removeMov }) {
+      var [armado, setArmado] = useState(false); /* primer clic arma el borrado, segundo confirma */
+      /* Auto-desarma el delete tras 3s sin clicar el segundo */
+      useEffect(function() {
+        if (!armado) return undefined;
+        var t = setTimeout(function() { setArmado(false); }, 2500);
+        return function() { clearTimeout(t); };
+      }, [armado]);
+      var tipoOpts = [
+        { value: "ingreso",   label: "Ingreso" },
+        { value: "coste_dir", label: "Coste dir." },
+        { value: "opex",      label: "OPEX" },
+      ];
+      return React.createElement("div", { className: "crux-row", style: { display: "grid", gridTemplateColumns: "130px 130px 170px 1fr 170px 140px 36px", gap: 0, padding: "8px 18px", borderBottom: idx < total - 1 ? "1px solid " + C.border : "none", alignItems: "center" } },
+        /* Fecha */
+        React.createElement("input", {
+          type: "date", value: m.fecha || "",
+          onChange: function(e) { updateMov(m.id, "fecha", e.target.value); },
+          style: { background: "transparent", border: "1px solid transparent", color: C.text, fontSize: 12, fontFamily: mono, padding: "4px 6px", borderRadius: 4, outline: "none", colorScheme: "dark", width: "100%" },
+          onFocus: function(e) { e.target.style.borderColor = C.accent; },
+          onBlur: function(e) { e.target.style.borderColor = "transparent"; }
+        }),
+        /* Tipo — SelectField inline coloreado por tono */
+        React.createElement("div", { style: { padding: "0 4px 0 0" } },
+          React.createElement(SelectField, {
+            value: m.tipo,
+            onChange: function(v) { updateMovTipo(m.id, v); },
+            options: tipoOpts,
+            size: "xs",
+            ariaLabel: "Tipo de movimiento",
+            style: {
+              backgroundColor: "transparent",
+              borderColor: "transparent",
+              color: tone,
+              fontWeight: 700,
+              fontSize: 11,
+              textTransform: "uppercase",
+              letterSpacing: 0.3,
+              width: "100%",
+              backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'><path d='M1 1L5 5L9 1' stroke='" + encodeURIComponent(tone) + "' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>\")",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right 6px center",
+              backgroundSize: "10px 6px",
+            }
+          })
+        ),
+        /* Categoría con dropdown custom */
+        React.createElement(CategoriaInput, {
+          tipo: m.tipo,
+          value: m.categoria,
+          onChange: function(v) { updateMov(m.id, "categoria", v); },
+          placeholder: "Categoría…",
+          style: { fontWeight: 500 }
+        }),
+        /* Concepto */
+        React.createElement(EditableText, { value: m.concepto || "", onChange: function(v) { updateMov(m.id, "concepto", v); }, style: { fontWeight: 400, fontSize: 12 } }),
+        /* Cliente */
+        React.createElement(EditableText, { value: m.cliente || "", onChange: function(v) { updateMov(m.id, "cliente", v); }, style: { fontWeight: 400, fontSize: 11, color: C.textDim } }),
+        /* Importe */
+        React.createElement(EditableCell, { value: Number(m.importe || 0), onChange: function(v) { updateMov(m.id, "importe", Number(v) || 0); }, style: { fontSize: 13, fontWeight: 600, color: tone, textAlign: "right" } }),
+        /* Delete — doble clic para confirmar (sin modal nativo) */
+        React.createElement("button", {
+          onClick: function() { if (armado) { removeMov(m.id); } else { setArmado(true); } },
+          title: armado ? "Clic de nuevo para confirmar" : "Eliminar (clic para armar)",
+          style: {
+            background: armado ? "rgba(201,112,100,0.18)" : "transparent",
+            border: "1px solid " + (armado ? C.red : "transparent"),
+            color: armado ? C.red : C.textDim,
+            cursor: "pointer",
+            fontSize: armado ? 12 : 16,
+            fontWeight: armado ? 700 : 400,
+            padding: armado ? "3px 6px" : 0,
+            lineHeight: 1,
+            borderRadius: 4,
+            transition: "all 0.15s",
+            fontFamily: font,
+            letterSpacing: armado ? 0.5 : 0,
+            textTransform: armado ? "uppercase" : "none",
+          },
+          onMouseEnter: function(e) { if (!armado) { e.target.style.color = C.red; e.target.style.background = "rgba(201,112,100,0.08)"; } },
+          onMouseLeave: function(e) { if (!armado) { e.target.style.color = C.textDim; e.target.style.background = "transparent"; } }
+        }, armado ? "✓" : "×")
+      );
+    }
+
+    /* ═══════════ TAB: MOVIMIENTOS ═══════════ */
+    function TabMovimientos({ movimientos, setMovimientos, selAnyo, setSelAnyo, selMes, setSelMes, navMes, goHoy }) {
+      var MESES_NOMBRE = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+      var [vistaAnual, setVistaAnual] = useState(false);
+      var [filtroTipo, setFiltroTipo] = useState("todos");
+      var [filtroCategoria, setFiltroCategoria] = useState("todas");
+      var [ordenar, setOrdenar] = useState("fecha_desc");
+
+      /* ── Derivación: lista filtrada ── */
+      var filtrados = React.useMemo(function() {
+        var list = movimientos.filter(function(m) {
+          if (filtroTipo !== "todos" && m.tipo !== filtroTipo) return false;
+          if (filtroCategoria !== "todas" && m.categoria !== filtroCategoria) return false;
+          var p = parseFechaISO(m.fecha);
+          if (!p) return false;
+          if (vistaAnual) return p.year === selAnyo;
+          return p.year === selAnyo && p.month === selMes;
+        });
+        list.sort(function(a, b) {
+          if (ordenar === "fecha_asc")  return String(a.fecha).localeCompare(String(b.fecha));
+          if (ordenar === "fecha_desc") return String(b.fecha).localeCompare(String(a.fecha));
+          if (ordenar === "importe_desc") return Number(b.importe || 0) - Number(a.importe || 0);
+          if (ordenar === "importe_asc")  return Number(a.importe || 0) - Number(b.importe || 0);
+          return 0;
+        });
+        return list;
+      }, [movimientos, filtroTipo, filtroCategoria, vistaAnual, selAnyo, selMes, ordenar]);
+
+      /* ── Totales del filtrado ── */
+      var totPeriodo = { ingreso: 0, coste_dir: 0, opex: 0, count: 0 };
+      filtrados.forEach(function(m) { totPeriodo[m.tipo] = (totPeriodo[m.tipo] || 0) + Number(m.importe || 0); totPeriodo.count++; });
+      var neto = totPeriodo.ingreso - totPeriodo.coste_dir - totPeriodo.opex;
+
+      /* ── Categorías existentes (para filtro dropdown) ── */
+      var categoriasExistentes = React.useMemo(function() {
+        var s = new Set();
+        movimientos.forEach(function(m) { if (m.categoria) s.add(m.categoria); });
+        return Array.from(s).sort();
+      }, [movimientos]);
+
+      /* ── Helpers CRUD ── */
+      var updateMov = function(id, field, value) {
+        setMovimientos(function(ms) { return ms.map(function(m) { return m.id === id ? Object.assign({}, m, (function() { var o = {}; o[field] = value; return o; })()) : m; }); });
+      };
+      var updateMovTipo = function(id, tipo) {
+        /* Si cambias el tipo, limpia la categoría si ya no aplica */
+        setMovimientos(function(ms) { return ms.map(function(m) {
+          if (m.id !== id) return m;
+          var validCats = CATEGORIAS[tipo] || [];
+          var cat = validCats.indexOf(m.categoria) >= 0 ? m.categoria : "";
+          return Object.assign({}, m, { tipo: tipo, categoria: cat });
+        }); });
+      };
+      var removeMov = function(id) { setMovimientos(function(ms) { return ms.filter(function(m) { return m.id !== id; }); }); };
+      var addMov = function(tipoPref) {
+        var tipo = tipoPref || filtroTipo !== "todos" ? filtroTipo : "ingreso";
+        if (typeof tipoPref === "string") tipo = tipoPref;
+        var today = todayISO();
+        /* Intentar usar el mes/año seleccionado: si el día actual encaja, usa hoy; si no, usa el 15 del mes seleccionado */
+        var p = parseFechaISO(today);
+        var fecha = (p && p.year === selAnyo && p.month === selMes && !vistaAnual) ? today : (selAnyo + "-" + String(selMes + 1).padStart(2, "0") + "-15");
+        if (vistaAnual) fecha = today;
+        var nuevo = { id: nuevoMovId(), fecha: fecha, tipo: tipo, categoria: (CATEGORIAS[tipo] && CATEGORIAS[tipo][0]) || "", concepto: "", importe: 0, cliente: "" };
+        setMovimientos(function(ms) { return [nuevo].concat(ms); });
+      };
+
+      var goMovHoy = function() { setVistaAnual(false); goHoy && goHoy(); };
+
+      /* Color del tipo */
+      var tipoTone = function(tipo) { return TIPO_COLOR[tipo] || C.textDim; };
+
+      /* ── Render ── */
+      return (
+        <Section title="Libro de Movimientos" subtitle="Registro atómico de ingresos, costes directos y OPEX con fecha, categoría y cliente. Fuente única de la que se derivan P&L y Costes.">
+          {/* Selector de período + botón Hoy */}
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginBottom: 16, padding: "12px 0", background: C.surface, borderRadius: 10, border: "1px solid " + C.border, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", background: C.bg, borderRadius: 6, overflow: "hidden" }}>
+              {["Mensual", "Anual"].map(function(t, ti) {
+                var active = (ti === 0 && !vistaAnual) || (ti === 1 && vistaAnual);
+                return <button key={t} onClick={function() { setVistaAnual(ti === 1); }}
+                  style={{ background: active ? C.accent : "transparent", color: active ? C.white : C.textDim, border: "none", padding: "7px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: font, transition: "all 0.15s" }}>{t}</button>;
+              })}
+            </div>
+            <button onClick={function() { vistaAnual ? setSelAnyo(selAnyo - 1) : navMes(-1); }} disabled={selAnyo <= 2026 && (vistaAnual || selMes <= 0)}
+              style={{ background: "transparent", border: "none", color: (selAnyo <= 2026 && (vistaAnual || selMes <= 0)) ? C.border : C.white, cursor: (selAnyo <= 2026 && (vistaAnual || selMes <= 0)) ? "default" : "pointer", fontSize: 16, padding: "0 8px", fontFamily: font, opacity: (selAnyo <= 2026 && (vistaAnual || selMes <= 0)) ? 0.3 : 1 }}>◂</button>
+            <div style={{ textAlign: "center", minWidth: vistaAnual ? 60 : 160 }}>
+              {!vistaAnual && <div style={{ fontSize: 16, fontWeight: 700, color: C.white }}>{MESES_NOMBRE[selMes]}</div>}
+              <div style={{ fontSize: vistaAnual ? 18 : 12, fontWeight: 700, color: C.white, fontFamily: mono }}>{selAnyo}</div>
+            </div>
+            <button onClick={function() { vistaAnual ? setSelAnyo(selAnyo + 1) : navMes(1); }}
+              style={{ background: "transparent", border: "none", color: C.white, cursor: "pointer", fontSize: 16, padding: "0 8px", fontFamily: font }}>▸</button>
+            <Btn variant="primary" size="xs" onClick={goMovHoy} title="Ir al mes actual" style={{ marginLeft: 8 }}>Hoy</Btn>
+          </div>
+
+          {/* Resumen del período filtrado */}
+          <div className="crux-grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 16 }}>
+            {[
+              { label: "Ingresos", val: totPeriodo.ingreso, color: TIPO_COLOR.ingreso },
+              { label: "Costes directos", val: totPeriodo.coste_dir, color: TIPO_COLOR.coste_dir },
+              { label: "OPEX", val: totPeriodo.opex, color: TIPO_COLOR.opex },
+              { label: "Resultado neto", val: neto, color: neto >= 0 ? C.green : C.red },
+            ].map(function(m, i) {
+              return (
+                <Card key={i} style={{ padding: "14px 16px" }}>
+                  <div style={{ fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>{m.label}</div>
+                  <div style={{ fontFamily: mono, fontSize: 20, fontWeight: 700, color: m.color }}>{fmt(m.val)} €</div>
+                </Card>
+              );
+            })}
+          </div>
+
+          {/* Barra de filtros + acciones */}
+          <Card style={{ padding: "14px 18px", marginBottom: 12 }}>
+            <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 }}>Tipo</span>
+                <SelectField value={filtroTipo} onChange={setFiltroTipo} ariaLabel="Filtrar por tipo"
+                  options={[
+                    { value: "todos", label: "Todos" },
+                    { value: "ingreso", label: "Ingresos" },
+                    { value: "coste_dir", label: "Costes directos" },
+                    { value: "opex", label: "OPEX" },
+                  ]} />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 }}>Categoría</span>
+                <SelectField value={filtroCategoria} onChange={setFiltroCategoria} ariaLabel="Filtrar por categoría"
+                  options={[{ value: "todas", label: "Todas" }].concat(categoriasExistentes.map(function(c) { return { value: c, label: c }; }))} />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 }}>Ordenar</span>
+                <SelectField value={ordenar} onChange={setOrdenar} ariaLabel="Ordenar"
+                  options={[
+                    { value: "fecha_desc", label: "Fecha ↓ (reciente)" },
+                    { value: "fecha_asc",  label: "Fecha ↑ (antigua)" },
+                    { value: "importe_desc", label: "Importe ↓" },
+                    { value: "importe_asc",  label: "Importe ↑" },
+                  ]} />
+              </div>
+              <span style={{ fontSize: 10, color: C.textDim, marginLeft: "auto" }}>{totPeriodo.count} movimiento{totPeriodo.count === 1 ? "" : "s"}</span>
+              <div style={{ display: "flex", gap: 6 }}>
+                <Btn variant="accent" tone={TIPO_COLOR.ingreso}   size="sm" onClick={function() { addMov("ingreso"); }}>+ Ingreso</Btn>
+                <Btn variant="accent" tone={TIPO_COLOR.coste_dir} size="sm" onClick={function() { addMov("coste_dir"); }}>+ Coste directo</Btn>
+                <Btn variant="accent" tone={TIPO_COLOR.opex}      size="sm" onClick={function() { addMov("opex"); }}>+ OPEX</Btn>
+              </div>
+            </div>
+          </Card>
+
+          {/* Tabla de movimientos */}
+          <Card style={{ padding: 0, overflow: "hidden" }}>
+            <div style={{ overflowX: "auto" }}>
+              <div style={{ minWidth: 1080 }}>
+                {/* Header */}
+                <div style={{ display: "grid", gridTemplateColumns: "130px 130px 170px 1fr 170px 140px 36px", gap: 0, padding: "12px 18px", borderBottom: "1px solid " + C.border, background: C.surfaceHover, fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 }}>
+                  <span>Fecha</span>
+                  <span>Tipo</span>
+                  <span>Categoría</span>
+                  <span>Concepto</span>
+                  <span>Cliente</span>
+                  <span style={{ textAlign: "right" }}>Importe</span>
+                  <span></span>
+                </div>
+                {/* Rows */}
+                {filtrados.length === 0 ? (
+                  <div style={{ padding: "40px 20px", textAlign: "center", color: C.textDim, fontSize: 12 }}>
+                    Sin movimientos para este filtro. Usa los botones de arriba para añadir uno.
+                  </div>
+                ) : filtrados.map(function(m, idx) {
+                  var tone = tipoTone(m.tipo);
+                  return React.createElement(MovimientoRow, {
+                    key: m.id,
+                    m: m,
+                    idx: idx,
+                    total: filtrados.length,
+                    tone: tone,
+                    updateMov: updateMov,
+                    updateMovTipo: updateMovTipo,
+                    removeMov: removeMov,
+                  });
+                })}
+                {/* Footer con totales */}
+                {filtrados.length > 0 && (
+                  <div style={{ display: "grid", gridTemplateColumns: "130px 130px 170px 1fr 170px 140px 36px", gap: 0, padding: "12px 18px", borderTop: "2px solid " + C.border, background: C.surfaceHover, alignItems: "center" }}>
+                    <span style={{ gridColumn: "1 / 6", fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 }}>
+                      Total {vistaAnual ? "año " + selAnyo : MESES_NOMBRE[selMes] + " " + selAnyo} · {filtroTipo === "todos" ? "todos los tipos" : TIPO_LABEL[filtroTipo]}
+                    </span>
+                    <span style={{ textAlign: "right", fontSize: 14, fontFamily: mono, fontWeight: 700, color: C.white }}>
+                      {fmt(
+                        (filtroTipo === "todos" || filtroTipo === "ingreso" ? totPeriodo.ingreso : 0)
+                        + (filtroTipo === "coste_dir" ? totPeriodo.coste_dir : 0)
+                        + (filtroTipo === "opex" ? totPeriodo.opex : 0)
+                      )} €
+                    </span>
+                    <span></span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+        </Section>
+      );
+    }
+
     /* ═══════════ TAB: KPIs ═══════════ */
     var MONTH_LABELS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
-    function TabKPI({ selAnyo, setSelAnyo, selMes, navMes, selKey, pylMensual, selClientes, selAging, selCaja, servicios, estrategico, burnRate, netBurn, computedDSO, selIng, selCos, selOpex }) {
+    function TabKPI({ selAnyo, setSelAnyo, selMes, setSelMes, navMes, goHoy, selKey, pylMensual, selClientes, selAging, selCaja, servicios, estrategico, burnRate, netBurn, computedDSO, selIng, selCos, selOpex, setTab, runwayMeses, costesRecurrentes, ingresosRecurrentes }) {
       var MESES_FULL = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
       var [vistaAnual, setVistaAnual] = useState(false);
 
@@ -713,7 +1322,9 @@
       var totalServIng = servicios.reduce(function(s, sv) { return s + Number(sv.ingresos || 0); }, 0);
       var ltvCac = totalServIng > 0 ? Number((servicios.reduce(function(s, sv) { return s + Number(sv.ltv_cac || 0) * Number(sv.ingresos || 0); }, 0) / totalServIng).toFixed(1)) : 0;
       var agingTotal = selAging.reduce(function(s, a) { return s + Number(a.importe || 0); }, 0);
-      var dDSO = dIng > 0 ? Math.round((agingTotal / (vistaAnual ? dIng / 12 : dIng)) * 30) : 0;
+      /* DSO: si el mes está vacío (selIng=0), usa ingresosRecurrentes como baseline para no dar 0 falso */
+      var ingresosMensualesDSO = dIng > 0 ? (vistaAnual ? dIng / 12 : dIng) : Number(ingresosRecurrentes || 0);
+      var dDSO = ingresosMensualesDSO > 0 ? Math.round((agingTotal / ingresosMensualesDSO) * 30) : 0;
 
       /* Chart data — full year (for annual view) */
       var chartMeses = []; var chartIng = []; var chartCos = [];
@@ -757,6 +1368,8 @@
                   <button onClick={function() { vistaAnual ? navAnyo(1) : navMes(1); }}
                     style={{ background: "transparent", border: "none", color: C.white, cursor: "pointer", fontSize: 16, padding: "0 4px", fontFamily: font }}>▸</button>
                 </div>
+                {/* Hoy button */}
+                {goHoy && <Btn variant="primary" size="sm" onClick={function() { setVistaAnual(false); goHoy(); }} title="Ir al mes actual" style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)", padding: "9px 18px" }}>Hoy</Btn>}
               </div>
             </div>
           </div>
@@ -767,7 +1380,8 @@
               { label: "Total costes", val: dBurn, fmt: true, prev: vistaAnual ? (prevYearData ? Number(prevYearData.costes || 0) + Number(prevYearData.opex || 0) : null) : (prevMes ? Number(prevMes.costes || 0) + Number(prevMes.opex || 0) : null), color: C.white },
               { label: "Resultado neto", val: dNeto, fmt: true, prev: vistaAnual ? (prevYearData ? Number(prevYearData.ingresos || 0) - Number(prevYearData.costes || 0) - Number(prevYearData.opex || 0) : null) : (prevMes ? Number(prevMes.ingresos || 0) - Number(prevMes.costes || 0) - Number(prevMes.opex || 0) : null), color: dNeto >= 0 ? C.green : C.red },
               { label: "Caja", val: selCaja, fmt: true, color: C.white },
-              { label: "Runway", val: netBurn > 0 ? (selCaja / netBurn).toFixed(1) + " meses" : "∞", raw: true, color: netBurn <= 0 || selCaja / netBurn >= 6 ? C.green : selCaja / netBurn >= 3 ? C.amber : C.red, sub: netBurn > 0 ? "Burn: " + fmt(netBurn) + "€/m" : "Rentable" },
+              /* Runway: caja / gastos recurrentes (avg últimos 3 meses), siempre finito salvo sin datos */
+              { label: "Runway", val: runwayMeses === null ? "—" : runwayMeses >= 36 ? ">36 m" : runwayMeses.toFixed(1) + " m", raw: true, color: runwayMeses === null ? C.textDim : runwayMeses >= 6 ? C.green : runwayMeses >= 3 ? C.amber : C.red, sub: costesRecurrentes > 0 ? "Gastos rec.: " + fmt(Math.round(costesRecurrentes)) + "€/m" : "Sin datos" },
             ].map(function(m, i) {
               var varPct = m.prev != null ? pctVar(m.val, m.prev) : null;
               return (
@@ -886,18 +1500,18 @@
     }
 
     /* ═══════════ TAB: P&L ═══════════ */
-    function TabPYL({ pyl, setPyl, pylMensual, setPylMensual, selAnyo }) {
+    function TabPYL({ pyl, setPyl, pylMensual, setPylMensual, selAnyo, setSelAnyo, selMes, setSelMes, navMes, goHoy, setTab }) {
       var MESES_NOMBRE = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+      /* mes/año ahora vienen del state global — calendar sync unificado.
+         Solo persiste local el toggle mensual/anual (es preferencia visual, no fecha). */
       var [pylVistaAnual, setPylVistaAnual] = useState(false);
-      var [pylMes, setPylMes] = useState(6);
-      var [pylAnyo, setPylAnyo] = useState(selAnyo || pylMensual.anyo);
-      var navPylMes = function(dir) {
-        var nm = pylMes + dir;
-        if (nm < 0) { if (pylAnyo > 2026) { setPylAnyo(pylAnyo - 1); setPylMes(11); } }
-        else if (nm > 11) { setPylAnyo(pylAnyo + 1); setPylMes(0); }
-        else { setPylMes(nm); }
-      };
-      var navPylAnyo = function(dir) { var n = pylAnyo + dir; if (n >= 2026) setPylAnyo(n); };
+      var hoyAnyoPYL = new Date().getFullYear();
+      var hoyMesPYL = new Date().getMonth();
+      var pylMes = selMes;
+      var pylAnyo = selAnyo;
+      var goPylHoy = function() { setPylVistaAnual(false); goHoy && goHoy(); };
+      var navPylMes = navMes;
+      var navPylAnyo = function(dir) { var n = selAnyo + dir; if (n >= 2026) setSelAnyo(n); };
 
       /* Resolve P&L data for selected period */
       var allMeses = pylMensual.datos[pylAnyo] || EMPTY_YEAR();
@@ -916,13 +1530,20 @@
       const mbPct = dIng > 0 ? ((mb / dIng) * 100).toFixed(1) : 0;
       const neto = mb - dOpex;
       const netoPct = dIng > 0 ? ((neto / dIng) * 100).toFixed(1) : 0;
-      const mbP = pyl.ingresosPresup - pyl.costesPresup;
-      const netoP = mbP - pyl.opexPresup;
+      /* Presupuesto: almacenado como mensual. En vista Anual, multiplicamos × 12 para comparar manzanas con manzanas.
+         Si se edita en vista Anual, dividimos por 12 antes de guardar. */
+      var presupFactor = pylVistaAnual ? 12 : 1;
+      var ingresosPresupShow = Number(pyl.ingresosPresup || 0) * presupFactor;
+      var costesPresupShow = Number(pyl.costesPresup || 0) * presupFactor;
+      var opexPresupShow = Number(pyl.opexPresup || 0) * presupFactor;
+      const mbP = ingresosPresupShow - costesPresupShow;
+      const netoP = mbP - opexPresupShow;
+      var setPresupShow = function(field, v) { setPyl(function(p) { var o = {}; o[field] = Number(v) / presupFactor; return Object.assign({}, p, o); }); };
       const rows = [
-        { label: "1. Ingresos", real: dIng, presup: pyl.ingresosPresup, field: "ingresos", fieldP: "ingresosPresup", bold: true },
-        { label: "2. Costes directos", real: dCos, presup: pyl.costesPresup, fieldP: "costesPresup", computed: true, hint: "→ Pestaña Costes" },
+        { label: "1. Ingresos", real: dIng, presup: ingresosPresupShow, fieldP: "ingresosPresup", bold: true, computed: true, hint: "→ Movimientos" },
+        { label: "2. Costes directos", real: dCos, presup: costesPresupShow, fieldP: "costesPresup", computed: true, hint: "→ Movimientos" },
         { label: "3. Margen bruto", real: mb, presup: mbP, pct: mbPct, bold: true, computed: true },
-        { label: "4. OPEX", real: dOpex, presup: pyl.opexPresup, fieldP: "opexPresup", computed: true, hint: "→ Pestaña Costes" },
+        { label: "4. OPEX", real: dOpex, presup: opexPresupShow, fieldP: "opexPresup", computed: true, hint: "→ Movimientos" },
         { label: "5. Resultado neto", real: neto, presup: netoP, pct: netoPct, bold: true, computed: true },
       ];
       var periodLabel = pylVistaAnual ? "Anual " + pylAnyo : MESES_NOMBRE[pylMes] + " " + pylAnyo;
@@ -945,10 +1566,14 @@
             </div>
             <button onClick={function() { pylVistaAnual ? navPylAnyo(1) : navPylMes(1); }}
               style={{ background: "transparent", border: "none", color: C.white, cursor: "pointer", fontSize: 16, padding: "0 8px", fontFamily: font }}>▸</button>
+            <Btn variant="primary" size="xs" onClick={goPylHoy} title="Ir al mes actual" style={{ marginLeft: 10 }}>Hoy</Btn>
           </div>
           <div className="crux-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             <Card>
-              <CardLabel>Cuenta de Resultados</CardLabel>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <CardLabel>Cuenta de Resultados</CardLabel>
+                {setTab && <Btn variant="primary" size="xs" onClick={function() { setTab("movimientos"); }}>+ Movimiento</Btn>}
+              </div>
               <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 0.6fr", fontSize: 10, color: C.textDim, paddingBottom: 8, borderBottom: "1px solid " + C.border, marginBottom: 4 }}>
                 <span>Concepto</span><span style={{ textAlign: "right" }}>Importe</span><span style={{ textAlign: "right" }}>%</span>
               </div>
@@ -985,7 +1610,7 @@
                         {r.computed && !r.fieldP ? (
                           <span style={{ textAlign: "right", fontFamily: mono, fontSize: 12, color: C.textDim }}>{fmt(r.presup)}</span>
                         ) : (
-                          <EditableCell value={r.presup} onChange={function(v) { set(r.fieldP, v); }} style={{ fontSize: 12, color: C.textDim }} />
+                          <EditableCell value={r.presup} onChange={function(v) { setPresupShow(r.fieldP, v); }} style={{ fontSize: 12, color: C.textDim }} />
                         )}
                         <span style={{ textAlign: "right", fontSize: 12, fontWeight: 600, color: Number(desv) > 0 ? C.green : Number(desv) < 0 ? C.red : C.textDim }}>{Number(desv) > 0 ? "+" : ""}{desv}%</span>
                       </div>
@@ -998,24 +1623,11 @@
           {/* ── P&L Mensual Calendarizado ── */}
           {(function() {
             var MESES_S = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
-            var anyo = selAnyo || pylMensual.anyo;
+            /* Año de la tabla P&L Mensual = selAnyo global (calendar sync) */
+            var anyo = selAnyo;
             var meses = pylMensual.datos[anyo] || EMPTY_YEAR();
-            var setMes = function(idx, field, val) {
-              setPylMensual(function(p) {
-                var yearData = (p.datos[anyo] || EMPTY_YEAR()).map(function(m, i) { return i === idx ? Object.assign({}, m, (function() { var o = {}; o[field] = Number(val); return o; })()) : m; });
-                var d = Object.assign({}, p.datos); d[anyo] = yearData;
-                return Object.assign({}, p, { datos: d });
-              });
-            };
-            var setAnyo = function(dir) {
-              setPylMensual(function(p) {
-                var next = p.anyo + dir;
-                if (next < 2026) return p;
-                var d = Object.assign({}, p.datos);
-                if (!d[next]) d[next] = EMPTY_YEAR();
-                return Object.assign({}, p, { anyo: next, datos: d });
-              });
-            };
+            /* setAnyo de la tabla = navegar el año global */
+            var setAnyo = function(dir) { var next = selAnyo + dir; if (next >= 2026) setSelAnyo(next); };
             var setPrev = function(field, val) {
               setPylMensual(function(p) { return Object.assign({}, p, { prevYear: Object.assign({}, p.prevYear, (function() { var o = {}; o[field] = Number(val); return o; })()) }); });
             };
@@ -1023,9 +1635,9 @@
             meses.forEach(function(m) { tot.ingresos += Number(m.ingresos || 0); tot.costes += Number(m.costes || 0); tot.opex += Number(m.opex || 0); });
             var colW = "2.2fr " + MESES_S.map(function() { return "1fr"; }).join(" ") + " 1.2fr";
             var filas = [
-              { label: "Ingresos", field: "ingresos", bold: true, editable: true },
-              { label: "Costes directos", field: "costes", editable: true },
-              { label: "OPEX", field: "opex", editable: true },
+              { label: "Ingresos", bold: true, computed: true, fn: function(m) { return Number(m.ingresos || 0); }, total: tot.ingresos, tipoTone: "#4FA68C" },
+              { label: "Costes directos", computed: true, fn: function(m) { return Number(m.costes || 0); }, total: tot.costes, tipoTone: "#3869AB" },
+              { label: "OPEX", computed: true, fn: function(m) { return Number(m.opex || 0); }, total: tot.opex, tipoTone: "#AB8338" },
               { label: "Margen bruto", computed: true, fn: function(m) { return Number(m.ingresos || 0) - Number(m.costes || 0); }, fnPct: function(m) { var ing = Number(m.ingresos || 0); return ing > 0 ? ((ing - Number(m.costes || 0)) / ing * 100).toFixed(0) : 0; }, total: tot.ingresos - tot.costes, totalPct: tot.ingresos > 0 ? ((tot.ingresos - tot.costes) / tot.ingresos * 100).toFixed(1) : 0 },
               { label: "Resultado neto", computed: true, bold: true, fn: function(m) { return Number(m.ingresos || 0) - Number(m.costes || 0) - Number(m.opex || 0); }, total: tot.ingresos - tot.costes - tot.opex },
             ];
@@ -1056,30 +1668,24 @@
                   <div style={{ minWidth: 960 }}>
                     <div style={{ display: "grid", gridTemplateColumns: colW, fontSize: 10, color: C.textDim, paddingBottom: 8, borderBottom: "1px solid " + C.border, gap: 4 }}>
                       <span>Concepto</span>
-                      {MESES_S.map(function(m) { return <span key={m} style={{ textAlign: "right" }}>{m + " " + String(anyo).slice(-2)}</span>; })}
+                      {MESES_S.map(function(m, mi) { var esHoy = anyo === hoyAnyoPYL && mi === hoyMesPYL; return <span key={m} style={{ textAlign: "right", color: esHoy ? C.accent : C.textDim, fontWeight: esHoy ? 700 : 400 }}>{esHoy ? "● " : ""}{m + " " + String(anyo).slice(-2)}</span>; })}
                       <span style={{ textAlign: "right", fontWeight: 700, color: C.textSec }}>Total Anual</span>
                     </div>
                     {filas.map(function(f, fi) {
                       return (
                         <div key={fi} style={{ display: "grid", gridTemplateColumns: colW, padding: "6px 0", borderBottom: fi < filas.length - 1 ? "1px solid " + C.border : "none", alignItems: "center", gap: 4 }}>
-                          <span style={{ fontSize: 12, fontWeight: f.bold ? 700 : 500, color: f.bold ? C.white : C.textSec }}>{f.label}</span>
+                          <span style={{ fontSize: 12, fontWeight: f.bold ? 700 : 500, color: f.bold ? C.white : (f.tipoTone || C.textSec) }}>{f.label}</span>
                           {meses.map(function(m, mi) {
-                            if (f.editable) {
-                              return <EditableCell key={mi} value={m[f.field]} onChange={function(v) { setMes(mi, f.field, v); }} style={{ fontSize: 11, textAlign: "right" }} />;
-                            }
                             var val = f.fn(m);
                             var pct = f.fnPct ? f.fnPct(m) : null;
-                            return <div key={mi} style={{ textAlign: "right" }}>
-                              <span style={{ fontFamily: mono, fontSize: 11, fontWeight: f.bold ? 700 : 500, color: val > 0 ? C.green : val < 0 ? C.red : C.textDim }}>{val !== 0 ? fmt(val) : "—"}</span>
+                            var esHoy = anyo === hoyAnyoPYL && mi === hoyMesPYL;
+                            return <div key={mi} style={{ textAlign: "right", background: esHoy ? C.accentGlow : "transparent", borderRadius: esHoy ? 4 : 0, padding: esHoy ? "2px 4px" : 0 }}>
+                              <span style={{ fontFamily: mono, fontSize: 11, fontWeight: f.bold ? 700 : 500, color: val > 0 ? (f.tipoTone || C.green) : val < 0 ? C.red : C.textDim }}>{val !== 0 ? fmt(val) : "—"}</span>
                               {pct && Number(pct) > 0 ? <div style={{ fontFamily: mono, fontSize: 9, color: C.textDim }}>{pct}%</div> : null}
                             </div>;
                           })}
                           <div style={{ textAlign: "right" }}>
-                            {f.editable ? (
-                              <span style={{ fontFamily: mono, fontSize: 12, fontWeight: 700, color: C.white }}>{fmt(tot[f.field])}</span>
-                            ) : (
-                              <span style={{ fontFamily: mono, fontSize: 12, fontWeight: 700, color: f.total > 0 ? C.green : f.total < 0 ? C.red : C.textDim }}>{fmt(f.total)}</span>
-                            )}
+                            <span style={{ fontFamily: mono, fontSize: 12, fontWeight: 700, color: f.total > 0 ? (f.tipoTone || C.green) : f.total < 0 ? C.red : C.textDim }}>{fmt(f.total)}</span>
                             {f.totalPct ? <div style={{ fontFamily: mono, fontSize: 9, color: C.textDim }}>{f.totalPct}%</div> : null}
                           </div>
                         </div>
@@ -1154,86 +1760,32 @@
     }
 
     /* ═══════════ TAB: Costes ═══════════ */
-    function TabCostes({ pyl, setPyl, pylMensual, setPylMensual, selAnyo, selIng, selCos, selOpex }) {
+    function TabCostes({ pyl, setPyl, pylMensual, setPylMensual, selAnyo, setSelAnyo, selMes, setSelMes, navMes, goHoy, selIng, selCos, selOpex, movimientos, setTab }) {
       var MESES_NOMBRE = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+      var hoyAnyoCOST = new Date().getFullYear();
+      var hoyMesCOST = new Date().getMonth();
 
-      /* Shared month/year selector for both CD and OPEX */
+      /* mes/año globales — calendar sync unificado; solo persiste local el toggle */
       var [costesVistaAnual, setCostesVistaAnual] = useState(false);
-      var [costesMes, setCostesMes] = useState(6);
-      var [costesAnyo, setCostesAnyo] = useState(selAnyo || pylMensual.anyo);
+      var costesMes = selMes;
+      var costesAnyo = selAnyo;
       var costesKey = costesAnyo + "-" + costesMes;
-      var navCostesAnyo = function(dir) {
-        var next = costesAnyo + dir;
-        if (next < 2026) return;
-        setCostesAnyo(next);
-      };
-      var navCostesMes = function(dir) {
-        var nm = costesMes + dir;
-        if (nm < 0) { if (costesAnyo > 2026) { setCostesAnyo(costesAnyo - 1); setCostesMes(11); } }
-        else if (nm > 11) { setCostesAnyo(costesAnyo + 1); setCostesMes(0); }
-        else { setCostesMes(nm); }
-      };
+      var navCostesMes = navMes;
+      var navCostesAnyo = function(dir) { var n = selAnyo + dir; if (n >= 2026) setSelAnyo(n); };
+      var goCostesHoy = function() { setCostesVistaAnual(false); goHoy && goHoy(); };
 
-      /* Sync breakdown totals → datos[year][month].costes/.opex */
-      var syncTotals = function(state) {
-        var cdItems = state.costesDirPorMes && state.costesDirPorMes[costesKey] ? state.costesDirPorMes[costesKey] : (pyl.costesDesglose || []);
-        var oxItems = state.opexPorMes && state.opexPorMes[costesKey] ? state.opexPorMes[costesKey] : (pyl.opexDesglose || []);
-        var cdSum = cdItems.reduce(function(s, c) { return s + Number(c.importe || 0); }, 0);
-        var oxSum = oxItems.reduce(function(s, c) { return s + Number(c.importe || 0); }, 0);
-        var d = Object.assign({}, state.datos || {});
-        var yearArr = (d[costesAnyo] || EMPTY_YEAR()).map(function(m, i) {
-          return i === costesMes ? Object.assign({}, m, { costes: cdSum, opex: oxSum }) : m;
-        });
-        d[costesAnyo] = yearArr;
-        return Object.assign({}, state, { datos: d });
-      };
+      /* Resolve items derivados desde pylMensual (que a su vez se deriva de movimientos) */
+      var cdItemsMes = (pylMensual.costesDirPorMes && pylMensual.costesDirPorMes[costesKey]) || [];
+      var opexItemsMes = (pylMensual.opexPorMes && pylMensual.opexPorMes[costesKey]) || [];
 
-      /* Generic per-month helpers — all sync to datos after edit */
-      var getItems = function(storeKey, defaultArr) {
-        return pylMensual[storeKey] && pylMensual[storeKey][costesKey] ? pylMensual[storeKey][costesKey] : (pyl[defaultArr] || []);
-      };
-      var setItem = function(storeKey, defaultArr, idx, field, val) {
-        setPylMensual(function(p) {
-          var pm = Object.assign({}, p[storeKey] || {});
-          var items = (pm[costesKey] || (pyl[defaultArr] || []).map(function(c) { return Object.assign({}, c); })).map(function(c, j) {
-            return j === idx ? Object.assign({}, c, (function() { var o = {}; o[field] = val; return o; })()) : c;
-          });
-          pm[costesKey] = items;
-          var upd = {}; upd[storeKey] = pm;
-          return syncTotals(Object.assign({}, p, upd));
-        });
-      };
-      var addItem = function(storeKey, defaultArr) {
-        setPylMensual(function(p) {
-          var pm = Object.assign({}, p[storeKey] || {});
-          var items = (pm[costesKey] || (pyl[defaultArr] || []).map(function(c) { return Object.assign({}, c); })).concat([{ concepto: "Nuevo concepto", importe: 0 }]);
-          pm[costesKey] = items;
-          var upd = {}; upd[storeKey] = pm;
-          return syncTotals(Object.assign({}, p, upd));
-        });
-      };
-      var removeItem = function(storeKey, defaultArr, idx) {
-        setPylMensual(function(p) {
-          var pm = Object.assign({}, p[storeKey] || {});
-          var current = pm[costesKey] || (pyl[defaultArr] || []).map(function(c) { return Object.assign({}, c); });
-          pm[costesKey] = current.filter(function(_, j) { return j !== idx; });
-          var upd = {}; upd[storeKey] = pm;
-          return syncTotals(Object.assign({}, p, upd));
-        });
-      };
-
-      /* Resolve items for current month */
-      var cdItemsMes = getItems("costesDirPorMes", "costesDesglose");
-      var opexItemsMes = getItems("opexPorMes", "opexDesglose");
-
-      /* Annual aggregation: sum all 12 months by concepto name */
-      var aggregateYear = function(storeKey, defaultArr) {
+      /* Annual aggregation: agrupa por categoría todos los meses del año seleccionado */
+      var aggregateYear = function(storeKey) {
         var totals = {};
         for (var mi = 0; mi < 12; mi++) {
           var k = costesAnyo + "-" + mi;
-          var items = pylMensual[storeKey] && pylMensual[storeKey][k] ? pylMensual[storeKey][k] : (pyl[defaultArr] || []);
+          var items = pylMensual[storeKey] && pylMensual[storeKey][k] ? pylMensual[storeKey][k] : [];
           items.forEach(function(it) {
-            var name = it.concepto || "Sin nombre";
+            var name = it.concepto || "Sin categoría";
             if (!totals[name]) totals[name] = 0;
             totals[name] += Number(it.importe || 0);
           });
@@ -1242,13 +1794,13 @@
           .sort(function(a, b) { return b.importe - a.importe; });
       };
 
-      var cdItems = costesVistaAnual ? aggregateYear("costesDirPorMes", "costesDesglose") : cdItemsMes;
-      var opexItems = costesVistaAnual ? aggregateYear("opexPorMes", "opexDesglose") : opexItemsMes;
+      var cdItems = costesVistaAnual ? aggregateYear("costesDirPorMes") : cdItemsMes;
+      var opexItems = costesVistaAnual ? aggregateYear("opexPorMes") : opexItemsMes;
       var cdTotal = cdItems.reduce(function(s, c) { return s + Number(c.importe || 0); }, 0);
       var opexTotal = opexItems.reduce(function(s, c) { return s + Number(c.importe || 0); }, 0);
 
-      /* Render a breakdown card */
-      var renderBreakdown = function(title, storeKey, defaultArr, items, total, color) {
+      /* Render a breakdown card (read-only — la edición real se hace en Movimientos) */
+      var renderBreakdown = function(title, tipo, items, total) {
         var isAnual = costesVistaAnual;
         return (
           <Card>
@@ -1259,47 +1811,38 @@
               </div>
               <span style={{ fontSize: 18, fontWeight: 700, fontFamily: mono, color: C.white }}>{fmt(total)} €</span>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: isAnual ? "2fr 1fr 0.5fr" : "2fr 1fr 0.5fr 28px", fontSize: 10, color: C.textDim, paddingBottom: 8, borderBottom: "1px solid " + C.border }}>
-              <span>Concepto</span><span style={{ textAlign: "right" }}>{isAnual ? "Total 12m" : "Importe"}</span><span style={{ textAlign: "right" }}>%</span>{!isAnual && <span></span>}
+            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 0.5fr", fontSize: 10, color: C.textDim, paddingBottom: 8, borderBottom: "1px solid " + C.border }}>
+              <span>Categoría</span><span style={{ textAlign: "right" }}>{isAnual ? "Total 12m" : "Importe"}</span><span style={{ textAlign: "right" }}>%</span>
             </div>
-            {items.map(function(item, idx) {
+            {items.length === 0 ? (
+              <div style={{ padding: "20px 0", textAlign: "center", fontSize: 11, color: C.textDim }}>Sin movimientos {isAnual ? "este año" : "este mes"}</div>
+            ) : items.map(function(item, idx) {
               var pct = total > 0 ? ((Number(item.importe || 0) / total) * 100).toFixed(0) : 0;
               return (
-                <div key={idx} style={{ display: "grid", gridTemplateColumns: isAnual ? "2fr 1fr 0.5fr" : "2fr 1fr 0.5fr 28px", padding: "10px 0", borderBottom: "1px solid " + C.border, alignItems: "center" }}>
-                  {isAnual ? (
-                    <span style={{ fontSize: 13, color: C.textSec }}>{item.concepto}</span>
-                  ) : (
-                    <EditableText value={item.concepto} onChange={function(v) { setItem(storeKey, defaultArr, idx, "concepto", v); }} />
-                  )}
-                  {isAnual ? (
-                    <span style={{ textAlign: "right", fontFamily: mono, fontSize: 13, color: C.white }}>{fmt(item.importe)}</span>
-                  ) : (
-                    <EditableCell value={item.importe} onChange={function(v) { setItem(storeKey, defaultArr, idx, "importe", Number(v)); }} />
-                  )}
+                <div key={idx} style={{ display: "grid", gridTemplateColumns: "2fr 1fr 0.5fr", padding: "10px 0", borderBottom: idx < items.length - 1 ? "1px solid " + C.border : "none", alignItems: "center" }}>
+                  <span style={{ fontSize: 13, color: C.textSec }}>{item.concepto}</span>
+                  <span style={{ textAlign: "right", fontFamily: mono, fontSize: 13, color: C.white }}>{fmt(item.importe)}</span>
                   <span style={{ textAlign: "right", fontSize: 11, color: C.textDim }}>{pct}%</span>
-                  {!isAnual && (items.length > 1 ? (
-                    <button onClick={function() { removeItem(storeKey, defaultArr, idx); }}
-                      style={{ background: "transparent", border: "none", color: C.textDim, cursor: "pointer", fontSize: 15, padding: 0, lineHeight: 1, borderRadius: 4, transition: "color 0.15s", fontFamily: font }}
-                      onMouseEnter={function(e) { e.target.style.color = C.red; }}
-                      onMouseLeave={function(e) { e.target.style.color = C.textDim; }}>×</button>
-                  ) : <span></span>)}
                 </div>
               );
             })}
-            {!isAnual && <div style={{ paddingTop: 10 }}>
-              <button className="crux-btn-add" onClick={function() { addItem(storeKey, defaultArr); }}
-                style={{ background: C.accentGlow, color: C.accent, border: "1px solid " + C.accentMuted, borderRadius: 6, padding: "6px 14px", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: font }}>+ Añadir</button>
-            </div>}
+            <div style={{ paddingTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+              {setTab && <Btn variant="primary" size="sm" onClick={function() { setTab("movimientos"); }}>+ Nuevo movimiento</Btn>}
+              <span style={{ fontSize: 9, color: C.textDim, fontStyle: "italic" }}>Categorías derivadas del Libro de Movimientos</span>
+            </div>
           </Card>
         );
       };
 
-      /* Donut data — from current month */
+      /* Donut data — from current period (mensual o anual) */
       var allItems = cdItems.filter(function(c) { return Number(c.importe || 0) > 0; }).map(function(c) { return { label: "CD: " + c.concepto, val: Number(c.importe || 0) }; })
         .concat(opexItems.filter(function(c) { return Number(c.importe || 0) > 0; }).map(function(c) { return { label: "OX: " + c.concepto, val: Number(c.importe || 0) }; }));
       var totalGeneral = cdTotal + opexTotal;
-      var mesIng = selIng || pyl.ingresos;
-      var margenCoste = mesIng > 0 ? ((1 - totalGeneral / mesIng) * 100).toFixed(1) : 0;
+      /* Ingresos del periodo (coherente con cdTotal/opexTotal): mensual → selIng; anual → suma del año */
+      var ingresosPeriodo = costesVistaAnual
+        ? derivarDatosAnyo(movimientos, costesAnyo).reduce(function(s, m) { return s + Number(m.ingresos || 0); }, 0)
+        : Number(selIng || 0);
+      var margenCoste = ingresosPeriodo > 0 ? ((1 - totalGeneral / ingresosPeriodo) * 100).toFixed(1) : 0;
 
       /* Annual spending chart data */
       var MESES_S_CHART = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
@@ -1335,11 +1878,12 @@
             </div>
             <button onClick={function() { costesVistaAnual ? navCostesAnyo(1) : navCostesMes(1); }}
               style={{ background: "transparent", border: "none", color: C.white, cursor: "pointer", fontSize: 16, padding: "0 8px", fontFamily: font }}>▸</button>
+            <Btn variant="primary" size="xs" onClick={goCostesHoy} title="Ir al mes actual" style={{ marginLeft: 10 }}>Hoy</Btn>
           </div>
 
           <div className="crux-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
-            {renderBreakdown("Costes Directos", "costesDirPorMes", "costesDesglose", cdItems, cdTotal, "#3869AB")}
-            {renderBreakdown("OPEX", "opexPorMes", "opexDesglose", opexItems, opexTotal, "#AB8338")}
+            {renderBreakdown("Costes Directos", "coste_dir", cdItems, cdTotal)}
+            {renderBreakdown("OPEX", "opex", opexItems, opexTotal)}
           </div>
           <div className="crux-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             <Card>
@@ -1361,7 +1905,7 @@
                   { label: "Costes directos", val: fmt(cdTotal) + " €", sub: "COGS + directos", color: C.accent },
                   { label: "OPEX", val: fmt(opexTotal) + " €", sub: "Gastos operativos", color: C.amber },
                   { label: "Total costes", val: fmt(totalGeneral) + " €", sub: "Directos + OPEX", color: C.white },
-                  { label: "Margen disponible", val: margenCoste + "%", sub: "Sobre ingresos (" + fmt(mesIng) + " €)", color: Number(margenCoste) >= 15 ? C.green : Number(margenCoste) >= 5 ? C.amber : C.red },
+                  { label: "Margen disponible", val: margenCoste + "%", sub: "Sobre ingresos " + (costesVistaAnual ? "anuales" : "del mes") + " (" + fmt(ingresosPeriodo) + " €)", color: Number(margenCoste) >= 15 ? C.green : Number(margenCoste) >= 5 ? C.amber : C.red },
                 ].map(function(m, i) {
                   return (
                     <div key={i} style={{ padding: "12px 0", borderBottom: i < 2 ? "1px solid " + C.border : "none" }}>
@@ -1400,29 +1944,15 @@
           {(function() {
             var MESES_S = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
             var colW = "2.2fr " + MESES_S.map(function() { return "1fr"; }).join(" ") + " 1.2fr";
-            var anyo = selAnyo || pylMensual.anyo;
+            /* Año global (calendar sync) */
+            var anyo = selAnyo;
             var meses = pylMensual.datos[anyo] || EMPTY_YEAR();
-            var setMesCost = function(idx, field, val) {
-              setPylMensual(function(p) {
-                var yearData = (p.datos[anyo] || EMPTY_YEAR()).map(function(m, i) { return i === idx ? Object.assign({}, m, (function() { var o = {}; o[field] = Number(val); return o; })()) : m; });
-                var d = Object.assign({}, p.datos); d[anyo] = yearData;
-                return Object.assign({}, p, { datos: d });
-              });
-            };
-            var setAnyoCostes = function(dir) {
-              setPylMensual(function(p) {
-                var next = p.anyo + dir;
-                if (next < 2026) return p;
-                var d = Object.assign({}, p.datos);
-                if (!d[next]) d[next] = EMPTY_YEAR();
-                return Object.assign({}, p, { anyo: next, datos: d });
-              });
-            };
+            var setAnyoCostes = function(dir) { var next = selAnyo + dir; if (next >= 2026) setSelAnyo(next); };
             var tot = { costes: 0, opex: 0 };
             meses.forEach(function(m) { tot.costes += Number(m.costes || 0); tot.opex += Number(m.opex || 0); });
             var filas = [
-              { label: "Costes directos", field: "costes", editable: true, total: tot.costes, color: "#3869AB" },
-              { label: "OPEX", field: "opex", editable: true, total: tot.opex, color: "#AB8338" },
+              { label: "Costes directos", computed: true, fn: function(m) { return Number(m.costes || 0); }, total: tot.costes, color: "#3869AB" },
+              { label: "OPEX", computed: true, fn: function(m) { return Number(m.opex || 0); }, total: tot.opex, color: "#AB8338" },
               { label: "Total costes", computed: true, fn: function(m) { return Number(m.costes || 0) + Number(m.opex || 0); }, total: tot.costes + tot.opex, bold: true },
               { label: "Margen disponible", computed: true, fn: function(m) { var ing = Number(m.ingresos || 0); var c = Number(m.costes || 0) + Number(m.opex || 0); return ing > 0 ? Number(((ing - c) / ing * 100).toFixed(0)) : 0; }, total: null, isPct: true },
             ];
@@ -1440,7 +1970,7 @@
                   <div style={{ minWidth: 960 }}>
                     <div style={{ display: "grid", gridTemplateColumns: colW, fontSize: 10, color: C.textDim, paddingBottom: 8, borderBottom: "1px solid " + C.border, gap: 4 }}>
                       <span>Concepto</span>
-                      {MESES_S.map(function(m) { return <span key={m} style={{ textAlign: "right" }}>{m + " " + String(anyo).slice(-2)}</span>; })}
+                      {MESES_S.map(function(m, mi) { var esHoy = anyo === hoyAnyoCOST && mi === hoyMesCOST; return <span key={m} style={{ textAlign: "right", color: esHoy ? C.accent : C.textDim, fontWeight: esHoy ? 700 : 400 }}>{esHoy ? "● " : ""}{m + " " + String(anyo).slice(-2)}</span>; })}
                       <span style={{ textAlign: "right", fontWeight: 700, color: C.textSec }}>Total Anual</span>
                     </div>
                     {filas.map(function(f, fi) {
@@ -1448,12 +1978,11 @@
                         <div key={fi} style={{ display: "grid", gridTemplateColumns: colW, padding: "6px 0", borderBottom: fi < filas.length - 1 ? "1px solid " + C.border : "none", alignItems: "center", gap: 4 }}>
                           <span style={{ fontSize: 12, fontWeight: f.bold ? 700 : 500, color: f.bold ? C.white : f.color || C.textSec }}>{f.label}</span>
                           {meses.map(function(m, mi) {
-                            if (f.editable) {
-                              return <EditableCell key={mi} value={m[f.field]} onChange={function(v) { setMesCost(mi, f.field, v); }} style={{ fontSize: 11, textAlign: "right" }} />;
-                            }
                             var val = f.fn(m);
-                            if (f.isPct) return <span key={mi} style={{ textAlign: "right", fontFamily: mono, fontSize: 11, color: val >= 15 ? C.green : val >= 5 ? C.amber : val > 0 ? C.red : C.textDim }}>{val > 0 ? val + "%" : "—"}</span>;
-                            return <span key={mi} style={{ textAlign: "right", fontFamily: mono, fontSize: 11, fontWeight: f.bold ? 700 : 400, color: f.bold ? C.white : C.textSec }}>{val > 0 ? fmt(val) : "—"}</span>;
+                            var esHoy = anyo === hoyAnyoCOST && mi === hoyMesCOST;
+                            var bgStyle = esHoy ? { background: C.accentGlow, borderRadius: 4, padding: "2px 4px" } : {};
+                            if (f.isPct) return <span key={mi} style={Object.assign({ textAlign: "right", fontFamily: mono, fontSize: 11, color: val >= 15 ? C.green : val >= 5 ? C.amber : val > 0 ? C.red : C.textDim }, bgStyle)}>{val > 0 ? val + "%" : "—"}</span>;
+                            return <span key={mi} style={Object.assign({ textAlign: "right", fontFamily: mono, fontSize: 11, fontWeight: f.bold ? 700 : 400, color: f.bold ? C.white : (f.color || C.textSec) }, bgStyle)}>{val > 0 ? fmt(val) : "—"}</span>;
                           })}
                           {f.isPct ? (
                             <span style={{ textAlign: "right", fontFamily: mono, fontSize: 12, fontWeight: 700, color: C.textDim }}>—</span>
@@ -1473,124 +2002,160 @@
     }
 
     /* ═══════════ TAB: Cash Flow ═══════════ */
-    function TabCash({ selAnyo, selMes, selKey, navMes, selAging, selCaja, selForecast, pylMensual, setPylMensual, aging, cash, forecast, burnRate, netBurn }) {
-      var MESES_FULL = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-      var [cashVistaAnual, setCashVistaAnual] = useState(false);
-      var [cashMes, setCashMes] = useState(selMes);
-      var [cashAnyo, setCashAnyo] = useState(selAnyo);
-      var cashKey = cashAnyo + "-" + cashMes;
-      var navCashMes = function(dir) {
-        var nm = cashMes + dir;
-        if (nm < 0) { if (cashAnyo > 2026) { setCashAnyo(cashAnyo - 1); setCashMes(11); } }
-        else if (nm > 11) { setCashAnyo(cashAnyo + 1); setCashMes(0); }
-        else { setCashMes(nm); }
-      };
-      var navCashAnyo = function(dir) { var n = cashAnyo + dir; if (n >= 2026) setCashAnyo(n); };
+    /* Snapshot de tesorería "ahora mismo". No hay selector de período: aging y caja son valores únicos;
+       el gráfico de evolución de caja se deriva de movimientos + saldo actual anclado a hoy. */
+    function TabCash({ aging, setAging, cash, setCash, forecast, setForecast, movimientos, runwayMeses, costesRecurrentes, ingresosRecurrentes, netoRecurrente }) {
+      var MESES_S = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+      var hoy = new Date();
+      var hoyAnyo = hoy.getFullYear();
+      var hoyMes = hoy.getMonth();
 
-      /* Resolve data for selected period */
-      var localAging = pylMensual.agingPorMes && pylMensual.agingPorMes[cashKey] ? pylMensual.agingPorMes[cashKey] : aging;
-      var localCaja = pylMensual.cajaPorMes && pylMensual.cajaPorMes[cashKey] != null ? pylMensual.cajaPorMes[cashKey] : cash.caja;
-      var localForecast = pylMensual.forecastPorAnyo && pylMensual.forecastPorAnyo[cashAnyo] ? pylMensual.forecastPorAnyo[cashAnyo] : forecast;
-      var total = localAging.reduce(function(s, a) { return s + Number(a.importe || 0); }, 0);
-      var runway = netBurn > 0 ? (localCaja / netBurn).toFixed(1) : "∞";
+      /* Mes actual (para indicador de rentabilidad del mes en curso) */
+      var tMesActual = totalesPeriodo(movimientos, hoyAnyo, hoyMes);
+      var netoMesActual = tMesActual.ingresos - tMesActual.costes - tMesActual.opex;
 
-      /* Per-month setters */
-      var setAgingMes = function(idx, field, val) {
-        setPylMensual(function(p) {
-          var pm = Object.assign({}, p.agingPorMes || {});
-          var items = (pm[cashKey] || aging.map(function(a) { return Object.assign({}, a); })).map(function(a, j) {
-            return j === idx ? Object.assign({}, a, (function() { var o = {}; o[field] = val; return o; })()) : a;
-          });
-          pm[cashKey] = items;
-          return Object.assign({}, p, { agingPorMes: pm });
-        });
+      /* Totales AR */
+      var agingTotal = aging.reduce(function(s, a) { return s + Number(a.importe || 0); }, 0);
+
+      /* ── Evolución de caja: running balance ─────────────────────────
+         Ancla: caja_actual = balance al final del MES HOY (aproximación: usamos la caja actual como balance fin-de-mes).
+         Hacia atrás: balance_fin(m) = caja_actual − sum(neto_m+1 ... neto_mesHoy)
+         Hacia adelante: balance_fin(m) = caja_actual + (m − mesHoy) * netoRecurrente
+         Empezamos desde enero del año en curso hasta +3 meses futuro.
+      */
+      var balanceSerie = React.useMemo(function() {
+        /* Calcula neto mensual desde enero año actual hasta mes actual */
+        var netosPorMes = [];
+        for (var m = 0; m <= hoyMes; m++) {
+          var t = totalesPeriodo(movimientos, hoyAnyo, m);
+          netosPorMes.push(t.ingresos - t.costes - t.opex);
+        }
+        /* Balance AL FINAL de cada mes, anclado a caja_actual = final-mes-HOY */
+        var balancesFin = [];
+        /* Último elemento: balance fin-de-mes-hoy = caja.caja */
+        balancesFin[hoyMes] = Number(cash.caja || 0);
+        for (var m2 = hoyMes - 1; m2 >= 0; m2--) {
+          balancesFin[m2] = balancesFin[m2 + 1] - netosPorMes[m2 + 1];
+        }
+        /* Balance AL INICIO del año actual = balance fin mes 0 − neto mes 0 */
+        var balanceInicio = balancesFin[0] - (netosPorMes[0] || 0);
+
+        var serie = [];
+        serie.push({ label: "1-Ene " + String(hoyAnyo).slice(-2), balance: balanceInicio, tipo: "historico" });
+        for (var m3 = 0; m3 <= hoyMes; m3++) {
+          serie.push({ label: MESES_S[m3] + " " + String(hoyAnyo).slice(-2), balance: balancesFin[m3], tipo: m3 === hoyMes ? "hoy" : "historico" });
+        }
+        /* Proyección: 3 meses hacia adelante con netoRecurrente */
+        var accProy = Number(cash.caja || 0);
+        for (var k = 1; k <= 3; k++) {
+          accProy += Number(netoRecurrente || 0);
+          var d = new Date(hoyAnyo, hoyMes + k, 1);
+          serie.push({ label: MESES_S[d.getMonth()] + " " + String(d.getFullYear()).slice(-2), balance: accProy, tipo: "forecast" });
+        }
+        return serie;
+      }, [movimientos, cash.caja, netoRecurrente, hoyAnyo, hoyMes]);
+
+      var chartLabels = balanceSerie.map(function(p) { return p.label; });
+      var chartReal = balanceSerie.map(function(p) { return p.tipo === "forecast" ? null : Math.round(p.balance); });
+      var chartForecast = balanceSerie.map(function(p, i) {
+        /* Punto de conexión: el último real es también primer forecast (visual) */
+        var prev = balanceSerie[i - 1];
+        if (p.tipo === "forecast") return Math.round(p.balance);
+        if (p.tipo === "hoy") return Math.round(p.balance);
+        return null;
+      });
+
+      /* ── Setters ── */
+      var setAgingField = function(idx, field, val) {
+        setAging(function(arr) { return arr.map(function(a, i) { return i === idx ? Object.assign({}, a, (function() { var o = {}; o[field] = val; return o; })()) : a; }); });
       };
-      var setCajaMes = function(v) {
-        setPylMensual(function(p) {
-          var pm = Object.assign({}, p.cajaPorMes || {});
-          pm[cashKey] = Number(v);
-          return Object.assign({}, p, { cajaPorMes: pm });
-        });
+      var setCaja = function(v) { setCash(function(c) { return Object.assign({}, c, { caja: Number(v) }); }); };
+      var setForecastField = function(idx, field, val) {
+        setForecast(function(arr) { return arr.map(function(f, i) { return i === idx ? Object.assign({}, f, (function() { var o = {}; o[field] = Number(val); return o; })()) : f; }); });
       };
-      var setForecastAnyo = function(idx, field, val) {
-        setPylMensual(function(p) {
-          var pfa = Object.assign({}, p.forecastPorAnyo || {});
-          var items = (pfa[cashAnyo] || forecast.map(function(f) { return Object.assign({}, f); })).map(function(f, j) {
-            return j === idx ? Object.assign({}, f, (function() { var o = {}; o[field] = Number(val); return o; })()) : f;
-          });
-          pfa[cashAnyo] = items;
-          return Object.assign({}, p, { forecastPorAnyo: pfa });
-        });
-      };
-      var agingColors = ["#3869AB", "#AB8338", "#3E526B", "#564C39"];
+
+      /* Colores y estilos */
+      var agingColors = ["#4FA68C", "#C9A96A", "#AB8338", "#C97064"];
       var escColors = ["#564C39", "#3869AB", "#AB8338"];
-      var periodLabel = cashVistaAnual ? "Anual " + cashAnyo : MESES_FULL[cashMes] + " " + cashAnyo;
+
+      /* Runway display */
+      var runwayLabel = runwayMeses === null ? "—" : runwayMeses >= 36 ? ">36 m" : runwayMeses.toFixed(1) + " m";
+      var runwayColor = runwayMeses === null ? C.textDim : runwayMeses >= 6 ? C.green : runwayMeses >= 3 ? C.amber : C.red;
+      var fechaHoyES = hoy.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+
       return (
-        <Section title={"Cash Flow — " + periodLabel} subtitle="Tesorería y control de cobros — Módulo 2.3, secciones 2.2 y 2.3">
-          {/* Period selector */}
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginBottom: 16, padding: "12px 0", background: C.surface, borderRadius: 10, border: "1px solid " + C.border }}>
-            <div style={{ display: "flex", background: C.bg, borderRadius: 6, overflow: "hidden" }}>
-              {["Mensual", "Anual"].map(function(t, ti) {
-                var active = (ti === 0 && !cashVistaAnual) || (ti === 1 && cashVistaAnual);
-                return <button key={t} onClick={function() { setCashVistaAnual(ti === 1); }}
-                  style={{ background: active ? C.accent : "transparent", color: active ? C.white : C.textDim, border: "none", padding: "7px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: font, transition: "all 0.15s" }}>{t}</button>;
-              })}
-            </div>
-            <button onClick={function() { cashVistaAnual ? navCashAnyo(-1) : navCashMes(-1); }} disabled={cashAnyo <= 2026 && (cashVistaAnual || cashMes <= 0)}
-              style={{ background: "transparent", border: "none", color: cashAnyo <= 2026 && (cashVistaAnual || cashMes <= 0) ? C.border : C.white, cursor: cashAnyo <= 2026 && (cashVistaAnual || cashMes <= 0) ? "default" : "pointer", fontSize: 16, padding: "0 8px", fontFamily: font, opacity: cashAnyo <= 2026 && (cashVistaAnual || cashMes <= 0) ? 0.3 : 1 }}>◂</button>
-            <div style={{ textAlign: "center", minWidth: cashVistaAnual ? 60 : 160 }}>
-              {!cashVistaAnual && <div style={{ fontSize: 16, fontWeight: 700, color: C.white }}>{MESES_FULL[cashMes]}</div>}
-              <div style={{ fontSize: cashVistaAnual ? 18 : 12, fontWeight: 700, color: C.white, fontFamily: mono }}>{cashAnyo}</div>
-            </div>
-            <button onClick={function() { cashVistaAnual ? navCashAnyo(1) : navCashMes(1); }}
-              style={{ background: "transparent", border: "none", color: C.white, cursor: "pointer", fontSize: 16, padding: "0 8px", fontFamily: font }}>▸</button>
-          </div>
-          {/* ── Hero metrics ── */}
+        <Section title="Cash Flow" subtitle={"Tesorería a día de hoy · " + fechaHoyES + ". No depende del mes seleccionado en otras pestañas."}>
+          {/* ── Hero metrics: Caja · Runway · Rentabilidad ── */}
           <div className="crux-grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 16 }}>
-            {[
-              { label: "Caja actual", val: localCaja, editable: true, color: C.white, sub: "Posición de tesorería" },
-              { label: "Costes mensuales", val: burnRate, color: C.white, badge: "CALCULADO", sub: netBurn > 0 ? "Burn neto: " + fmt(netBurn) + " €/mes" : "Burn neto: Rentable" },
-              { label: "Runway", val: runway, isRunway: true, color: runway === "∞" || Number(runway) >= 6 ? C.green : Number(runway) >= 3 ? C.amber : C.red, sub: "Ref: ≥6 meses" },
-            ].map(function(m, mi) {
-              return (
-                <Card key={mi} style={{ textAlign: "center", padding: "20px 16px" }}>
-                  <div style={{ fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5 }}>{m.label} {m.badge && <span style={{ fontSize: 8, color: C.accent, background: C.accentGlow, padding: "1px 6px", borderRadius: 3, marginLeft: 4, fontWeight: 700 }}>{m.badge}</span>}</div>
-                  {m.editable ? (
-                    <div style={{ display: "flex", justifyContent: "center", alignItems: "baseline", gap: 4, marginTop: 8 }}>
-                      <EditableCell value={m.val} onChange={function(v) { setCajaMes(v); }} style={{ fontSize: 32, fontWeight: 700, color: m.color, textAlign: "center", width: 180 }} />
-                      <span style={{ fontSize: 14, color: C.textDim }}>€</span>
-                    </div>
-                  ) : (
-                    <div style={{ fontSize: 32, fontWeight: 700, fontFamily: mono, color: m.color, marginTop: 8 }}>{m.isRunway ? runway : fmt(m.val) + " €"}</div>
-                  )}
-                  <div style={{ fontSize: 10, color: C.textDim, marginTop: 6 }}>{m.sub}</div>
-                </Card>
-              );
-            })}
+            <Card style={{ textAlign: "center", padding: "20px 16px" }}>
+              <div style={{ fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5 }}>Caja actual <span style={{ fontSize: 8, color: C.accent, background: C.accentGlow, padding: "1px 6px", borderRadius: 3, marginLeft: 4, fontWeight: 700 }}>EDITABLE</span></div>
+              <div style={{ display: "flex", justifyContent: "center", alignItems: "baseline", gap: 4, marginTop: 8 }}>
+                <EditableCell value={cash.caja} onChange={function(v) { setCaja(v); }} style={{ fontSize: 32, fontWeight: 700, color: C.white, textAlign: "center", width: 200 }} />
+                <span style={{ fontSize: 14, color: C.textDim }}>€</span>
+              </div>
+              <div style={{ fontSize: 10, color: C.textDim, marginTop: 6 }}>Saldo en banco hoy</div>
+            </Card>
+            <Card style={{ textAlign: "center", padding: "20px 16px" }}>
+              <div style={{ fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5 }}>Runway <span style={{ fontSize: 8, color: C.accent, background: C.accentGlow, padding: "1px 6px", borderRadius: 3, marginLeft: 4, fontWeight: 700 }}>CALCULADO</span></div>
+              <div style={{ fontSize: 32, fontWeight: 700, fontFamily: mono, color: runwayColor, marginTop: 8 }}>{runwayLabel}</div>
+              <div style={{ fontSize: 10, color: C.textDim, marginTop: 6 }}>{costesRecurrentes > 0 ? "Gastos rec.: " + fmt(Math.round(costesRecurrentes)) + " €/m" : "Sin gastos registrados"}</div>
+            </Card>
+            <Card style={{ textAlign: "center", padding: "20px 16px" }}>
+              <div style={{ fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5 }}>Rentabilidad mensual <span style={{ fontSize: 8, color: C.accent, background: C.accentGlow, padding: "1px 6px", borderRadius: 3, marginLeft: 4, fontWeight: 700 }}>CALCULADO</span></div>
+              <div style={{ fontSize: 32, fontWeight: 700, fontFamily: mono, color: netoRecurrente >= 0 ? C.green : C.red, marginTop: 8 }}>{netoRecurrente >= 0 ? "+" : ""}{fmt(Math.round(netoRecurrente))} €</div>
+              <div style={{ fontSize: 10, color: C.textDim, marginTop: 6 }}>Promedio 3m · este mes: <span style={{ color: netoMesActual >= 0 ? C.green : C.red, fontWeight: 700 }}>{netoMesActual >= 0 ? "+" : ""}{fmt(Math.round(netoMesActual))} €</span></div>
+            </Card>
           </div>
 
-          {/* ── Cuentas por Cobrar — Barra segmentada + mini cards ── */}
+          {/* ── Gráfico: Evolución de caja ── */}
+          <Card style={{ marginBottom: 16 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <CardLabel>Evolución de caja {hoyAnyo}</CardLabel>
+              <span style={{ fontSize: 10, color: C.textDim, fontStyle: "italic" }}>Histórico anclado a caja actual · proyección con promedio mensual</span>
+            </div>
+            <ApexChart type="area" height={280} options={{
+              series: [
+                { name: "Real (histórico)", data: chartReal },
+                { name: "Proyección", data: chartForecast },
+              ],
+              colors: [C.accent2, C.amber],
+              stroke: { width: [2.8, 2.2], curve: "smooth", dashArray: [0, 6] },
+              fill: { type: "gradient", gradient: { opacityFrom: 0.3, opacityTo: 0.02 } },
+              markers: { size: [4, 0], colors: [C.accent2, C.amber], strokeColors: C.bg, strokeWidth: 2 },
+              xaxis: { categories: chartLabels, labels: { style: { colors: C.textDim, fontSize: "10px" } } },
+              yaxis: { labels: { style: { colors: C.textDim, fontSize: "11px" }, formatter: function(v) { return v == null ? "" : fmt(Math.round(v)) + " €"; } } },
+              legend: { position: "top", horizontalAlign: "right", labels: { colors: C.textSec }, fontSize: "11px", markers: { radius: 2 } },
+              grid: { borderColor: C.border, strokeDashArray: 3 },
+              annotations: { xaxis: [{ x: MESES_S[hoyMes] + " " + String(hoyAnyo).slice(-2), borderColor: C.accent, strokeDashArray: 4, label: { text: "Hoy", style: { color: C.white, background: C.accent, fontSize: "9px" }, orientation: "horizontal" } }] },
+              tooltip: { y: { formatter: function(v) { return v == null ? "—" : fmt(Math.round(v)) + " €"; } } },
+            }} />
+          </Card>
+
+          {/* ── Cuentas por Cobrar (estático, a día de hoy) ── */}
           <Card style={{ marginBottom: 16 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <CardLabel>Cuentas por Cobrar</CardLabel>
-              <span style={{ fontSize: 14, fontWeight: 700, fontFamily: mono, color: C.white }}>{fmt(total)} €</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <CardLabel>Cuentas por Cobrar</CardLabel>
+                <span style={{ fontSize: 8, color: C.accent, background: C.accentGlow, padding: "2px 6px", borderRadius: 3, fontWeight: 700, letterSpacing: 0.4 }}>HOY</span>
+              </div>
+              <span style={{ fontSize: 18, fontWeight: 700, fontFamily: mono, color: C.white }}>{fmt(agingTotal)} €</span>
             </div>
             {/* Segmented bar */}
-            <div style={{ display: "flex", height: 20, borderRadius: 6, overflow: "hidden", marginBottom: 16 }}>
-              {localAging.map(function(a, i) {
-                var w = total > 0 ? (Number(a.importe) / total * 100) : 25;
+            <div style={{ display: "flex", height: 18, borderRadius: 6, overflow: "hidden", marginBottom: 16, background: C.bg }}>
+              {aging.map(function(a, i) {
+                var w = agingTotal > 0 ? (Number(a.importe) / agingTotal * 100) : 0;
                 return <div key={i} style={{ width: w + "%", background: agingColors[i], transition: "width 0.3s" }}></div>;
               })}
             </div>
-            {/* 4 mini cards */}
+            {/* 4 mini cards editable */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12 }} className="crux-grid-4">
-              {localAging.map(function(a, i) {
-                var pct = total > 0 ? ((Number(a.importe) / total) * 100).toFixed(0) : 0;
+              {aging.map(function(a, i) {
+                var pct = agingTotal > 0 ? ((Number(a.importe) / agingTotal) * 100).toFixed(0) : 0;
                 return (
                   <div key={i} style={{ background: "rgba(255,255,255,0.02)", borderRadius: 8, padding: "14px 12px", borderLeft: "3px solid " + agingColors[i] }}>
                     <div style={{ fontSize: 11, fontWeight: 600, color: agingColors[i], marginBottom: 6 }}>{a.tramo}</div>
                     <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-                      <EditableCell value={a.importe} onChange={function(v) { setAgingMes(i, "importe", Number(v)); }} style={{ fontSize: 18, fontWeight: 700, color: C.white, textAlign: "left", width: 100 }} />
+                      <EditableCell value={a.importe} onChange={function(v) { setAgingField(i, "importe", Number(v)); }} style={{ fontSize: 18, fontWeight: 700, color: C.white, textAlign: "left", width: 100 }} />
                       <span style={{ fontSize: 11, color: C.textDim }}>{pct}%</span>
                     </div>
                     <div style={{ fontSize: 9, color: C.textDim, marginTop: 6 }}>{a.accion}</div>
@@ -1598,14 +2163,20 @@
                 );
               })}
             </div>
+            <div style={{ paddingTop: 12, borderTop: "1px solid " + C.border, marginTop: 14, fontSize: 10, color: C.textDim, fontStyle: "italic" }}>
+              Aging estático — representa saldo de cobros outstanding a día de hoy. Edita manualmente cuando se emite factura o se cobra.
+            </div>
           </Card>
 
-          {/* ── Forecast ── */}
+          {/* ── Forecast trimestral (manual, backup) ── */}
           <div className="crux-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             <Card>
-              <CardLabel>Forecast — 3 Escenarios (K€)</CardLabel>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <CardLabel>Forecast manual — 3 escenarios (K€)</CardLabel>
+                <span style={{ fontSize: 8, color: C.textDim, background: "transparent", padding: "1px 6px", borderRadius: 3, fontWeight: 700, letterSpacing: 0.4 }}>MANUAL</span>
+              </div>
               <ApexChart type="area" height={240} options={{
-                series: localForecast.map(function(f) { return { name: f.escenario, data: [Number(f.q1), Number(f.q2), Number(f.q3), Number(f.q4)] }; }),
+                series: forecast.map(function(f) { return { name: f.escenario, data: [Number(f.q1), Number(f.q2), Number(f.q3), Number(f.q4)] }; }),
                 colors: escColors,
                 stroke: { width: 2, curve: "smooth" },
                 fill: { type: "gradient", gradient: { opacityFrom: 0.2, opacityTo: 0.02 } },
@@ -1616,19 +2187,19 @@
               }} />
             </Card>
             <Card>
-              <CardLabel>Forecast Trimestral (K€)</CardLabel>
+              <CardLabel>Forecast trimestral (K€)</CardLabel>
               <div className="crux-scroll-table">
                 <div>
                   <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 1fr 1fr 1fr", fontSize: 10, color: C.textDim, paddingBottom: 8, borderBottom: "1px solid " + C.border }}>
                     <span>Escenario</span><span style={{ textAlign: "right" }}>Q1</span><span style={{ textAlign: "right" }}>Q2</span><span style={{ textAlign: "right" }}>Q3</span><span style={{ textAlign: "right" }}>Q4</span><span style={{ textAlign: "right" }}>Total</span>
                   </div>
-                  {localForecast.map(function(f, i) {
+                  {forecast.map(function(f, i) {
                     var t = Number(f.q1) + Number(f.q2) + Number(f.q3) + Number(f.q4);
                     return (
                       <div key={i} style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 1fr 1fr 1fr", padding: "10px 0", borderBottom: i < 2 ? "1px solid " + C.border : "none", alignItems: "center" }}>
                         <span style={{ fontSize: 13, fontWeight: 600, color: escColors[i] }}>{f.escenario}</span>
                         {["q1", "q2", "q3", "q4"].map(function(q) {
-                          return <EditableCell key={q} value={f[q]} onChange={function(v) { setForecastAnyo(i, q, v); }} style={{ fontSize: 12 }} />;
+                          return <EditableCell key={q} value={f[q]} onChange={function(v) { setForecastField(i, q, v); }} style={{ fontSize: 12 }} />;
                         })}
                         <span style={{ textAlign: "right", fontFamily: mono, fontSize: 13, fontWeight: 700, color: escColors[i] }}>{t}</span>
                       </div>
@@ -1642,82 +2213,46 @@
       );
     }
 
-    /* ═══════════ TAB: Clientes ═══════════ */
-    function TabClientes({ selAnyo, selMes, selKey, navMes, selClientes, pylMensual, setPylMensual, clientes }) {
+    /* ═══════════ TAB: Clientes ═══════════
+       Clientes derivados de `movimientos` (nombre, facturación, fechas).
+       La metadata manual (margen, estado, notas) vive en el state `clientes` indexado por nombre. */
+    function TabClientes({ movimientos, clientes, setClientes, selAnyo, setSelAnyo, selMes, setSelMes, navMes, goHoy, setTab }) {
       var MESES_FULL = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+      /* mes/año globales — calendar sync */
       var [cliVistaAnual, setCliVistaAnual] = useState(false);
-      var [cliMes, setCliMes] = useState(selMes);
-      var [cliAnyo, setCliAnyo] = useState(selAnyo);
-      var cliKey = cliAnyo + "-" + cliMes;
-      var navCliMes = function(dir) {
-        var nm = cliMes + dir;
-        if (nm < 0) { if (cliAnyo > 2026) { setCliAnyo(cliAnyo - 1); setCliMes(11); } }
-        else if (nm > 11) { setCliAnyo(cliAnyo + 1); setCliMes(0); }
-        else { setCliMes(nm); }
-      };
-      var navCliAnyo = function(dir) { var n = cliAnyo + dir; if (n >= 2026) setCliAnyo(n); };
+      var cliMes = selMes;
+      var cliAnyo = selAnyo;
+      var navCliMes = navMes;
+      var navCliAnyo = function(dir) { var n = selAnyo + dir; if (n >= 2026) setSelAnyo(n); };
+      var goCliHoy = function() { setCliVistaAnual(false); goHoy && goHoy(); };
 
-      /* Resolve clients for selected month */
-      var mesClientes = pylMensual.clientesPorMes && pylMensual.clientesPorMes[cliKey] ? pylMensual.clientesPorMes[cliKey] : clientes;
+      /* Clientes del periodo seleccionado (derivados de movimientos + metadata) */
+      var displayClientes = React.useMemo(function() {
+        return clientesDelPeriodo(movimientos, clientes, cliAnyo, cliVistaAnual ? null : cliMes);
+      }, [movimientos, clientes, cliAnyo, cliMes, cliVistaAnual]);
 
-      /* Annual aggregation: sum fact across 12 months by client name */
-      var anyoClientes = (function() {
-        var totals = {};
-        for (var mi = 0; mi < 12; mi++) {
-          var k = cliAnyo + "-" + mi;
-          var items = pylMensual.clientesPorMes && pylMensual.clientesPorMes[k] ? pylMensual.clientesPorMes[k] : clientes;
-          items.forEach(function(c) {
-            var name = c.nombre || "Sin nombre";
-            if (!totals[name]) totals[name] = { nombre: name, fact: 0, margen: 0, count: 0, fechaAlta: c.fechaAlta || "", ultimoServicio: c.ultimoServicio || "", estado: c.estado || "activo" };
-            totals[name].fact += Number(c.fact || 0);
-            totals[name].margen += Number(c.margen || 0);
-            totals[name].count++;
-            if (c.ultimoServicio && c.ultimoServicio > totals[name].ultimoServicio) totals[name].ultimoServicio = c.ultimoServicio;
-            if (c.fechaAlta && (!totals[name].fechaAlta || c.fechaAlta < totals[name].fechaAlta)) totals[name].fechaAlta = c.fechaAlta;
+      /* Setter de metadata: solo escribe margen/estado/notas en `clientes` indexado por nombre.
+         Si el nombre no existe en clientes, lo añade. */
+      var setMeta = function(nombre, field, value) {
+        setClientes(function(arr) {
+          var found = false;
+          var next = (arr || []).map(function(c) {
+            if (c && c.nombre === nombre) { found = true; return Object.assign({}, c, (function() { var o = {}; o[field] = value; return o; })()); }
+            return c;
           });
-        }
-        return Object.keys(totals).map(function(name) { var t = totals[name]; t.margen = t.count > 0 ? Math.round(t.margen / t.count) : 0; return t; });
-      })();
-
-      var displayClientes = cliVistaAnual ? anyoClientes : mesClientes;
-
-      /* Per-month setters */
-      var setClienteField = function(origIdx, field, val) {
-        setPylMensual(function(p) {
-          var pm = Object.assign({}, p.clientesPorMes || {});
-          var items = (pm[cliKey] || clientes.map(function(c) { return Object.assign({}, c); })).map(function(c, j) {
-            return j === origIdx ? Object.assign({}, c, (function() { var o = {}; o[field] = val; return o; })()) : c;
-          });
-          pm[cliKey] = items;
-          return Object.assign({}, p, { clientesPorMes: pm });
-        });
-      };
-      var addClienteMes = function() {
-        setPylMensual(function(p) {
-          var pm = Object.assign({}, p.clientesPorMes || {});
-          var items = (pm[cliKey] || clientes.map(function(c) { return Object.assign({}, c); })).concat([{ nombre: "Nuevo cliente", fact: 0, margen: 0, fechaAlta: cliAnyo + "-" + String(cliMes + 1).padStart(2, "0"), ultimoServicio: "", estado: "activo" }]);
-          pm[cliKey] = items;
-          return Object.assign({}, p, { clientesPorMes: pm });
-        });
-      };
-      var removeClienteMes = function(idx) {
-        setPylMensual(function(p) {
-          var pm = Object.assign({}, p.clientesPorMes || {});
-          var current = pm[cliKey] || clientes.map(function(c) { return Object.assign({}, c); });
-          pm[cliKey] = current.filter(function(_, j) { return j !== idx; });
-          return Object.assign({}, p, { clientesPorMes: pm });
+          if (!found) next = next.concat([Object.assign({ nombre: nombre, margen: 0, estado: "activo", notas: "" }, (function() { var o = {}; o[field] = value; return o; })())]);
+          return next;
         });
       };
 
-      var sorted = displayClientes.map(function(c, i) { return Object.assign({ origIdx: i }, c); })
-        .sort(function(a, b) { return Number(b.fact || 0) - Number(a.fact || 0); });
+      var sorted = displayClientes.slice().sort(function(a, b) { return Number(b.fact || 0) - Number(a.fact || 0); });
       var totalFact = displayClientes.reduce(function(s, c) { return s + Number(c.fact || 0); }, 0);
       var clientesActivos = displayClientes.filter(function(c) { return (c.estado || "activo") === "activo"; }).length;
 
       var concData = [
-        { label: "Top 1", limit: 25, val: sorted.length > 0 ? ((Number(sorted[0].fact || 0) / (totalFact || 1)) * 100) : 0 },
-        { label: "Top 3", limit: 50, val: (sorted.slice(0, 3).reduce(function(s, c) { return s + Number(c.fact || 0); }, 0) / (totalFact || 1)) * 100 },
-        { label: "Top 5", limit: 70, val: (sorted.slice(0, 5).reduce(function(s, c) { return s + Number(c.fact || 0); }, 0) / (totalFact || 1)) * 100 },
+        { label: "Top 1", limit: 25, val: sorted.length > 0 && totalFact > 0 ? ((Number(sorted[0].fact || 0) / totalFact) * 100) : 0 },
+        { label: "Top 3", limit: 50, val: totalFact > 0 ? ((sorted.slice(0, 3).reduce(function(s, c) { return s + Number(c.fact || 0); }, 0) / totalFact) * 100) : 0 },
+        { label: "Top 5", limit: 70, val: totalFact > 0 ? ((sorted.slice(0, 5).reduce(function(s, c) { return s + Number(c.fact || 0); }, 0) / totalFact) * 100) : 0 },
       ];
 
       var periodLabel = cliVistaAnual ? "Anual " + cliAnyo : MESES_FULL[cliMes] + " " + cliAnyo;
@@ -1725,8 +2260,8 @@
       var isAnual = cliVistaAnual;
 
       return (
-        <Section title={"Cartera de Clientes — " + periodLabel} subtitle="Análisis de concentración y rentabilidad">
-          {/* Period selector */}
+        <Section title={"Cartera de Clientes — " + periodLabel} subtitle="Facturación y fechas derivadas del Libro de Movimientos. Margen y estado editables.">
+          {/* Period selector + Hoy */}
           <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginBottom: 16, padding: "12px 0", background: C.surface, borderRadius: 10, border: "1px solid " + C.border }}>
             <div style={{ display: "flex", background: C.bg, borderRadius: 6, overflow: "hidden" }}>
               {["Mensual", "Anual"].map(function(t, ti) {
@@ -1743,6 +2278,7 @@
             </div>
             <button onClick={function() { cliVistaAnual ? navCliAnyo(1) : navCliMes(1); }}
               style={{ background: "transparent", border: "none", color: C.white, cursor: "pointer", fontSize: 16, padding: "0 8px", fontFamily: font }}>▸</button>
+            <Btn variant="primary" size="xs" onClick={goCliHoy} title="Ir al mes actual" style={{ marginLeft: 10 }}>Hoy</Btn>
           </div>
 
           {/* Hero metrics */}
@@ -1779,7 +2315,7 @@
                     legend: { position: "bottom", labels: { colors: C.textSec }, fontSize: "10px" },
                     plotOptions: { pie: { donut: { size: "60%", labels: { show: true, total: { show: true, label: isAnual ? "Total anual" : "Total", color: C.textDim, fontSize: "10px", formatter: function() { return fmt(totalFact) + " €"; } }, value: { fontSize: "14px", fontFamily: mono, color: C.white, offsetY: 2 } } } } },
                   }} />
-                ) : <div style={{ padding: 40, textAlign: "center", color: C.textDim, fontSize: 12 }}>Sin datos de facturación</div>;
+                ) : <div style={{ padding: 40, textAlign: "center", color: C.textDim, fontSize: 12 }}>Sin facturación este periodo</div>;
               })()}
             </Card>
 
@@ -1787,52 +2323,61 @@
             <Card style={{ overflowX: "auto" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
                 <CardLabel>{isAnual ? "Ranking Global " + cliAnyo : "Clientes del Mes"}</CardLabel>
-                {!isAnual && <button className="crux-btn-add" onClick={addClienteMes} style={{ background: C.accentGlow, color: C.accent, border: "1px solid " + C.accentMuted, borderRadius: 6, padding: "5px 12px", fontSize: 10, fontWeight: 600, cursor: "pointer", fontFamily: font }}>+ Añadir</button>}
+                {setTab && <Btn variant="primary" size="xs" onClick={function() { setTab("movimientos"); }}>+ Movimiento</Btn>}
               </div>
-              <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}><div style={{ minWidth: 600 }}>
-              <div style={{ display: "grid", gridTemplateColumns: isAnual ? "28px 2fr 1fr 0.6fr 0.6fr 0.8fr 0.8fr" : "28px 2fr 1fr 0.6fr 0.6fr 0.8fr 0.6fr 28px", fontSize: 10, color: C.textDim, paddingBottom: 8, borderBottom: "1px solid " + C.border }}>
-                <span>#</span><span>Cliente</span><span style={{ textAlign: "right" }}>{isAnual ? "Fact. anual" : "Facturación"}</span><span style={{ textAlign: "center" }}>Margen</span><span style={{ textAlign: "center" }}>Share</span><span style={{ textAlign: "center" }}>Alta</span>{isAnual ? <span style={{ textAlign: "center" }}>Estado</span> : React.createElement(React.Fragment, null, <span style={{ textAlign: "center" }}>Últ. serv.</span>, <span></span>)}
+              <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}><div style={{ minWidth: 720 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "28px 2fr 1fr 0.7fr 0.6fr 0.9fr 0.9fr 0.9fr", fontSize: 10, color: C.textDim, paddingBottom: 8, borderBottom: "1px solid " + C.border }}>
+                <span>#</span><span>Cliente</span><span style={{ textAlign: "right" }}>{isAnual ? "Fact. anual" : "Facturación"}</span><span style={{ textAlign: "center" }}>Margen %</span><span style={{ textAlign: "center" }}>Share</span><span style={{ textAlign: "center" }}>Alta</span><span style={{ textAlign: "center" }}>Últ. serv.</span><span style={{ textAlign: "center" }}>Estado</span>
               </div>
-              {sorted.map(function(c, rank) {
-                var i = c.origIdx;
+              {sorted.length === 0 ? (
+                <div style={{ padding: "30px 0", textAlign: "center", fontSize: 12, color: C.textDim }}>Sin clientes con ingresos este periodo. Añade un movimiento con <code style={{ color: C.accent }}>cliente</code> no vacío.</div>
+              ) : sorted.map(function(c, rank) {
                 var pct = totalFact > 0 ? ((Number(c.fact) / totalFact) * 100).toFixed(0) : 0;
                 var mc = Number(c.margen) >= 50 ? C.green : Number(c.margen) >= 35 ? C.amber : C.red;
                 var ec = estadoColor(c.estado || "activo");
                 return (
-                  <div key={i} style={{ display: "grid", gridTemplateColumns: isAnual ? "28px 2fr 1fr 0.6fr 0.6fr 0.8fr 0.8fr" : "28px 2fr 1fr 0.6fr 0.6fr 0.8fr 0.6fr 28px", padding: "10px 0", borderBottom: "1px solid " + C.border, alignItems: "center" }}>
+                  <div key={c.nombre} style={{ display: "grid", gridTemplateColumns: "28px 2fr 1fr 0.7fr 0.6fr 0.9fr 0.9fr 0.9fr", padding: "10px 0", borderBottom: rank < sorted.length - 1 ? "1px solid " + C.border : "none", alignItems: "center" }}>
                     <span style={{ fontSize: 12, fontWeight: 700, color: rank < 3 ? C.accent : C.textDim }}>{rank + 1}</span>
-                    {isAnual ? (
-                      <span style={{ fontSize: 13, color: C.textSec }}>{c.nombre}</span>
-                    ) : (
-                      <EditableText value={c.nombre} onChange={function(v) { setClienteField(i, "nombre", v); }} />
-                    )}
-                    {isAnual ? (
-                      <span style={{ textAlign: "right", fontFamily: mono, fontSize: 13, color: C.white }}>{fmt(Number(c.fact))}</span>
-                    ) : (
-                      <EditableCell value={c.fact} onChange={function(v) { setClienteField(i, "fact", Number(v)); }} style={{ textAlign: "right" }} />
-                    )}
-                    {isAnual ? (
-                      <span style={{ textAlign: "center", fontFamily: mono, fontSize: 12, fontWeight: 700, color: mc }}>{c.margen}%</span>
-                    ) : (
-                      <EditableCell value={c.margen} onChange={function(v) { setClienteField(i, "margen", Number(v)); }} style={{ textAlign: "center", color: mc, fontWeight: 700 }} />
-                    )}
+                    {/* Nombre read-only (deriva del movimiento) */}
+                    <span style={{ fontSize: 13, color: C.text, fontWeight: 500 }}>{c.nombre}</span>
+                    {/* Facturación read-only (derivado) */}
+                    <span style={{ textAlign: "right", fontFamily: mono, fontSize: 13, color: C.white, fontWeight: 600 }}>{fmt(Number(c.fact))} €</span>
+                    {/* Margen editable (meta) */}
+                    <EditableCell value={c.margen} onChange={function(v) { setMeta(c.nombre, "margen", Number(v)); }} style={{ textAlign: "center", color: mc, fontWeight: 700 }} />
+                    {/* Share */}
                     <span style={{ textAlign: "center", fontSize: 11, fontFamily: mono, color: C.textDim }}>{pct}%</span>
-                    <span style={{ textAlign: "center", fontSize: 10, color: C.textDim }}>{c.fechaAlta || "—"}</span>
-                    {isAnual ? (
-                      <span style={{ textAlign: "center", fontSize: 10, fontWeight: 600, color: ec }}>{(c.estado || "activo").charAt(0).toUpperCase() + (c.estado || "activo").slice(1)}</span>
-                    ) : React.createElement(React.Fragment, null,
-                      <span style={{ textAlign: "center", fontSize: 10, color: C.textDim }}>{c.ultimoServicio || "—"}</span>,
-                      displayClientes.length > 1 ? (
-                        <button onClick={function() { removeClienteMes(i); }}
-                          style={{ background: "transparent", border: "none", color: C.textDim, cursor: "pointer", fontSize: 15, padding: 0, lineHeight: 1, borderRadius: 4, transition: "color 0.15s", fontFamily: font }}
-                          onMouseEnter={function(e) { e.target.style.color = C.red; }}
-                          onMouseLeave={function(e) { e.target.style.color = C.textDim; }}>×</button>
-                      ) : <span></span>
-                    )}
+                    {/* Fecha alta (derivada) */}
+                    <span style={{ textAlign: "center", fontSize: 10, color: C.textDim, fontFamily: mono }}>{c.fechaAlta ? fmtFechaES(c.fechaAlta) : "—"}</span>
+                    {/* Último servicio (derivado) */}
+                    <span style={{ textAlign: "center", fontSize: 10, color: C.textDim, fontFamily: mono }}>{c.ultimoServicio ? fmtFechaES(c.ultimoServicio) : "—"}</span>
+                    {/* Estado editable (meta) */}
+                    <SelectField
+                      value={c.estado || "activo"}
+                      onChange={function(v) { setMeta(c.nombre, "estado", v); }}
+                      size="xs"
+                      ariaLabel="Estado del cliente"
+                      options={[{ value: "activo", label: "Activo" }, { value: "inactivo", label: "Inactivo" }, { value: "riesgo", label: "Riesgo" }]}
+                      style={{
+                        backgroundColor: "transparent",
+                        borderColor: "transparent",
+                        color: ec,
+                        fontWeight: 700,
+                        fontSize: 10,
+                        textTransform: "uppercase",
+                        letterSpacing: 0.3,
+                        backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'><path d='M1 1L5 5L9 1' stroke='" + encodeURIComponent(ec) + "' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>\")",
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "right 6px center",
+                        backgroundSize: "10px 6px",
+                      }}
+                    />
                   </div>
                 );
               })}
               </div></div>
+              <div style={{ paddingTop: 10, marginTop: 4, fontSize: 9, color: C.textDim, fontStyle: "italic" }}>
+                Cliente, facturación y fechas son <b>derivados</b> del Libro de Movimientos. Añade o edita movimientos con <code>cliente</code> para que aparezcan aquí. Margen % y estado se editan manualmente.
+              </div>
             </Card>
           </div>
         </Section>
@@ -1854,7 +2399,7 @@
                 <CardLabel>Servicios</CardLabel>
                 <span style={{ fontSize: 12, fontFamily: mono, fontWeight: 700, color: C.white }}>{fmt(totalIng)} € total</span>
               </div>
-              <button className="crux-btn-add" onClick={function() { setServicios(function(p) { return p.concat([{ nombre: "Nuevo servicio", ingresos: 0, margen: 0, ltv_cac: 0 }]); }); }} style={{ background: C.accentGlow, color: C.accent, border: "1px solid " + C.accentMuted, borderRadius: 6, padding: "6px 14px", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: font }}>+ Añadir</button>
+              <Btn variant="primary" size="sm" onClick={function() { setServicios(function(p) { return p.concat([{ nombre: "Nuevo servicio", ingresos: 0, margen: 0, ltv_cac: 0 }]); }); }}>+ Añadir</Btn>
             </div>
             <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}><div style={{ minWidth: 700 }}>
             <div style={{ display: "grid", gridTemplateColumns: "28px 2fr 1.2fr 0.6fr 0.8fr 0.8fr 0.8fr 28px", fontSize: 10, color: C.textDim, paddingBottom: 8, borderBottom: "1px solid " + C.border }}>
@@ -1965,7 +2510,7 @@
       });
 
       return (
-        <Section title="Simulador de Escenarios" subtitle="Proyección a 12 meses basada en P&L actual y tasas de crecimiento">
+        <Section title="Simulador de Escenarios" subtitle={"Proyección a 12 meses desde baseline recurrente (promedio 3m): " + fmt(Math.round(pyl.ingresos)) + " € ingresos · " + fmt(Math.round(pyl.costesDirectos)) + " € costes dir. · " + fmt(Math.round(pyl.opex)) + " € OPEX"}>
           {/* Parámetros */}
           <div className="crux-grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 16 }}>
             {escenarios.map(function(esc, ei) {
@@ -2017,7 +2562,7 @@
                 yaxis: { labels: { style: { colors: C.textDim, fontSize: "11px" }, formatter: function(v) { return fmt(Math.round(v)); } } },
                 legend: { position: "top", horizontalAlign: "right", labels: { colors: C.textSec }, fontSize: "11px", markers: { radius: 2 } },
                 grid: { borderColor: C.border, strokeDashArray: 3 },
-                annotations: { yaxis: [{ y: pyl.ingresos, borderColor: C.textDim, strokeDashArray: 4, label: { text: "Actual: " + fmt(pyl.ingresos), style: { color: C.textDim, fontSize: "9px", background: C.surface } } }] },
+                annotations: { yaxis: [{ y: pyl.ingresos, borderColor: C.textDim, strokeDashArray: 4, label: { text: "Baseline 3m: " + fmt(Math.round(pyl.ingresos)), style: { color: C.textDim, fontSize: "9px", background: C.surface } } }] },
               }} />
             </Card>
             <Card>
@@ -2287,14 +2832,16 @@
 
     /* ═══════════ PRINT VIEWS ═══════════ */
 
-    function PrintViewKPI({ selAnyo, selMes, pylMensual, selClientes, selAging, selCaja, servicios, estrategico, burnRate, netBurn, selIng, selCos, selOpex, pyl }) {
+    function PrintViewKPI({ selAnyo, selMes, pylMensual, selClientes, selAging, selCaja, servicios, estrategico, burnRate, netBurn, selIng, selCos, selOpex, pyl, ingresosRecurrentes }) {
       var MF = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
       var allMeses = pylMensual.datos[selAnyo] || EMPTY_YEAR();
       var dNeto = selIng - selCos - selOpex;
       var dBurn = selCos + selOpex;
       var curMB = selIng > 0 ? Number(((selIng - selCos) / selIng * 100).toFixed(1)) : 0;
       var agingTotal = selAging.reduce(function(s, a) { return s + Number(a.importe || 0); }, 0);
-      var dDSO = selIng > 0 ? Math.round((agingTotal / selIng) * 30) : 0;
+      /* DSO con fallback a ingresosRecurrentes si el mes está vacío */
+      var ingresosMensualesDSO = selIng > 0 ? selIng : Number(ingresosRecurrentes || 0);
+      var dDSO = ingresosMensualesDSO > 0 ? Math.round((agingTotal / ingresosMensualesDSO) * 30) : 0;
       var totalFact = selClientes.reduce(function(s, c) { return s + Number(c.fact || 0); }, 0);
       var sortedCli = selClientes.slice().sort(function(a, b) { return Number(b.fact || 0) - Number(a.fact || 0); });
       var top3Conc = totalFact > 0 ? Number(((sortedCli.slice(0, 3).reduce(function(s, c) { return s + Number(c.fact || 0); }, 0) / totalFact) * 100).toFixed(0)) : 0;
@@ -2533,9 +3080,11 @@
     }
 
     /* ── PrintViewCostes ── */
-    function PrintViewCostes({ pyl, pylMensual, selAnyo, selIng, selCos, selOpex }) {
-      var cdItems = (pyl.costesDesglose||[]).filter(function(c){return Number(c.importe||0)>0;});
-      var oxItems = (pyl.opexDesglose||[]).filter(function(c){return Number(c.importe||0)>0;});
+    function PrintViewCostes({ pyl, pylMensual, selAnyo, selMes, selIng, selCos, selOpex }) {
+      /* Desgloses derivados del Libro de Movimientos (coherentes con la vista interactiva) */
+      var printKey = selAnyo + "-" + selMes;
+      var cdItems = ((pylMensual.costesDirPorMes && pylMensual.costesDirPorMes[printKey]) || []).filter(function(c){return Number(c.importe||0)>0;});
+      var oxItems = ((pylMensual.opexPorMes && pylMensual.opexPorMes[printKey]) || []).filter(function(c){return Number(c.importe||0)>0;});
       var cdT = cdItems.reduce(function(s,c){return s+Number(c.importe||0);},0);
       var oxT = oxItems.reduce(function(s,c){return s+Number(c.importe||0);},0);
       var totalG = cdT+oxT;
@@ -2791,11 +3340,54 @@
       const [clientes, setClientes] = useState(defaultClientes);
       const [servicios, setServicios] = useState(defaultServicios);
       const [escenarios, setEscenarios] = useState(defaultEscenarios);
-      const [pylMensual, setPylMensual] = useState(defaultPylMensual);
+      const [pylMensualRaw, setPylMensualRaw] = useState(defaultPylMensual);
+      const [movimientos, setMovimientos] = useState(defaultMovimientos);
       const [estrategico, setEstrategico] = useState(defaultEstrategico);
       const [checklist, setChecklist] = useState(defaultChecklist);
       const [printTabId, setPrintTabId] = useState(null);
       const printRef = useRef(null);
+
+      /* ── pylMensual derivado: datos[year] y desgloses por categoría salen de `movimientos`.
+         Se preserva anyo y prevYear del state raw (únicos campos manuales restantes). */
+      const pylMensual = React.useMemo(function() {
+        var datos = {};
+        var years = new Set();
+        movimientos.forEach(function(m) { var p = parseFechaISO(m.fecha); if (p) years.add(p.year); });
+        years.add(new Date().getFullYear());
+        years.add(pylMensualRaw.anyo || new Date().getFullYear());
+        years.forEach(function(y) { datos[y] = derivarDatosAnyo(movimientos, y); });
+
+        var opexPorMes = {};
+        var costesDirPorMes = {};
+        years.forEach(function(y) {
+          for (var mn = 0; mn < 12; mn++) {
+            var key = y + "-" + mn;
+            var cd = derivarDesgloseCategoria(movimientos, y, mn, "coste_dir");
+            var ox = derivarDesgloseCategoria(movimientos, y, mn, "opex");
+            if (cd.length) costesDirPorMes[key] = cd;
+            if (ox.length) opexPorMes[key] = ox;
+          }
+        });
+
+        return Object.assign({}, pylMensualRaw, {
+          datos: datos,
+          opexPorMes: opexPorMes,
+          costesDirPorMes: costesDirPorMes,
+        });
+      }, [movimientos, pylMensualRaw]);
+
+      /* Setter compat: solo escribe en pylMensualRaw los campos manuales (anyo, prevYear).
+         Los campos derivados (datos, opexPorMes, costesDirPorMes) se ignoran silenciosamente. */
+      const setPylMensual = useCallback(function(updater) {
+        setPylMensualRaw(function(prev) {
+          var next = typeof updater === "function" ? updater(prev) : updater;
+          if (!next) return prev;
+          var DERIVED = ["datos", "opexPorMes", "costesDirPorMes"];
+          var clean = {};
+          Object.keys(next).forEach(function(k) { if (DERIVED.indexOf(k) === -1) clean[k] = next[k]; });
+          return Object.assign({}, prev, clean);
+        });
+      }, []);
 
       /* ── Backend sync state (Vercel KV) ── */
       const [syncStatus, setSyncStatus] = useState("idle"); // idle|loading|saving|saved|error|offline
@@ -2808,9 +3400,10 @@
         return {
           pyl: pyl, aging: aging, cash: cash, forecast: forecast,
           clientes: clientes, servicios: servicios, escenarios: escenarios,
-          pylMensual: pylMensual, estrategico: estrategico, checklist: checklist
+          pylMensual: pylMensualRaw, movimientos: movimientos,
+          estrategico: estrategico, checklist: checklist
         };
-      }, [pyl, aging, cash, forecast, clientes, servicios, escenarios, pylMensual, estrategico, checklist]);
+      }, [pyl, aging, cash, forecast, clientes, servicios, escenarios, pylMensualRaw, movimientos, estrategico, checklist]);
 
       // Apply a snapshot into state
       const applySnapshot = useCallback(function(snap) {
@@ -2822,7 +3415,8 @@
         if (snap.clientes) setClientes(snap.clientes);
         if (snap.servicios) setServicios(snap.servicios);
         if (snap.escenarios) setEscenarios(snap.escenarios);
-        if (snap.pylMensual) setPylMensual(snap.pylMensual);
+        if (snap.pylMensual) setPylMensualRaw(snap.pylMensual);
+        if (Array.isArray(snap.movimientos)) setMovimientos(snap.movimientos);
         if (snap.estrategico) setEstrategico(snap.estrategico);
         if (snap.checklist) setChecklist(snap.checklist);
       }, []);
@@ -2895,14 +3489,11 @@
         if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
         saveTimerRef.current = setTimeout(function() { saveToBackend(); }, 1500);
         return function() { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
-      }, [pyl, aging, cash, forecast, clientes, servicios, escenarios, pylMensual, estrategico, checklist, hydrated]);
+      }, [pyl, aging, cash, forecast, clientes, servicios, escenarios, pylMensualRaw, movimientos, estrategico, checklist, hydrated]);
 
-      /* ── Global month/year selector ── */
-      const [selAnyo, setSelAnyo] = useState(pylMensual.anyo);
-      const [selMes, setSelMes] = useState(function() {
-        var d = pylMensual.datos[pylMensual.anyo] || EMPTY_YEAR();
-        var last = 0; d.forEach(function(m, i) { if (Number(m.ingresos || 0) > 0) last = i; }); return last;
-      });
+      /* ── Global month/year selector — arranca en HOY (calendar sync) ── */
+      const [selAnyo, setSelAnyo] = useState(function() { return new Date().getFullYear(); });
+      const [selMes, setSelMes] = useState(function() { return new Date().getMonth(); });
       var selKey = selAnyo + "-" + selMes;
       var navMesGlobal = function(dir) {
         var nm = selMes + dir;
@@ -2910,6 +3501,14 @@
         else if (nm > 11) { setSelAnyo(selAnyo + 1); setSelMes(0); }
         else { setSelMes(nm); }
       };
+      var goHoy = function() {
+        var d = new Date();
+        setSelAnyo(d.getFullYear());
+        setSelMes(d.getMonth());
+      };
+      /* Flags "hoy" para pintar highlight en tablas anuales */
+      var hoyAnyo = new Date().getFullYear();
+      var hoyMes = new Date().getMonth();
 
       const updateArr = useCallback(function(setter) {
         return function(index, field, value) {
@@ -2976,16 +3575,58 @@
       var selIng = Number(selPylMes.ingresos || 0);
       var selCos = Number(selPylMes.costes || 0);
       var selOpex = Number(selPylMes.opex || 0);
-      var selClientes = pylMensual.clientesPorMes && pylMensual.clientesPorMes[selKey] ? pylMensual.clientesPorMes[selKey] : clientes;
-      var selAging = pylMensual.agingPorMes && pylMensual.agingPorMes[selKey] ? pylMensual.agingPorMes[selKey] : aging;
-      var selCaja = pylMensual.cajaPorMes && pylMensual.cajaPorMes[selKey] != null ? pylMensual.cajaPorMes[selKey] : cash.caja;
-      var selForecast = pylMensual.forecastPorAnyo && pylMensual.forecastPorAnyo[selAnyo] ? pylMensual.forecastPorAnyo[selAnyo] : forecast;
+      /* Clientes derivados de movimientos (fact/fechas) + metadata manual (margen/estado) */
+      var selClientes = React.useMemo(function() {
+        return clientesDelPeriodo(movimientos, clientes, selAnyo, selMes).sort(function(a, b) { return b.fact - a.fact; });
+      }, [movimientos, clientes, selAnyo, selMes]);
+      /* aging, caja y forecast son snapshots únicos (no per-mes/year) — TabCash ya lee directo */
+      var selAging = aging;
+      var selCaja = cash.caja;
 
       /* ── Auto-computed values (from selected month) ── */
       var burnRate = selCos + selOpex;
       var netBurn = Math.max(0, burnRate - selIng);
       var agingTotal = selAging.reduce(function(s, a) { return s + Number(a.importe || 0); }, 0);
       var computedDSO = selIng > 0 ? Math.round((agingTotal / selIng) * 30) : 0;
+
+      /* ── Baseline recurrente: promedio por tipo de los últimos 3 meses con actividad.
+         Fuente de verdad para proyecciones (Escenarios), runway (Cash Flow) y fallbacks (DSO). */
+      var baselineRec = React.useMemo(function() {
+        var series = { ingresos: [], costes: [], opex: [] };
+        for (var i = 0; i < 12 && series.ingresos.length < 3; i++) {
+          var d = new Date(hoyAnyo, hoyMes - i, 1);
+          var t = totalesPeriodo(movimientos, d.getFullYear(), d.getMonth());
+          if (t.ingresos > 0 || t.costes > 0 || t.opex > 0) {
+            series.ingresos.push(t.ingresos);
+            series.costes.push(t.costes);
+            series.opex.push(t.opex);
+          }
+        }
+        var avg = function(arr) { return arr.length > 0 ? arr.reduce(function(s, v) { return s + v; }, 0) / arr.length : 0; };
+        return { ingresos: avg(series.ingresos), costesDirectos: avg(series.costes), opex: avg(series.opex), mesesUsados: series.ingresos.length };
+      }, [movimientos, hoyAnyo, hoyMes]);
+
+      var ingresosRecurrentes = baselineRec.ingresos;
+      var costesRecurrentes = baselineRec.costesDirectos + baselineRec.opex;
+      var netoRecurrente = ingresosRecurrentes - costesRecurrentes;
+      var runwayMeses = costesRecurrentes > 0 ? cash.caja / costesRecurrentes : null;
+
+      /* pylBaseline: para Escenarios y cualquier proyección.
+         Sobrescribe ingresos/costesDirectos/opex con el promedio recurrente (estable vs mes-vacío). */
+      var pylBaseline = React.useMemo(function() {
+        return Object.assign({}, pyl, {
+          ingresos: baselineRec.ingresos,
+          costesDirectos: baselineRec.costesDirectos,
+          opex: baselineRec.opex,
+        });
+      }, [pyl, baselineRec]);
+
+      /* ── pyl derivado: mantiene presupuesto y desgloses editables del usuario,
+         pero sobrescribe ingresos/costesDirectos/opex con los totales del mes seleccionado
+         (derivados de movimientos). Así Escenarios, Estratégico, PrintViews usan siempre datos coherentes. */
+      const pylDerived = React.useMemo(function() {
+        return Object.assign({}, pyl, { ingresos: selIng, costesDirectos: selCos, opex: selOpex });
+      }, [pyl, selIng, selCos, selOpex]);
 
       return (
         <div style={{ background: C.bg, minHeight: "100vh", fontFamily: font, color: C.text }}>
@@ -3001,17 +3642,17 @@
                   <span style={{ fontWeight: 600 }}>
                     {syncStatus === "loading" ? "Cargando…" : syncStatus === "saving" ? "Guardando…" : syncStatus === "error" ? "Error de sincronización" : syncStatus === "offline" ? "Modo local" : syncStatus === "saved" ? ("Guardado" + (lastSync ? " · " + lastSync.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "")) : "En espera"}
                   </span>
-                  <button onClick={loadFromBackend} title="Recargar desde servidor" style={{ background: "transparent", border: "1px solid " + C.border, color: C.textDim, padding: "2px 8px", borderRadius: 4, fontSize: 10, cursor: "pointer", fontFamily: font }}>↻</button>
+                  <Btn variant="ghost" size="xs" onClick={loadFromBackend} title="Recargar desde servidor" style={{ padding: "3px 10px", textTransform: "none" }}>↻</Btn>
                 </div>
                 <div style={{ display: "flex", gap: 6 }}>
-                  <button className="crux-btn-add" onClick={function() { exportCurrentTab(); }} style={{ background: C.accentGlow, color: C.accent, border: "1px solid " + C.accentMuted, borderRadius: 6, padding: "5px 12px", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: font, display: "flex", alignItems: "center", gap: 4 }}>
+                  <Btn variant="primary" size="sm" onClick={function() { exportCurrentTab(); }} title="Exportar la pestaña actual a PDF">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     PDF tab
-                  </button>
-                  <button className="crux-btn-add" onClick={function() { exportFullPage(); }} style={{ background: C.accentGlow, color: C.accent, border: "1px solid " + C.accentMuted, borderRadius: 6, padding: "5px 12px", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: font, display: "flex", alignItems: "center", gap: 4 }}>
+                  </Btn>
+                  <Btn variant="primary" size="sm" onClick={function() { exportFullPage(); }} title="Exportar dashboard completo a PDF">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     PDF completo
-                  </button>
+                  </Btn>
                 </div>
               </div>
             </div>
@@ -3033,27 +3674,28 @@
             {printTabId ? (
               React.createElement(React.Fragment, null,
                 <PrintViewHeader tabName={TAB_NAMES[printTabId] || "Dashboard"} />,
-                printTabId === "kpi" ? <PrintViewKPI selAnyo={selAnyo} selMes={selMes} pylMensual={pylMensual} selClientes={selClientes} selAging={selAging} selCaja={selCaja} servicios={servicios} estrategico={estrategico} burnRate={burnRate} netBurn={netBurn} selIng={selIng} selCos={selCos} selOpex={selOpex} pyl={pyl} /> : null,
-                printTabId === "pyl" ? <PrintViewPYL pyl={pyl} pylMensual={pylMensual} selAnyo={selAnyo} /> : null,
-                printTabId === "costes" ? <PrintViewCostes pyl={pyl} pylMensual={pylMensual} selAnyo={selAnyo} selIng={selIng} selCos={selCos} selOpex={selOpex} /> : null,
+                printTabId === "kpi" ? <PrintViewKPI selAnyo={selAnyo} selMes={selMes} pylMensual={pylMensual} selClientes={selClientes} selAging={selAging} selCaja={selCaja} servicios={servicios} estrategico={estrategico} burnRate={burnRate} netBurn={netBurn} selIng={selIng} selCos={selCos} selOpex={selOpex} pyl={pylDerived} ingresosRecurrentes={ingresosRecurrentes} /> : null,
+                printTabId === "pyl" ? <PrintViewPYL pyl={pylDerived} pylMensual={pylMensual} selAnyo={selAnyo} /> : null,
+                printTabId === "costes" ? <PrintViewCostes pyl={pylDerived} pylMensual={pylMensual} selAnyo={selAnyo} selMes={selMes} selIng={selIng} selCos={selCos} selOpex={selOpex} /> : null,
                 printTabId === "cash" ? <PrintViewCash selAging={selAging} selCaja={selCaja} forecast={forecast} burnRate={burnRate} netBurn={netBurn} /> : null,
                 printTabId === "clientes" ? <PrintViewClientes selClientes={selClientes} /> : null,
                 printTabId === "unit" ? <PrintViewUnit servicios={servicios} /> : null,
-                printTabId === "escenarios" ? <PrintViewEscenarios escenarios={escenarios} pyl={pyl} cash={cash} burnRate={burnRate} /> : null,
-                printTabId === "estrategico" ? <PrintViewEstrategico data={estrategico} pyl={pyl} clientes={selClientes} pylMensual={pylMensual} servicios={servicios} /> : null,
+                printTabId === "escenarios" ? <PrintViewEscenarios escenarios={escenarios} pyl={pylBaseline} cash={cash} burnRate={burnRate} /> : null,
+                printTabId === "estrategico" ? <PrintViewEstrategico data={estrategico} pyl={pylDerived} clientes={selClientes} pylMensual={pylMensual} servicios={servicios} /> : null,
                 printTabId === "checklist" ? <PrintViewChecklist items={checklist} /> : null,
                 <PrintViewFooter />
               )
             ) : (
               React.createElement(React.Fragment, null,
-                tab === "kpi" ? <TabKPI selAnyo={selAnyo} setSelAnyo={setSelAnyo} selMes={selMes} navMes={navMesGlobal} selKey={selKey} pylMensual={pylMensual} selClientes={selClientes} selAging={selAging} selCaja={selCaja} servicios={servicios} estrategico={estrategico} burnRate={burnRate} netBurn={netBurn} computedDSO={computedDSO} selIng={selIng} selCos={selCos} selOpex={selOpex} /> : null,
-                tab === "pyl" ? <TabPYL pyl={pyl} setPyl={setPyl} pylMensual={pylMensual} setPylMensual={setPylMensual} selAnyo={selAnyo} /> : null,
-                tab === "costes" ? <TabCostes pyl={pyl} setPyl={setPyl} pylMensual={pylMensual} setPylMensual={setPylMensual} selAnyo={selAnyo} selIng={selIng} selCos={selCos} selOpex={selOpex} /> : null,
-                tab === "cash" ? <TabCash selAnyo={selAnyo} selMes={selMes} selKey={selKey} navMes={navMesGlobal} selAging={selAging} selCaja={selCaja} selForecast={selForecast} pylMensual={pylMensual} setPylMensual={setPylMensual} aging={aging} cash={cash} forecast={forecast} burnRate={burnRate} netBurn={netBurn} /> : null,
-                tab === "clientes" ? <TabClientes selAnyo={selAnyo} selMes={selMes} selKey={selKey} navMes={navMesGlobal} selClientes={selClientes} pylMensual={pylMensual} setPylMensual={setPylMensual} clientes={clientes} /> : null,
+                tab === "kpi" ? <TabKPI selAnyo={selAnyo} setSelAnyo={setSelAnyo} selMes={selMes} setSelMes={setSelMes} navMes={navMesGlobal} goHoy={goHoy} selKey={selKey} pylMensual={pylMensual} selClientes={selClientes} selAging={selAging} selCaja={selCaja} servicios={servicios} estrategico={estrategico} burnRate={burnRate} netBurn={netBurn} computedDSO={computedDSO} selIng={selIng} selCos={selCos} selOpex={selOpex} setTab={setTab} runwayMeses={runwayMeses} costesRecurrentes={costesRecurrentes} ingresosRecurrentes={ingresosRecurrentes} /> : null,
+                tab === "movimientos" ? <TabMovimientos movimientos={movimientos} setMovimientos={setMovimientos} selAnyo={selAnyo} setSelAnyo={setSelAnyo} selMes={selMes} setSelMes={setSelMes} navMes={navMesGlobal} goHoy={goHoy} /> : null,
+                tab === "pyl" ? <TabPYL pyl={pylDerived} setPyl={setPyl} pylMensual={pylMensual} setPylMensual={setPylMensual} selAnyo={selAnyo} setSelAnyo={setSelAnyo} selMes={selMes} setSelMes={setSelMes} navMes={navMesGlobal} goHoy={goHoy} setTab={setTab} /> : null,
+                tab === "costes" ? <TabCostes pyl={pylDerived} setPyl={setPyl} pylMensual={pylMensual} setPylMensual={setPylMensual} selAnyo={selAnyo} setSelAnyo={setSelAnyo} selMes={selMes} setSelMes={setSelMes} navMes={navMesGlobal} goHoy={goHoy} selIng={selIng} selCos={selCos} selOpex={selOpex} movimientos={movimientos} setTab={setTab} /> : null,
+                tab === "cash" ? <TabCash aging={aging} setAging={setAging} cash={cash} setCash={setCash} forecast={forecast} setForecast={setForecast} movimientos={movimientos} runwayMeses={runwayMeses} costesRecurrentes={costesRecurrentes} ingresosRecurrentes={ingresosRecurrentes} netoRecurrente={netoRecurrente} /> : null,
+                tab === "clientes" ? <TabClientes movimientos={movimientos} clientes={clientes} setClientes={setClientes} selAnyo={selAnyo} setSelAnyo={setSelAnyo} selMes={selMes} setSelMes={setSelMes} navMes={navMesGlobal} goHoy={goHoy} setTab={setTab} /> : null,
                 tab === "unit" ? <TabUnit servicios={servicios} updateServicios={updateArr(setServicios)} setServicios={setServicios} /> : null,
-                tab === "escenarios" ? <TabEscenarios escenarios={escenarios} updateEscenarios={updateArr(setEscenarios)} pyl={pyl} cash={cash} burnRate={burnRate} /> : null,
-                tab === "estrategico" ? <TabEstrategico data={estrategico} setData={setEstrategico} pyl={pyl} clientes={selClientes} pylMensual={pylMensual} servicios={servicios} /> : null,
+                tab === "escenarios" ? <TabEscenarios escenarios={escenarios} updateEscenarios={updateArr(setEscenarios)} pyl={pylBaseline} cash={cash} burnRate={burnRate} /> : null,
+                tab === "estrategico" ? <TabEstrategico data={estrategico} setData={setEstrategico} pyl={pylDerived} clientes={selClientes} pylMensual={pylMensual} servicios={servicios} /> : null,
                 tab === "checklist" ? <TabChecklist items={checklist} setItems={setChecklist} /> : null
               )
             )}
