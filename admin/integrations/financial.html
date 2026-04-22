@@ -740,7 +740,10 @@
       { tramo: ">90 días", importe: 3700, accion: "Escalada a dirección" },
     ];
 
-    const defaultCash = { caja: 155000 };
+    /* cash.caja = "ajuste pre-movimientos" o aportación inicial de capital.
+       Caja hoy (lo que muestra el dashboard) = cash.caja + sum(netos de TODOS los movimientos).
+       Default 0 para que sin movimientos la caja sea 0 (coherencia con el libro). */
+    const defaultCash = { caja: 0 };
 
     const defaultForecast = [
       { escenario: "Conservador", q1: 135, q2: 140, q3: 138, q4: 145 },
@@ -1154,8 +1157,8 @@
                   style={{ background: active ? C.accent : "transparent", color: active ? C.white : C.textDim, border: "none", padding: "7px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: font, transition: "all 0.15s" }}>{t}</button>;
               })}
             </div>
-            <button onClick={function() { vistaAnual ? setSelAnyo(selAnyo - 1) : navMes(-1); }} disabled={selAnyo <= 2026 && (vistaAnual || selMes <= 0)}
-              style={{ background: "transparent", border: "none", color: (selAnyo <= 2026 && (vistaAnual || selMes <= 0)) ? C.border : C.white, cursor: (selAnyo <= 2026 && (vistaAnual || selMes <= 0)) ? "default" : "pointer", fontSize: 16, padding: "0 8px", fontFamily: font, opacity: (selAnyo <= 2026 && (vistaAnual || selMes <= 0)) ? 0.3 : 1 }}>◂</button>
+            <button onClick={function() { vistaAnual ? setSelAnyo(selAnyo - 1) : navMes(-1); }}
+              style={{ background: "transparent", border: "none", color: C.white, cursor: "pointer", fontSize: 16, padding: "0 8px", fontFamily: font }}>◂</button>
             <div style={{ textAlign: "center", minWidth: vistaAnual ? 60 : 160 }}>
               {!vistaAnual && <div style={{ fontSize: 16, fontWeight: 700, color: C.white }}>{MESES_NOMBRE[selMes]}</div>}
               <div style={{ fontSize: vistaAnual ? 18 : 12, fontWeight: 700, color: C.white, fontFamily: mono }}>{selAnyo}</div>
@@ -1359,8 +1362,8 @@
                 </div>
                 {/* Period selector */}
                 <div style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(0,0,0,0.5)", borderRadius: 10, padding: "10px 16px", backdropFilter: "blur(8px)" }}>
-                  <button onClick={function() { vistaAnual ? navAnyo(-1) : navMes(-1); }} disabled={selAnyo <= 2026 && (vistaAnual || selMes <= 0)}
-                    style={{ background: "transparent", border: "none", color: selAnyo <= 2026 && (vistaAnual || selMes <= 0) ? C.border : C.white, cursor: selAnyo <= 2026 && (vistaAnual || selMes <= 0) ? "default" : "pointer", fontSize: 16, padding: "0 4px", fontFamily: font, opacity: selAnyo <= 2026 && (vistaAnual || selMes <= 0) ? 0.3 : 1 }}>◂</button>
+                  <button onClick={function() { vistaAnual ? navAnyo(-1) : navMes(-1); }}
+                    style={{ background: "transparent", border: "none", color: C.white, cursor: "pointer", fontSize: 16, padding: "0 4px", fontFamily: font }}>◂</button>
                   <div style={{ textAlign: "center", minWidth: vistaAnual ? 60 : 140 }}>
                     {!vistaAnual && <div style={{ fontSize: 16, fontWeight: 700, color: C.white }}>{MESES_FULL[selMes]}</div>}
                     <div style={{ fontSize: vistaAnual ? 18 : 12, fontWeight: 700, color: C.white, fontFamily: mono }}>{selAnyo}</div>
@@ -1379,8 +1382,8 @@
               { label: "Ingresos", val: dIng, fmt: true, prev: vistaAnual ? (prevYearData ? prevYearData.ingresos : null) : (prevMes ? prevMes.ingresos : null), color: C.white },
               { label: "Total costes", val: dBurn, fmt: true, prev: vistaAnual ? (prevYearData ? Number(prevYearData.costes || 0) + Number(prevYearData.opex || 0) : null) : (prevMes ? Number(prevMes.costes || 0) + Number(prevMes.opex || 0) : null), color: C.white },
               { label: "Resultado neto", val: dNeto, fmt: true, prev: vistaAnual ? (prevYearData ? Number(prevYearData.ingresos || 0) - Number(prevYearData.costes || 0) - Number(prevYearData.opex || 0) : null) : (prevMes ? Number(prevMes.ingresos || 0) - Number(prevMes.costes || 0) - Number(prevMes.opex || 0) : null), color: dNeto >= 0 ? C.green : C.red },
-              { label: "Caja", val: selCaja, fmt: true, color: C.white },
-              /* Runway: caja / gastos recurrentes (avg últimos 3 meses), siempre finito salvo sin datos */
+              { label: "Caja hoy", val: selCaja, fmt: true, color: C.white },
+              /* Runway siempre desde HOY: caja / gastos recurrentes (avg últimos 3 meses), dinámico. */
               { label: "Runway", val: runwayMeses === null ? "—" : runwayMeses >= 36 ? ">36 m" : runwayMeses.toFixed(1) + " m", raw: true, color: runwayMeses === null ? C.textDim : runwayMeses >= 6 ? C.green : runwayMeses >= 3 ? C.amber : C.red, sub: costesRecurrentes > 0 ? "Gastos rec.: " + fmt(Math.round(costesRecurrentes)) + "€/m" : "Sin datos" },
             ].map(function(m, i) {
               var varPct = m.prev != null ? pctVar(m.val, m.prev) : null;
@@ -1511,7 +1514,7 @@
       var pylAnyo = selAnyo;
       var goPylHoy = function() { setPylVistaAnual(false); goHoy && goHoy(); };
       var navPylMes = navMes;
-      var navPylAnyo = function(dir) { var n = selAnyo + dir; if (n >= 2026) setSelAnyo(n); };
+      var navPylAnyo = function(dir) { setSelAnyo(selAnyo + dir); };
 
       /* Resolve P&L data for selected period */
       var allMeses = pylMensual.datos[pylAnyo] || EMPTY_YEAR();
@@ -1558,8 +1561,8 @@
                   style={{ background: active ? C.accent : "transparent", color: active ? C.white : C.textDim, border: "none", padding: "7px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: font, transition: "all 0.15s" }}>{t}</button>;
               })}
             </div>
-            <button onClick={function() { pylVistaAnual ? navPylAnyo(-1) : navPylMes(-1); }} disabled={pylAnyo <= 2026 && (pylVistaAnual || pylMes <= 0)}
-              style={{ background: "transparent", border: "none", color: pylAnyo <= 2026 && (pylVistaAnual || pylMes <= 0) ? C.border : C.white, cursor: pylAnyo <= 2026 && (pylVistaAnual || pylMes <= 0) ? "default" : "pointer", fontSize: 16, padding: "0 8px", fontFamily: font, opacity: pylAnyo <= 2026 && (pylVistaAnual || pylMes <= 0) ? 0.3 : 1 }}>◂</button>
+            <button onClick={function() { pylVistaAnual ? navPylAnyo(-1) : navPylMes(-1); }}
+              style={{ background: "transparent", border: "none", color: C.white, cursor: "pointer", fontSize: 16, padding: "0 8px", fontFamily: font }}>◂</button>
             <div style={{ textAlign: "center", minWidth: pylVistaAnual ? 60 : 160 }}>
               {!pylVistaAnual && <div style={{ fontSize: 16, fontWeight: 700, color: C.white }}>{MESES_NOMBRE[pylMes]}</div>}
               <div style={{ fontSize: pylVistaAnual ? 18 : 12, fontWeight: 700, color: C.white, fontFamily: mono }}>{pylAnyo}</div>
@@ -1627,7 +1630,7 @@
             var anyo = selAnyo;
             var meses = pylMensual.datos[anyo] || EMPTY_YEAR();
             /* setAnyo de la tabla = navegar el año global */
-            var setAnyo = function(dir) { var next = selAnyo + dir; if (next >= 2026) setSelAnyo(next); };
+            var setAnyo = function(dir) { setSelAnyo(selAnyo + dir); };
             var setPrev = function(field, val) {
               setPylMensual(function(p) { return Object.assign({}, p, { prevYear: Object.assign({}, p.prevYear, (function() { var o = {}; o[field] = Number(val); return o; })()) }); });
             };
@@ -1659,7 +1662,7 @@
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <CardLabel>{"P&L Mensual — " + anyo}</CardLabel>
                   <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                    <button onClick={function() { setAnyo(-1); }} disabled={anyo <= 2026} style={{ background: "transparent", border: "1px solid " + (anyo <= 2026 ? C.border : C.textDim), borderRadius: 4, color: anyo <= 2026 ? C.border : C.textDim, cursor: anyo <= 2026 ? "default" : "pointer", padding: "2px 8px", fontSize: 11, fontFamily: font, opacity: anyo <= 2026 ? 0.4 : 1 }}>◂</button>
+                    <button onClick={function() { setAnyo(-1); }} style={{ background: "transparent", border: "1px solid " + C.textDim, borderRadius: 4, color: C.textDim, cursor: "pointer", padding: "2px 8px", fontSize: 11, fontFamily: font }}>◂</button>
                     <span style={{ fontSize: 13, fontWeight: 700, color: C.white, fontFamily: mono, minWidth: 40, textAlign: "center" }}>{anyo}</span>
                     <button onClick={function() { setAnyo(1); }} style={{ background: "transparent", border: "1px solid " + C.textDim, borderRadius: 4, color: C.textDim, cursor: "pointer", padding: "2px 8px", fontSize: 11, fontFamily: font }}>▸</button>
                   </div>
@@ -1771,7 +1774,7 @@
       var costesAnyo = selAnyo;
       var costesKey = costesAnyo + "-" + costesMes;
       var navCostesMes = navMes;
-      var navCostesAnyo = function(dir) { var n = selAnyo + dir; if (n >= 2026) setSelAnyo(n); };
+      var navCostesAnyo = function(dir) { setSelAnyo(selAnyo + dir); };
       var goCostesHoy = function() { setCostesVistaAnual(false); goHoy && goHoy(); };
 
       /* Resolve items derivados desde pylMensual (que a su vez se deriva de movimientos) */
@@ -1870,8 +1873,8 @@
               })}
             </div>
             {/* Period nav */}
-            <button onClick={function() { costesVistaAnual ? navCostesAnyo(-1) : navCostesMes(-1); }} disabled={costesAnyo <= 2026 && (costesVistaAnual || costesMes <= 0)}
-              style={{ background: "transparent", border: "none", color: costesAnyo <= 2026 && (costesVistaAnual || costesMes <= 0) ? C.border : C.white, cursor: costesAnyo <= 2026 && (costesVistaAnual || costesMes <= 0) ? "default" : "pointer", fontSize: 16, padding: "0 8px", fontFamily: font, opacity: costesAnyo <= 2026 && (costesVistaAnual || costesMes <= 0) ? 0.3 : 1 }}>◂</button>
+            <button onClick={function() { costesVistaAnual ? navCostesAnyo(-1) : navCostesMes(-1); }}
+              style={{ background: "transparent", border: "none", color: C.white, cursor: "pointer", fontSize: 16, padding: "0 8px", fontFamily: font }}>◂</button>
             <div style={{ textAlign: "center", minWidth: costesVistaAnual ? 60 : 160 }}>
               {!costesVistaAnual && <div style={{ fontSize: 16, fontWeight: 700, color: C.white }}>{MESES_NOMBRE[costesMes]}</div>}
               <div style={{ fontSize: costesVistaAnual ? 18 : 12, fontWeight: 700, color: C.white, fontFamily: mono }}>{costesAnyo}</div>
@@ -1947,7 +1950,7 @@
             /* Año global (calendar sync) */
             var anyo = selAnyo;
             var meses = pylMensual.datos[anyo] || EMPTY_YEAR();
-            var setAnyoCostes = function(dir) { var next = selAnyo + dir; if (next >= 2026) setSelAnyo(next); };
+            var setAnyoCostes = function(dir) { setSelAnyo(selAnyo + dir); };
             var tot = { costes: 0, opex: 0 };
             meses.forEach(function(m) { tot.costes += Number(m.costes || 0); tot.opex += Number(m.opex || 0); });
             var filas = [
@@ -1961,7 +1964,7 @@
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <CardLabel>{"Evolución Mensual de Costes — " + anyo}</CardLabel>
                   <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                    <button onClick={function() { setAnyoCostes(-1); }} disabled={anyo <= 2026} style={{ background: "transparent", border: "1px solid " + (anyo <= 2026 ? C.border : C.textDim), borderRadius: 4, color: anyo <= 2026 ? C.border : C.textDim, cursor: anyo <= 2026 ? "default" : "pointer", padding: "2px 8px", fontSize: 11, fontFamily: font, opacity: anyo <= 2026 ? 0.4 : 1 }}>◂</button>
+                    <button onClick={function() { setAnyoCostes(-1); }} style={{ background: "transparent", border: "1px solid " + C.textDim, borderRadius: 4, color: C.textDim, cursor: "pointer", padding: "2px 8px", fontSize: 11, fontFamily: font }}>◂</button>
                     <span style={{ fontSize: 13, fontWeight: 700, color: C.white, fontFamily: mono, minWidth: 40, textAlign: "center" }}>{anyo}</span>
                     <button onClick={function() { setAnyoCostes(1); }} style={{ background: "transparent", border: "1px solid " + C.textDim, borderRadius: 4, color: C.textDim, cursor: "pointer", padding: "2px 8px", fontSize: 11, fontFamily: font }}>▸</button>
                   </div>
@@ -2002,42 +2005,38 @@
     }
 
     /* ═══════════ TAB: Cash Flow ═══════════ */
-    /* Snapshot de tesorería "ahora mismo". No hay selector de período: aging y caja son valores únicos;
-       el gráfico de evolución de caja se deriva de movimientos + saldo actual anclado a hoy. */
-    function TabCash({ aging, setAging, cash, setCash, forecast, setForecast, movimientos, runwayMeses, costesRecurrentes, ingresosRecurrentes, netoRecurrente }) {
+    /* Panel de tesorería "a día de hoy". NO tiene selector de mes — lo principal es:
+       - Cuánta caja hay AHORA
+       - Runway desde hoy (caja / gastos recurrentes 3m)
+       - Rentabilidad del mes en curso
+       El histórico (mes a mes) vive abajo en una tabla de referencia.
+       Todo se deriva en vivo de los movimientos. */
+    function TabCash({ aging, setAging, cash, setCash, forecast, setForecast, movimientos, runwayMeses, costesRecurrentes, ingresosRecurrentes, netoRecurrente, cajaHoy, netoTotalMovs }) {
       var MESES_S = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
       var hoy = new Date();
       var hoyAnyo = hoy.getFullYear();
       var hoyMes = hoy.getMonth();
+      var fechaHoyES = hoy.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
 
-      /* Mes actual (para indicador de rentabilidad del mes en curso) */
+      /* Neto del mes en curso */
       var tMesActual = totalesPeriodo(movimientos, hoyAnyo, hoyMes);
       var netoMesActual = tMesActual.ingresos - tMesActual.costes - tMesActual.opex;
 
-      /* Totales AR */
+      /* Totales AR — estático, independiente del mes */
       var agingTotal = aging.reduce(function(s, a) { return s + Number(a.importe || 0); }, 0);
 
-      /* ── Evolución de caja: running balance ─────────────────────────
-         Ancla: caja_actual = balance al final del MES HOY (aproximación: usamos la caja actual como balance fin-de-mes).
-         Hacia atrás: balance_fin(m) = caja_actual − sum(neto_m+1 ... neto_mesHoy)
-         Hacia adelante: balance_fin(m) = caja_actual + (m − mesHoy) * netoRecurrente
-         Empezamos desde enero del año en curso hasta +3 meses futuro.
-      */
+      /* ── Evolución de caja: running balance YTD anclado a cajaHoy + proyección 3m ─── */
       var balanceSerie = React.useMemo(function() {
-        /* Calcula neto mensual desde enero año actual hasta mes actual */
         var netosPorMes = [];
         for (var m = 0; m <= hoyMes; m++) {
           var t = totalesPeriodo(movimientos, hoyAnyo, m);
           netosPorMes.push(t.ingresos - t.costes - t.opex);
         }
-        /* Balance AL FINAL de cada mes, anclado a caja_actual = final-mes-HOY */
         var balancesFin = [];
-        /* Último elemento: balance fin-de-mes-hoy = caja.caja */
-        balancesFin[hoyMes] = Number(cash.caja || 0);
+        balancesFin[hoyMes] = Number(cajaHoy || 0);
         for (var m2 = hoyMes - 1; m2 >= 0; m2--) {
           balancesFin[m2] = balancesFin[m2 + 1] - netosPorMes[m2 + 1];
         }
-        /* Balance AL INICIO del año actual = balance fin mes 0 − neto mes 0 */
         var balanceInicio = balancesFin[0] - (netosPorMes[0] || 0);
 
         var serie = [];
@@ -2045,31 +2044,67 @@
         for (var m3 = 0; m3 <= hoyMes; m3++) {
           serie.push({ label: MESES_S[m3] + " " + String(hoyAnyo).slice(-2), balance: balancesFin[m3], tipo: m3 === hoyMes ? "hoy" : "historico" });
         }
-        /* Proyección: 3 meses hacia adelante con netoRecurrente */
-        var accProy = Number(cash.caja || 0);
+        /* Proyección: 3 meses con netoRecurrente (avg 3m desde hoy) */
+        var accProy = Number(cajaHoy || 0);
         for (var k = 1; k <= 3; k++) {
           accProy += Number(netoRecurrente || 0);
           var d = new Date(hoyAnyo, hoyMes + k, 1);
           serie.push({ label: MESES_S[d.getMonth()] + " " + String(d.getFullYear()).slice(-2), balance: accProy, tipo: "forecast" });
         }
         return serie;
-      }, [movimientos, cash.caja, netoRecurrente, hoyAnyo, hoyMes]);
+      }, [movimientos, cajaHoy, netoRecurrente, hoyAnyo, hoyMes]);
 
       var chartLabels = balanceSerie.map(function(p) { return p.label; });
       var chartReal = balanceSerie.map(function(p) { return p.tipo === "forecast" ? null : Math.round(p.balance); });
-      var chartForecast = balanceSerie.map(function(p, i) {
-        /* Punto de conexión: el último real es también primer forecast (visual) */
-        var prev = balanceSerie[i - 1];
+      var chartForecast = balanceSerie.map(function(p) {
         if (p.tipo === "forecast") return Math.round(p.balance);
         if (p.tipo === "hoy") return Math.round(p.balance);
         return null;
       });
 
+      /* ── Tabla histórica mes a mes: saldo fin-de-mes + netos ── */
+      var historicoTabla = React.useMemo(function() {
+        /* Recorre todos los años con movimientos hasta el mes actual + ordena cronológicamente. */
+        var years = new Set();
+        movimientos.forEach(function(m) { var p = parseFechaISO(m.fecha); if (p) years.add(p.year); });
+        years.add(hoyAnyo);
+        var yearsArr = Array.from(years).sort();
+        /* Rango: desde primer año con actividad hasta el mes en curso */
+        var rows = [];
+        var rangoInicio = yearsArr[0];
+        for (var y = rangoInicio; y <= hoyAnyo; y++) {
+          var maxMes = (y === hoyAnyo) ? hoyMes : 11;
+          for (var m = 0; m <= maxMes; m++) {
+            var t = totalesPeriodo(movimientos, y, m);
+            var neto = t.ingresos - t.costes - t.opex;
+            if (t.ingresos === 0 && t.costes === 0 && t.opex === 0 && rows.length === 0) continue; /* saltar vacíos iniciales */
+            rows.push({ y: y, m: m, ingresos: t.ingresos, gastos: t.costes + t.opex, neto: neto, vacio: t.ingresos === 0 && t.costes === 0 && t.opex === 0 });
+          }
+        }
+        /* Calcular saldo fin-de-mes retrocediendo desde cajaHoy (valor derivado, real).
+           rows está en orden cronológico ascendente; el último es el mes en curso. */
+        var saldosFin = new Array(rows.length);
+        if (rows.length > 0) {
+          saldosFin[rows.length - 1] = Number(cajaHoy || 0);
+          for (var i = rows.length - 2; i >= 0; i--) {
+            saldosFin[i] = saldosFin[i + 1] - (rows[i + 1].neto || 0);
+          }
+          for (var j = 0; j < rows.length; j++) { rows[j].saldo = saldosFin[j]; }
+        }
+        /* Mostrar de más reciente a más antiguo, limitar a 12 */
+        return rows.reverse().slice(0, 12);
+      }, [movimientos, cajaHoy, hoyAnyo, hoyMes]);
+
       /* ── Setters ── */
       var setAgingField = function(idx, field, val) {
         setAging(function(arr) { return arr.map(function(a, i) { return i === idx ? Object.assign({}, a, (function() { var o = {}; o[field] = val; return o; })()) : a; }); });
       };
-      var setCaja = function(v) { setCash(function(c) { return Object.assign({}, c, { caja: Number(v) }); }); };
+      /* Al editar "Caja hoy" (valor derivado), recalcula cash.caja (ajuste) para que la ecuación cuadre:
+         cajaHoy = cash.caja + netoTotalMovs  ⇒  cash.caja = cajaHoy − netoTotalMovs */
+      var setCajaHoy = function(v) {
+        var nuevoAjuste = Number(v) - Number(netoTotalMovs || 0);
+        setCash(function(c) { return Object.assign({}, c, { caja: nuevoAjuste }); });
+      };
       var setForecastField = function(idx, field, val) {
         setForecast(function(arr) { return arr.map(function(f, i) { return i === idx ? Object.assign({}, f, (function() { var o = {}; o[field] = Number(val); return o; })()) : f; }); });
       };
@@ -2081,29 +2116,29 @@
       /* Runway display */
       var runwayLabel = runwayMeses === null ? "—" : runwayMeses >= 36 ? ">36 m" : runwayMeses.toFixed(1) + " m";
       var runwayColor = runwayMeses === null ? C.textDim : runwayMeses >= 6 ? C.green : runwayMeses >= 3 ? C.amber : C.red;
-      var fechaHoyES = hoy.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+      var mesActualSinAct = tMesActual.ingresos === 0 && tMesActual.costes === 0 && tMesActual.opex === 0;
 
       return (
-        <Section title="Cash Flow" subtitle={"Tesorería a día de hoy · " + fechaHoyES + ". No depende del mes seleccionado en otras pestañas."}>
-          {/* ── Hero metrics: Caja · Runway · Rentabilidad ── */}
+        <Section title="Cash Flow" subtitle={"Tesorería a día de hoy · " + fechaHoyES + ". El histórico mes a mes está abajo."}>
+          {/* ── Hero metrics: Caja HOY · Runway · Rentabilidad mensual ── */}
           <div className="crux-grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 16 }}>
             <Card style={{ textAlign: "center", padding: "20px 16px" }}>
-              <div style={{ fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5 }}>Caja actual <span style={{ fontSize: 8, color: C.accent, background: C.accentGlow, padding: "1px 6px", borderRadius: 3, marginLeft: 4, fontWeight: 700 }}>EDITABLE</span></div>
+              <div style={{ fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5 }}>Caja hoy <span style={{ fontSize: 8, color: C.accent, background: C.accentGlow, padding: "1px 6px", borderRadius: 3, marginLeft: 4, fontWeight: 700 }}>DERIVADA</span></div>
               <div style={{ display: "flex", justifyContent: "center", alignItems: "baseline", gap: 4, marginTop: 8 }}>
-                <EditableCell value={cash.caja} onChange={function(v) { setCaja(v); }} style={{ fontSize: 32, fontWeight: 700, color: C.white, textAlign: "center", width: 200 }} />
+                <EditableCell value={Number(cajaHoy || 0)} onChange={function(v) { setCajaHoy(v); }} style={{ fontSize: 32, fontWeight: 700, color: cajaHoy >= 0 ? C.white : C.red, textAlign: "center", width: 200 }} />
                 <span style={{ fontSize: 14, color: C.textDim }}>€</span>
               </div>
-              <div style={{ fontSize: 10, color: C.textDim, marginTop: 6 }}>Saldo en banco hoy</div>
+              <div style={{ fontSize: 10, color: C.textDim, marginTop: 6 }}>Ajuste {Number(cash.caja || 0) >= 0 ? "+" : ""}{fmt(Number(cash.caja || 0))} € · netos {netoTotalMovs >= 0 ? "+" : ""}{fmt(Math.round(netoTotalMovs))} €</div>
             </Card>
             <Card style={{ textAlign: "center", padding: "20px 16px" }}>
               <div style={{ fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5 }}>Runway <span style={{ fontSize: 8, color: C.accent, background: C.accentGlow, padding: "1px 6px", borderRadius: 3, marginLeft: 4, fontWeight: 700 }}>CALCULADO</span></div>
               <div style={{ fontSize: 32, fontWeight: 700, fontFamily: mono, color: runwayColor, marginTop: 8 }}>{runwayLabel}</div>
-              <div style={{ fontSize: 10, color: C.textDim, marginTop: 6 }}>{costesRecurrentes > 0 ? "Gastos rec.: " + fmt(Math.round(costesRecurrentes)) + " €/m" : "Sin gastos registrados"}</div>
+              <div style={{ fontSize: 10, color: C.textDim, marginTop: 6 }}>{costesRecurrentes > 0 ? "Gastos rec. 3m: " + fmt(Math.round(costesRecurrentes)) + " €/m" : "Sin gastos registrados"}</div>
             </Card>
             <Card style={{ textAlign: "center", padding: "20px 16px" }}>
-              <div style={{ fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5 }}>Rentabilidad mensual <span style={{ fontSize: 8, color: C.accent, background: C.accentGlow, padding: "1px 6px", borderRadius: 3, marginLeft: 4, fontWeight: 700 }}>CALCULADO</span></div>
-              <div style={{ fontSize: 32, fontWeight: 700, fontFamily: mono, color: netoRecurrente >= 0 ? C.green : C.red, marginTop: 8 }}>{netoRecurrente >= 0 ? "+" : ""}{fmt(Math.round(netoRecurrente))} €</div>
-              <div style={{ fontSize: 10, color: C.textDim, marginTop: 6 }}>Promedio 3m · este mes: <span style={{ color: netoMesActual >= 0 ? C.green : C.red, fontWeight: 700 }}>{netoMesActual >= 0 ? "+" : ""}{fmt(Math.round(netoMesActual))} €</span></div>
+              <div style={{ fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5 }}>Neto mes en curso <span style={{ fontSize: 8, color: C.accent, background: C.accentGlow, padding: "1px 6px", borderRadius: 3, marginLeft: 4, fontWeight: 700 }}>CALCULADO</span></div>
+              <div style={{ fontSize: 32, fontWeight: 700, fontFamily: mono, color: mesActualSinAct ? C.textDim : (netoMesActual >= 0 ? C.green : C.red), marginTop: 8 }}>{mesActualSinAct ? "—" : (netoMesActual >= 0 ? "+" : "") + fmt(Math.round(netoMesActual)) + " €"}</div>
+              <div style={{ fontSize: 10, color: C.textDim, marginTop: 6 }}>Promedio 3m: <span style={{ color: netoRecurrente >= 0 ? C.green : C.red, fontWeight: 700 }}>{netoRecurrente >= 0 ? "+" : ""}{fmt(Math.round(netoRecurrente))} €</span></div>
             </Card>
           </div>
 
@@ -2111,7 +2146,7 @@
           <Card style={{ marginBottom: 16 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
               <CardLabel>Evolución de caja {hoyAnyo}</CardLabel>
-              <span style={{ fontSize: 10, color: C.textDim, fontStyle: "italic" }}>Histórico anclado a caja actual · proyección con promedio mensual</span>
+              <span style={{ fontSize: 10, color: C.textDim, fontStyle: "italic" }}>Histórico anclado a caja actual · proyección con promedio 3m</span>
             </div>
             <ApexChart type="area" height={280} options={{
               series: [
@@ -2130,6 +2165,42 @@
               tooltip: { y: { formatter: function(v) { return v == null ? "—" : fmt(Math.round(v)) + " €"; } } },
             }} />
           </Card>
+
+          {/* ── Histórico mes a mes (hasta 12 meses) ── */}
+          {historicoTabla.length > 0 && (
+            <Card style={{ marginBottom: 16 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <CardLabel>Histórico mes a mes</CardLabel>
+                <span style={{ fontSize: 9, color: C.textDim, fontStyle: "italic" }}>Saldo fin de mes derivado de caja actual</span>
+              </div>
+              <div style={{ overflowX: "auto" }}>
+                <div style={{ minWidth: 640 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr 1fr 1.2fr", fontSize: 10, color: C.textDim, paddingBottom: 8, borderBottom: "1px solid " + C.border, textTransform: "uppercase", letterSpacing: 0.4, fontWeight: 700 }}>
+                    <span>Mes</span>
+                    <span style={{ textAlign: "right" }}>Ingresos</span>
+                    <span style={{ textAlign: "right" }}>Gastos</span>
+                    <span style={{ textAlign: "right" }}>Neto</span>
+                    <span style={{ textAlign: "right" }}>Saldo fin mes</span>
+                  </div>
+                  {historicoTabla.map(function(row, idx) {
+                    var esHoyRow = row.y === hoyAnyo && row.m === hoyMes;
+                    return (
+                      <div key={row.y + "-" + row.m} style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr 1fr 1.2fr", padding: "10px 0", borderBottom: idx < historicoTabla.length - 1 ? "1px solid " + C.border : "none", alignItems: "center", background: esHoyRow ? C.accentGlow : "transparent", borderRadius: esHoyRow ? 4 : 0, margin: esHoyRow ? "0 -4px" : 0, paddingLeft: esHoyRow ? 6 : 0, paddingRight: esHoyRow ? 6 : 0 }}>
+                        <span style={{ fontSize: 12, fontWeight: esHoyRow ? 700 : 500, color: esHoyRow ? C.accent2 : C.text }}>
+                          {esHoyRow && <span style={{ color: C.accent, marginRight: 6 }}>●</span>}
+                          {MESES_S[row.m]} {String(row.y).slice(-2)}
+                        </span>
+                        <span style={{ textAlign: "right", fontFamily: mono, fontSize: 12, color: row.ingresos > 0 ? C.green : C.textDim }}>{row.ingresos > 0 ? fmt(row.ingresos) + " €" : "—"}</span>
+                        <span style={{ textAlign: "right", fontFamily: mono, fontSize: 12, color: row.gastos > 0 ? C.textSec : C.textDim }}>{row.gastos > 0 ? fmt(row.gastos) + " €" : "—"}</span>
+                        <span style={{ textAlign: "right", fontFamily: mono, fontSize: 12, fontWeight: 700, color: row.vacio ? C.textDim : (row.neto >= 0 ? C.green : C.red) }}>{row.vacio ? "—" : (row.neto >= 0 ? "+" : "") + fmt(Math.round(row.neto)) + " €"}</span>
+                        <span style={{ textAlign: "right", fontFamily: mono, fontSize: 13, fontWeight: 700, color: C.white }}>{fmt(Math.round(row.saldo || 0))} €</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </Card>
+          )}
 
           {/* ── Cuentas por Cobrar (estático, a día de hoy) ── */}
           <Card style={{ marginBottom: 16 }}>
@@ -2223,7 +2294,7 @@
       var cliMes = selMes;
       var cliAnyo = selAnyo;
       var navCliMes = navMes;
-      var navCliAnyo = function(dir) { var n = selAnyo + dir; if (n >= 2026) setSelAnyo(n); };
+      var navCliAnyo = function(dir) { setSelAnyo(selAnyo + dir); };
       var goCliHoy = function() { setCliVistaAnual(false); goHoy && goHoy(); };
 
       /* Clientes del periodo seleccionado (derivados de movimientos + metadata) */
@@ -2270,8 +2341,8 @@
                   style={{ background: active ? C.accent : "transparent", color: active ? C.white : C.textDim, border: "none", padding: "7px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: font, transition: "all 0.15s" }}>{t}</button>;
               })}
             </div>
-            <button onClick={function() { cliVistaAnual ? navCliAnyo(-1) : navCliMes(-1); }} disabled={cliAnyo <= 2026 && (cliVistaAnual || cliMes <= 0)}
-              style={{ background: "transparent", border: "none", color: cliAnyo <= 2026 && (cliVistaAnual || cliMes <= 0) ? C.border : C.white, cursor: cliAnyo <= 2026 && (cliVistaAnual || cliMes <= 0) ? "default" : "pointer", fontSize: 16, padding: "0 8px", fontFamily: font, opacity: cliAnyo <= 2026 && (cliVistaAnual || cliMes <= 0) ? 0.3 : 1 }}>◂</button>
+            <button onClick={function() { cliVistaAnual ? navCliAnyo(-1) : navCliMes(-1); }}
+              style={{ background: "transparent", border: "none", color: C.white, cursor: "pointer", fontSize: 16, padding: "0 8px", fontFamily: font }}>◂</button>
             <div style={{ textAlign: "center", minWidth: cliVistaAnual ? 60 : 160 }}>
               {!cliVistaAnual && <div style={{ fontSize: 16, fontWeight: 700, color: C.white }}>{MESES_FULL[cliMes]}</div>}
               <div style={{ fontSize: cliVistaAnual ? 18 : 12, fontWeight: 700, color: C.white, fontFamily: mono }}>{cliAnyo}</div>
@@ -3491,13 +3562,15 @@
         return function() { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
       }, [pyl, aging, cash, forecast, clientes, servicios, escenarios, pylMensualRaw, movimientos, estrategico, checklist, hydrated]);
 
-      /* ── Global month/year selector — arranca en HOY (calendar sync) ── */
+      /* ── Global month/year selector — arranca en HOY (calendar sync) ──
+         Sin guard inferior: la navegación hacia atrás llega hasta cualquier año;
+         los meses pre-operación se muestran como "sin actividad" (preOperacion). */
       const [selAnyo, setSelAnyo] = useState(function() { return new Date().getFullYear(); });
       const [selMes, setSelMes] = useState(function() { return new Date().getMonth(); });
       var selKey = selAnyo + "-" + selMes;
       var navMesGlobal = function(dir) {
         var nm = selMes + dir;
-        if (nm < 0) { if (selAnyo > 2026) { setSelAnyo(selAnyo - 1); setSelMes(11); } }
+        if (nm < 0) { setSelAnyo(selAnyo - 1); setSelMes(11); }
         else if (nm > 11) { setSelAnyo(selAnyo + 1); setSelMes(0); }
         else { setSelMes(nm); }
       };
@@ -3579,9 +3652,19 @@
       var selClientes = React.useMemo(function() {
         return clientesDelPeriodo(movimientos, clientes, selAnyo, selMes).sort(function(a, b) { return b.fact - a.fact; });
       }, [movimientos, clientes, selAnyo, selMes]);
-      /* aging, caja y forecast son snapshots únicos (no per-mes/year) — TabCash ya lee directo */
+      /* aging = snapshot único; caja hoy se deriva de cash.caja (ajuste) + sum(netos movimientos). */
       var selAging = aging;
-      var selCaja = cash.caja;
+      var netoTotalMovs = React.useMemo(function() {
+        var s = 0;
+        movimientos.forEach(function(m) {
+          var imp = Number(m.importe || 0);
+          if (m.tipo === "ingreso") s += imp;
+          else if (m.tipo === "coste_dir" || m.tipo === "opex") s -= imp;
+        });
+        return s;
+      }, [movimientos]);
+      var cajaHoy = Number(cash.caja || 0) + netoTotalMovs;
+      var selCaja = cajaHoy;
 
       /* ── Auto-computed values (from selected month) ── */
       var burnRate = selCos + selOpex;
@@ -3609,7 +3692,10 @@
       var ingresosRecurrentes = baselineRec.ingresos;
       var costesRecurrentes = baselineRec.costesDirectos + baselineRec.opex;
       var netoRecurrente = ingresosRecurrentes - costesRecurrentes;
-      var runwayMeses = costesRecurrentes > 0 ? cash.caja / costesRecurrentes : null;
+
+      /* Runway siempre desde HOY: caja derivada / avg(gastos últimos 3 meses con actividad).
+         No cambia al navegar meses — es un indicador de salud dinámico "a día de hoy". */
+      var runwayMeses = costesRecurrentes > 0 ? cajaHoy / costesRecurrentes : null;
 
       /* pylBaseline: para Escenarios y cualquier proyección.
          Sobrescribe ingresos/costesDirectos/opex con el promedio recurrente (estable vs mes-vacío). */
@@ -3691,7 +3777,7 @@
                 tab === "movimientos" ? <TabMovimientos movimientos={movimientos} setMovimientos={setMovimientos} selAnyo={selAnyo} setSelAnyo={setSelAnyo} selMes={selMes} setSelMes={setSelMes} navMes={navMesGlobal} goHoy={goHoy} /> : null,
                 tab === "pyl" ? <TabPYL pyl={pylDerived} setPyl={setPyl} pylMensual={pylMensual} setPylMensual={setPylMensual} selAnyo={selAnyo} setSelAnyo={setSelAnyo} selMes={selMes} setSelMes={setSelMes} navMes={navMesGlobal} goHoy={goHoy} setTab={setTab} /> : null,
                 tab === "costes" ? <TabCostes pyl={pylDerived} setPyl={setPyl} pylMensual={pylMensual} setPylMensual={setPylMensual} selAnyo={selAnyo} setSelAnyo={setSelAnyo} selMes={selMes} setSelMes={setSelMes} navMes={navMesGlobal} goHoy={goHoy} selIng={selIng} selCos={selCos} selOpex={selOpex} movimientos={movimientos} setTab={setTab} /> : null,
-                tab === "cash" ? <TabCash aging={aging} setAging={setAging} cash={cash} setCash={setCash} forecast={forecast} setForecast={setForecast} movimientos={movimientos} runwayMeses={runwayMeses} costesRecurrentes={costesRecurrentes} ingresosRecurrentes={ingresosRecurrentes} netoRecurrente={netoRecurrente} /> : null,
+                tab === "cash" ? <TabCash aging={aging} setAging={setAging} cash={cash} setCash={setCash} forecast={forecast} setForecast={setForecast} movimientos={movimientos} runwayMeses={runwayMeses} costesRecurrentes={costesRecurrentes} ingresosRecurrentes={ingresosRecurrentes} netoRecurrente={netoRecurrente} cajaHoy={cajaHoy} netoTotalMovs={netoTotalMovs} /> : null,
                 tab === "clientes" ? <TabClientes movimientos={movimientos} clientes={clientes} setClientes={setClientes} selAnyo={selAnyo} setSelAnyo={setSelAnyo} selMes={selMes} setSelMes={setSelMes} navMes={navMesGlobal} goHoy={goHoy} setTab={setTab} /> : null,
                 tab === "unit" ? <TabUnit servicios={servicios} updateServicios={updateArr(setServicios)} setServicios={setServicios} /> : null,
                 tab === "escenarios" ? <TabEscenarios escenarios={escenarios} updateEscenarios={updateArr(setEscenarios)} pyl={pylBaseline} cash={cash} burnRate={burnRate} /> : null,
