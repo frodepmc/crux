@@ -866,9 +866,9 @@
 
     /* Catálogo sugerido de categorías por tipo — no limita (el usuario puede escribir libre) */
     const CATEGORIAS = {
-      ingreso:   ["Consultoría", "Proyecto", "Iguala mensual", "Formación", "Subvención", "Otros ingresos"],
+      ingreso:   ["Consultoría", "Proyecto", "Iguala mensual", "Formación", "Subvención", "Capital inicial", "Ajuste reconciliación", "Otros ingresos"],
       coste_dir: ["Subcontratación", "Materiales", "Licencias/Hosting", "Comisiones", "Otros directos"],
-      opex:      ["Alquiler", "Software", "Marketing", "Salarios", "Gestoría/Legal", "Suministros", "Viajes", "Formación interna", "Otros OPEX"],
+      opex:      ["Alquiler", "Software", "Marketing", "Salarios", "Gestoría/Legal", "Suministros", "Viajes", "Formación interna", "Ajuste reconciliación", "Otros OPEX"],
     };
 
     const TIPO_LABEL = { ingreso: "Ingreso", coste_dir: "Coste directo", opex: "OPEX" };
@@ -2124,11 +2124,8 @@
           <div className="crux-grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 16 }}>
             <Card style={{ textAlign: "center", padding: "20px 16px" }}>
               <div style={{ fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5 }}>Caja hoy <span style={{ fontSize: 8, color: C.accent, background: C.accentGlow, padding: "1px 6px", borderRadius: 3, marginLeft: 4, fontWeight: 700 }}>DERIVADA</span></div>
-              <div style={{ display: "flex", justifyContent: "center", alignItems: "baseline", gap: 4, marginTop: 8 }}>
-                <EditableCell value={Number(cajaHoy || 0)} onChange={function(v) { setCajaHoy(v); }} style={{ fontSize: 32, fontWeight: 700, color: cajaHoy >= 0 ? C.white : C.red, textAlign: "center", width: 200 }} />
-                <span style={{ fontSize: 14, color: C.textDim }}>€</span>
-              </div>
-              <div style={{ fontSize: 10, color: C.textDim, marginTop: 6 }}>Ajuste {Number(cash.caja || 0) >= 0 ? "+" : ""}{fmt(Number(cash.caja || 0))} € · netos {netoTotalMovs >= 0 ? "+" : ""}{fmt(Math.round(netoTotalMovs))} €</div>
+              <div style={{ fontSize: 32, fontWeight: 700, fontFamily: mono, color: cajaHoy >= 0 ? C.white : C.red, marginTop: 8 }}>{fmt(Math.round(cajaHoy))} €</div>
+              <div style={{ fontSize: 10, color: C.textDim, marginTop: 6 }}>Suma neta de {movimientos.length} movimiento{movimientos.length === 1 ? "" : "s"}</div>
             </Card>
             <Card style={{ textAlign: "center", padding: "20px 16px" }}>
               <div style={{ fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5 }}>Runway <span style={{ fontSize: 8, color: C.accent, background: C.accentGlow, padding: "1px 6px", borderRadius: 3, marginLeft: 4, fontWeight: 700 }}>CALCULADO</span></div>
@@ -3652,9 +3649,11 @@
       var selClientes = React.useMemo(function() {
         return clientesDelPeriodo(movimientos, clientes, selAnyo, selMes).sort(function(a, b) { return b.fact - a.fact; });
       }, [movimientos, clientes, selAnyo, selMes]);
-      /* aging = snapshot único; caja hoy se deriva de cash.caja (ajuste) + sum(netos movimientos). */
+      /* aging = snapshot único; caja hoy = SUM NETO DE MOVIMIENTOS (puro, sin ajustes).
+         Si quieres reflejar capital inicial, añade un movimiento ingreso con categoría "Capital inicial".
+         Si quieres reconciliar con banco, añade un movimiento ingreso/coste categoría "Ajuste reconciliación". */
       var selAging = aging;
-      var netoTotalMovs = React.useMemo(function() {
+      var cajaHoy = React.useMemo(function() {
         var s = 0;
         movimientos.forEach(function(m) {
           var imp = Number(m.importe || 0);
@@ -3663,7 +3662,7 @@
         });
         return s;
       }, [movimientos]);
-      var cajaHoy = Number(cash.caja || 0) + netoTotalMovs;
+      var netoTotalMovs = cajaHoy; /* alias para lector */
       var selCaja = cajaHoy;
 
       /* ── Auto-computed values (from selected month) ── */
