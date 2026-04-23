@@ -370,10 +370,6 @@
     background: linear-gradient(160deg, rgba(255, 255, 255, 0.6) 0%, rgba(56, 105, 171, 0.04) 100%);
 }
 
-.ns-team__card--lead .ns-team__photo {
-    width: clamp(110px, 14vw, 150px);
-}
-
 /* Photo placeholders — silueta con blur sobre fondo azul profundo.
    100% CSS (pseudo-elementos), sin imágenes. Cuando lleguen las fotos reales
    se añade un <img> dentro del contenedor y estas reglas quedan ocultas por él. */
@@ -420,22 +416,22 @@
     box-shadow: 0 8px 28px rgba(19, 37, 60, 0.25);
 }
 
-/* Lead card: foto vertical con siluetas más tenues — sugiere grupo */
+/* Lead card: foto vertical más grande con siluetas visibles pero difuminadas */
 .ns-team__card--lead .ns-team__photo {
-    max-width: clamp(180px, 26vw, 320px);
+    max-width: clamp(220px, 34vw, 440px);
     aspect-ratio: 4 / 5;
 }
 
 .ns-team__card--lead .ns-team__photo::before {
-    width: 14%;
-    top: 32%;
-    filter: blur(10px);
+    width: 22%;
+    top: 34%;
+    filter: blur(12px);
 }
 
 .ns-team__card--lead .ns-team__photo::after {
-    width: 30%;
-    left: 42%;
-    filter: blur(10px);
+    width: 52%;
+    left: 50%;
+    filter: blur(12px);
 }
 
 .ns-team__name {
@@ -705,6 +701,9 @@
     }
     .ns-team__card--lead .ns-team__photo {
         margin-bottom: 0;
+        flex-shrink: 0;
+        width: clamp(240px, 32vw, 360px);
+        max-width: none;
     }
     .ns-philosophy__statement {
         grid-template-columns: minmax(160px, 260px) 1fr;
@@ -836,12 +835,12 @@
     }
 
     .ns-team__photo {
-        width: 64px;
+        max-width: clamp(96px, 30vw, 140px);
         margin-bottom: 0.8rem;
     }
 
     .ns-team__card--lead .ns-team__photo {
-        width: 80px;
+        max-width: clamp(180px, 48vw, 240px);
     }
 }
 
