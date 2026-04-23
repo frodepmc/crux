@@ -754,6 +754,11 @@
 .ns-cta__heading em {
     color: var(--accent);
     font-style: normal;
+    text-decoration: underline;
+    text-decoration-color: var(--crux-sand);
+    text-decoration-thickness: 3px;
+    text-underline-offset: 0.18em;
+    transition: text-decoration-color 0.4s ease;
 }
 
 .ns-cta__text {
@@ -792,14 +797,18 @@
     transform: translateY(-2px);
 }
 
+/* Boton primario — unico uso pleno del warm accent.
+   Cierra el arco cromatico (la pagina abre fria, cierra con tension calida). */
 .ns-cta__btn--primary {
-    background: var(--accent);
+    background: var(--crux-sand);
+    border-color: var(--crux-sand);
     color: #fff;
 }
 
 .ns-cta__btn--primary:hover {
-    background: var(--accent-hover);
-    border-color: var(--accent-hover);
+    background: var(--crux-sand-hover);
+    border-color: var(--crux-sand-hover);
+    color: #fff;
 }
 
 /* ═══════════════════════════════════════
