@@ -45,7 +45,7 @@
     position: absolute;
     inset: 0;
     background: var(--bg);
-    opacity: 0.78;
+    opacity: 0.55;
     pointer-events: none;
     z-index: 0;
 }
@@ -85,37 +85,46 @@
 
 .ns-hero__heading {
     margin-bottom: 0;
+    text-shadow: 0 1px 30px rgba(242, 239, 233, 0.4);
 }
 
-/* Three staggered lines — each bigger, building tension */
+/* Three staggered lines — each bigger, building tension
+   Override: monograph-scale + diagonal reveal motion
+   (matching la diagonal intrinseca del fondo architectural) */
 .ns-hero__heading .hero-line {
     display: block;
+    overflow: visible;
+}
+
+.ns-hero__heading .hero-line__inner {
+    transform: translate(-40px, 60px);
+    animation-name: heroRevealDiagonal;
 }
 
 .ns-hero__heading .hero-line:nth-child(1) .hero-line__inner {
     font-family: var(--font-body);
     font-weight: 300;
-    font-size: clamp(3rem, 6.5vw, 6rem);
-    line-height: 1.05;
-    letter-spacing: -0.03em;
+    font-size: clamp(3.6rem, 9vw, 9rem);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
     animation-delay: 0.3s;
 }
 
 .ns-hero__heading .hero-line:nth-child(2) .hero-line__inner {
     font-family: var(--font-body);
     font-weight: 300;
-    font-size: clamp(3rem, 6.5vw, 6rem);
-    line-height: 1.05;
-    letter-spacing: -0.03em;
+    font-size: clamp(3.6rem, 9vw, 9rem);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
     animation-delay: 0.5s;
 }
 
 .ns-hero__heading .hero-line:nth-child(3) .hero-line__inner {
     font-family: var(--font-display);
     font-weight: 400;
-    font-size: clamp(3.2rem, 7vw, 6.5rem);
-    line-height: 1;
-    letter-spacing: -0.02em;
+    font-size: clamp(3.8rem, 9.5vw, 9.5rem);
+    line-height: 0.98;
+    letter-spacing: -0.025em;
     animation-delay: 0.7s;
     color: var(--accent);
 }
