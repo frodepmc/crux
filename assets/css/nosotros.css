@@ -370,13 +370,13 @@
     background: linear-gradient(160deg, rgba(255, 255, 255, 0.6) 0%, rgba(56, 105, 171, 0.04) 100%);
 }
 
-/* Photo placeholders — silueta con blur sobre fondo azul profundo.
-   100% CSS (pseudo-elementos), sin imágenes. Cuando lleguen las fotos reales
-   se añade un <img> dentro del contenedor y estas reglas quedan ocultas por él. */
+/* Photo containers — aspect portrait 9:16 coincidiendo con la relación nativa
+   de las fotos del equipo (1080×1920). Cuando el contenedor tiene <img>,
+   las siluetas se ocultan via :has(img). */
 .ns-team__photo {
     width: 100%;
-    max-width: clamp(120px, 14vw, 180px);
-    aspect-ratio: 1 / 1;
+    max-width: clamp(140px, 16vw, 220px);
+    aspect-ratio: 9 / 16;
     border-radius: 4px;
     background: #2a3e57;
     position: relative;
@@ -385,12 +385,13 @@
     transition: transform 0.5s var(--ease-out), box-shadow 0.4s ease;
 }
 
+/* Silueta placeholder (solo visible si la card no tiene foto real) */
 .ns-team__photo::before {
     content: '';
     position: absolute;
     left: 50%;
-    top: 38%;
-    width: 38%;
+    top: 32%;
+    width: 32%;
     aspect-ratio: 1 / 1;
     border-radius: 50%;
     background: rgba(200, 220, 240, 0.25);
@@ -404,11 +405,28 @@
     left: 50%;
     top: 100%;
     width: 70%;
-    height: 55%;
+    height: 42%;
     border-radius: 50% 50% 0 0;
     background: rgba(200, 220, 240, 0.22);
-    transform: translate(-50%, -30%);
+    transform: translate(-50%, -40%);
     filter: blur(6px);
+}
+
+/* Oculta la silueta cuando la card ya lleva foto real */
+.ns-team__photo:has(img)::before,
+.ns-team__photo:has(img)::after {
+    display: none;
+}
+
+/* Foto real: llena el contenedor manteniendo aspect nativo */
+.ns-team__photo img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+    display: block;
 }
 
 .ns-team__card:hover .ns-team__photo {
@@ -416,15 +434,16 @@
     box-shadow: 0 8px 28px rgba(19, 37, 60, 0.25);
 }
 
-/* Lead card: foto vertical más grande con siluetas visibles pero difuminadas */
+/* Lead card: placeholder sin foto todavía — aspect 9/16 coherente con las
+   fotos reales del equipo (portrait), silueta de grupo difuminada */
 .ns-team__card--lead .ns-team__photo {
     max-width: clamp(220px, 34vw, 440px);
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 9 / 16;
 }
 
 .ns-team__card--lead .ns-team__photo::before {
     width: 22%;
-    top: 34%;
+    top: 28%;
     filter: blur(12px);
 }
 
