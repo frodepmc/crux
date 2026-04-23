@@ -229,17 +229,27 @@
     border-bottom: 1px solid var(--border);
 }
 
-/* Silueta Mallorca — unica ilustracion vectorial de la pagina.
-   Colofon editorial de la narrativa: despues del tercer parrafo,
-   alineada a la derecha de la columna de narrativa. */
+/* Silueta Baleares — ilustracion vectorial decorativa de Historia.
+   Estrategia unificada below-text: el SVG vive anclado a .ns-story__narrative
+   y se posiciona SIEMPRE por debajo del texto (bottom negativo), sangrando al
+   section-padding entre Historia y Equipo. Cero colision vertical con el
+   texto; posibles solapes horizontales son irrelevantes porque verticalmente
+   el island esta por debajo. Narrative es el unico anchor en todos los
+   viewports — sin re-anchoring en mobile. */
+.ns-story__narrative {
+    position: relative;
+}
+
 .ns-story__island {
-    display: block;
-    width: clamp(200px, 22vw, 300px);
+    position: absolute;
+    left: auto;
+    right: clamp(10px, 3vw, 40px);
+    bottom: -210px;
+    width: clamp(180px, 20vw, 220px);
     height: auto;
-    margin: clamp(2.5rem, 5vh, 4rem) 0 0 auto;
     opacity: 0.22;
-    color: var(--accent);
     pointer-events: none;
+    z-index: 0;
 }
 
 .ns-story__spread {
@@ -818,6 +828,7 @@
     .ns-story__spread {
         grid-template-columns: 1fr 320px;
     }
+    /* .ns-story__island: sin override en 1100 — el base already cubre este rango */
     .ns-team__bento {
         grid-template-columns: 1fr 1fr;
     }
@@ -849,8 +860,16 @@
 }
 
 @media (max-width: 900px) {
+    /* Mobile/tablet — micro-colofon anclado a la misma narrativa (sin
+       re-anchoring). Tamano de marca de agua (44-64 px) y opacidad
+       reducida (0.18) para evitar efecto pegote. Bleed controlado al
+       gap entre narrative y metricas (3rem = 48px) para no tocar ni
+       texto del ultimo parrafo ni el contenedor de metricas. */
     .ns-story__island {
-        display: none;
+        right: clamp(1rem, 4vw, 2rem);
+        bottom: -30px;
+        width: clamp(44px, 10vw, 64px);
+        opacity: 0.18;
     }
     .ns-story__spread {
         grid-template-columns: 1fr;
