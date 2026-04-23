@@ -359,158 +359,159 @@
 }
 
 .ns-team__card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: clamp(1.8rem, 3vw, 2.5rem) clamp(1.2rem, 2vw, 1.8rem);
-    border: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.5);
     position: relative;
     overflow: hidden;
-    transition: transform 0.5s var(--ease-out), border-color 0.4s ease, box-shadow 0.5s ease;
-}
-
-/* Accent line on reveal */
-.ns-team__card::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: clamp(50px, 10vw, 80px);
-    height: 1px;
-    background: var(--accent);
-    transform-origin: left;
-    transform: scaleX(0);
-    transition: transform 0.8s var(--ease-out) 0.1s;
-}
-
-.ns-team__card.is-visible::after {
-    transform: scaleX(1);
+    transition: transform 0.5s var(--ease-out), box-shadow 0.5s ease;
 }
 
 .ns-team__card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(56, 105, 171, 0.25);
-    box-shadow: 0 20px 56px rgba(0, 0, 0, 0.07);
+    transform: translateY(-4px);
+    box-shadow: 0 22px 56px rgba(19, 37, 60, 0.18);
 }
 
-/* Lead card — spans 2 rows, left-aligned */
-.ns-team__card--lead {
-    grid-row: 1 / 3;
-    align-items: flex-start;
-    text-align: left;
-    justify-content: center;
-    background: linear-gradient(160deg, rgba(255, 255, 255, 0.6) 0%, rgba(56, 105, 171, 0.04) 100%);
-}
-
-/* Photo containers — aspect portrait 9:16 coincidiendo con la relación nativa
-   de las fotos del equipo (1080×1920). Cuando el contenedor tiene <img>,
-   las siluetas se ocultan via :has(img). */
-.ns-team__photo {
-    width: 100%;
-    max-width: clamp(140px, 16vw, 220px);
+/* Cards individuales — foto a sangre, cero padding/border/background.
+   La aspect-ratio del card define la altura uniforme del row. */
+.ns-team__card:not(.ns-team__card--lead) {
     aspect-ratio: 9 / 16;
-    border-radius: 4px;
-    background: #2a3e57;
+    background: var(--bg-accent);
+}
+
+.ns-team__card:not(.ns-team__card--lead) .ns-team__photo {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    aspect-ratio: auto;
+    border-radius: 0;
+    margin-bottom: 0;
+    background: transparent;
+}
+
+/* Foto real: rellena el card completo */
+.ns-team__photo {
     position: relative;
     overflow: hidden;
-    margin-bottom: 1.2rem;
-    transition: transform 0.5s var(--ease-out), box-shadow 0.4s ease;
+    transition: transform 0.6s var(--ease-out);
 }
 
-/* Silueta placeholder (solo visible si la card no tiene foto real) */
-.ns-team__photo::before {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 32%;
-    width: 32%;
-    aspect-ratio: 1 / 1;
-    border-radius: 50%;
-    background: rgba(200, 220, 240, 0.25);
-    transform: translate(-50%, -50%);
-    filter: blur(8px);
-}
-
-.ns-team__photo::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 100%;
-    width: 70%;
-    height: 42%;
-    border-radius: 50% 50% 0 0;
-    background: rgba(200, 220, 240, 0.22);
-    transform: translate(-50%, -40%);
-    filter: blur(6px);
-}
-
-/* Oculta la silueta cuando la card ya lleva foto real */
-.ns-team__photo:has(img)::before,
-.ns-team__photo:has(img)::after {
-    display: none;
-}
-
-/* Foto real: llena el contenedor manteniendo aspect nativo */
 .ns-team__photo img {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: inherit;
     display: block;
 }
 
 .ns-team__card:hover .ns-team__photo {
-    transform: scale(1.04);
-    box-shadow: 0 8px 28px rgba(19, 37, 60, 0.25);
+    transform: scale(1.03);
 }
 
-/* Lead card: placeholder sin foto todavía — aspect 9/16 coherente con las
-   fotos reales del equipo (portrait), silueta de grupo difuminada */
-.ns-team__card--lead .ns-team__photo {
-    max-width: clamp(220px, 34vw, 440px);
-    aspect-ratio: 9 / 16;
-}
-
-.ns-team__card--lead .ns-team__photo::before {
-    width: 22%;
-    top: 28%;
-    filter: blur(12px);
-}
-
-.ns-team__card--lead .ns-team__photo::after {
-    width: 52%;
-    left: 50%;
-    filter: blur(12px);
-}
-
-.ns-team__name {
-    font-family: var(--font-display);
-    font-size: clamp(1rem, 1.3vw, 1.15rem);
-    font-weight: 500;
-    color: var(--text);
-    margin-bottom: 0.3rem;
+/* Info overlay — rol sobre la foto (solo cards individuales).
+   Gradient navy desde el borde inferior, rol en crema sobre fondo oscurecido. */
+.ns-team__info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: clamp(1rem, 1.8vw, 1.6rem) clamp(1.1rem, 2vw, 1.8rem);
+    background: linear-gradient(
+        to top,
+        rgba(19, 37, 60, 0.88) 0%,
+        rgba(19, 37, 60, 0.48) 55%,
+        transparent 100%);
+    z-index: 2;
+    pointer-events: none;
 }
 
 .ns-team__role {
     font-family: var(--font-brand);
-    font-size: 0.6rem;
+    font-size: 0.66rem;
     font-weight: 600;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: var(--accent);
-    opacity: 0.7;
+    color: var(--bg);
+    opacity: 0.96;
+    margin: 0;
 }
 
-.ns-team__bio {
-    margin-top: 0.8rem;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    line-height: 1.7;
+/* Lead card — signature tipografica. Sin foto, sin silueta.
+   Numeral gigante "IV" + triada de firma editorial. */
+.ns-team__card--lead {
+    grid-row: 1 / 3;
+}
+
+.ns-team__lead-mark {
+    aspect-ratio: 9 / 16;
+    background: var(--bg-accent);
+    color: var(--bg);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: clamp(1.4rem, 2.5vw, 2.4rem);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decoracion diagonal sutil sobre el navy — eco del fondo architectural del hero */
+.ns-team__lead-mark::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, transparent 42%),
+        linear-gradient(315deg, rgba(120, 183, 238, 0.06) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Grano sutil local sobre el navy (refuerza la textura del site) */
+.ns-team__lead-mark::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+    background-size: 42px 42px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.ns-team__lead-numeral {
+    font-family: var(--font-display);
+    font-size: clamp(8rem, 18vw, 14rem);
     font-weight: 300;
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    color: var(--bg);
+    align-self: flex-end;
+    position: relative;
+    z-index: 2;
+    transition: color 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+}
+
+.ns-team__card--lead:hover .ns-team__lead-numeral {
+    color: var(--accent-deep);
+    transform: translateX(-4px);
+}
+
+.ns-team__lead-triplet {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-family: var(--font-brand);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--bg);
+    opacity: 0.62;
+    position: relative;
+    z-index: 2;
+}
+
+.ns-team__lead-triplet span {
+    display: block;
 }
 
 /* ─────────────────────────────────────
@@ -748,15 +749,24 @@
     .ns-team__card--lead {
         grid-column: 1 / -1;
         grid-row: auto;
+    }
+    .ns-team__lead-mark {
+        aspect-ratio: 16 / 5;
         flex-direction: row;
         align-items: center;
-        gap: clamp(1.5rem, 3vw, 2.5rem);
+        justify-content: space-between;
+        padding: clamp(1.4rem, 2.5vw, 2.6rem) clamp(1.8rem, 3.5vw, 3rem);
     }
-    .ns-team__card--lead .ns-team__photo {
-        margin-bottom: 0;
-        flex-shrink: 0;
-        width: clamp(240px, 32vw, 360px);
-        max-width: none;
+    .ns-team__lead-numeral {
+        align-self: center;
+        font-size: clamp(5rem, 12vw, 9rem);
+    }
+    .ns-team__lead-triplet {
+        text-align: right;
+        gap: 0.3rem;
+    }
+    .ns-team__lead-mark::after {
+        background-size: 36px 36px;
     }
     .ns-philosophy__statement {
         grid-template-columns: minmax(160px, 260px) 1fr;
@@ -840,10 +850,19 @@
         grid-template-columns: 1fr 1fr;
     }
 
-    .ns-team__card--lead {
+    .ns-team__lead-mark {
+        aspect-ratio: 4 / 3;
         flex-direction: column;
-        text-align: center;
-        align-items: center;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: clamp(1.2rem, 3vw, 2rem);
+    }
+    .ns-team__lead-numeral {
+        align-self: flex-end;
+        font-size: clamp(6rem, 22vw, 11rem);
+    }
+    .ns-team__lead-triplet {
+        text-align: left;
     }
 
     .ns-philosophy__statement {
@@ -883,17 +902,22 @@
         gap: 0.6rem;
     }
 
-    .ns-team__card {
-        padding: 1.2rem 1rem;
+    .ns-team__info {
+        padding: 0.7rem 0.9rem;
     }
 
-    .ns-team__photo {
-        max-width: clamp(96px, 30vw, 140px);
-        margin-bottom: 0.8rem;
+    .ns-team__role {
+        font-size: 0.58rem;
+        letter-spacing: 0.2em;
     }
 
-    .ns-team__card--lead .ns-team__photo {
-        max-width: clamp(180px, 48vw, 240px);
+    .ns-team__lead-numeral {
+        font-size: clamp(5rem, 26vw, 9rem);
+    }
+
+    .ns-team__lead-triplet {
+        font-size: 0.62rem;
+        letter-spacing: 0.2em;
     }
 }
 
@@ -902,5 +926,15 @@
     .ns-hero__sidebar {
         animation: none;
         opacity: 1;
+    }
+    .ns-hero__heading .hero-line__inner {
+        animation: none;
+        transform: translate(0, 0);
+        opacity: 1;
+    }
+    .ns-team__card:hover .ns-team__photo,
+    .ns-team__card:hover,
+    .ns-team__card--lead:hover .ns-team__lead-numeral {
+        transform: none;
     }
 }
