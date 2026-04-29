@@ -202,15 +202,22 @@
   </style>
 </head>
 <body>
-  <!-- CRUX · Back-to-hub floating button -->
-  <a href="/admin/hub" id="crux-backhub" title="Volver al hub"
-     style="position:fixed;top:16px;left:16px;z-index:9998;display:inline-flex;align-items:center;gap:8px;padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:#78B7EE;background:rgba(19,37,60,0.85);border:1px solid rgba(120,183,238,0.3);border-radius:2px;text-decoration:none;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:color .2s,background .2s,border-color .2s,transform .25s cubic-bezier(0.16,1,0.3,1)">
-    <span style="font-size:13px">&#8592;</span>
-    <span>Hub interno</span>
-  </a>
+  <!-- CRUX · Logo + Back-to-hub fijo arriba a la izquierda -->
+  <div id="crux-topleft"
+       style="position:fixed;top:14px;left:16px;z-index:9998;display:inline-flex;align-items:center;gap:14px;">
+    <img src="../../icono-crux-transparente.png" alt="CRUX" id="crux-toplogo"
+         style="width:38px;height:38px;object-fit:contain;filter:brightness(0) invert(1) drop-shadow(0 2px 6px rgba(0,0,0,0.4));" />
+    <a href="/admin/hub" id="crux-backhub" title="Volver al hub"
+       style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:#78B7EE;background:rgba(19,37,60,0.85);border:1px solid rgba(120,183,238,0.3);border-radius:2px;text-decoration:none;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:color .2s,background .2s,border-color .2s,transform .25s cubic-bezier(0.16,1,0.3,1)">
+      <span style="font-size:13px">&#8592;</span>
+      <span>Hub interno</span>
+    </a>
+  </div>
   <style>
     #crux-backhub:hover { background: rgba(120,183,238,0.12); border-color: #78B7EE; color: #E6EDF6; transform: translateY(-1px); }
-    @media (max-width: 640px) { #crux-backhub span:last-child { display: none; } #crux-backhub { padding: 8px 10px; } }
+    #crux-toplogo { transition: opacity .2s, transform .25s cubic-bezier(0.16,1,0.3,1); opacity: 0.92; }
+    #crux-toplogo:hover { opacity: 1; transform: translateY(-1px); }
+    @media (max-width: 640px) { #crux-backhub span:last-child { display: none; } #crux-backhub { padding: 8px 10px; } #crux-toplogo { width: 32px; height: 32px; } }
   </style>
 
   <div id="root"></div>
@@ -338,7 +345,9 @@
       });
     }
 
-    const CRUX_LOGO = "assets/crux-logo.png?v=2";
+    /* Logo: PNG transparente real (relative funciona en preview local y en Vercel).
+       El filter brightness(0) invert(1) lo deja blanco puro. */
+    const CRUX_LOGO = "../../icono-crux-transparente.png";
 
     /* ── Paleta CRUX Oficial ──
        Azul CRUX #3869AB · Azul Oscuro #1E3A5F · Azul Claro #5B9BD5
@@ -882,48 +891,48 @@
        siguen siendo editables aparte. */
     const defaultMovimientos = [
       /* ── Enero 2026 — cierre agregado ── */
-      { id: "mv-0101", fecha: "2026-01-31", tipo: "ingreso",   categoria: "Consultoría",     concepto: "Igualas mensuales — enero",           importe: 54000, cliente: "Varios" },
-      { id: "mv-0102", fecha: "2026-01-28", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Subcontratación enero",               importe: 12000, cliente: "" },
-      { id: "mv-0103", fecha: "2026-01-20", tipo: "coste_dir", categoria: "Materiales",      concepto: "Materiales y hosting enero",          importe: 7200,  cliente: "" },
-      { id: "mv-0104", fecha: "2026-01-15", tipo: "coste_dir", categoria: "Otros directos",  concepto: "Otros costes directos enero",         importe: 4000,  cliente: "" },
-      { id: "mv-0105", fecha: "2026-01-05", tipo: "opex",      categoria: "Alquiler",        concepto: "Alquiler oficina — enero",            importe: 3000,  cliente: "" },
-      { id: "mv-0106", fecha: "2026-01-05", tipo: "opex",      categoria: "Software",        concepto: "Suscripciones SaaS — enero",          importe: 2300,  cliente: "" },
-      { id: "mv-0107", fecha: "2026-01-10", tipo: "opex",      categoria: "Marketing",       concepto: "Marketing y ads — enero",             importe: 4200,  cliente: "" },
-      { id: "mv-0108", fecha: "2026-01-28", tipo: "opex",      categoria: "Salarios",        concepto: "Salarios administrativos — enero",    importe: 11500, cliente: "" },
+      { id: "mv-0101", fecha: "2026-01-31", tipo: "ingreso",   categoria: "Consultoría",     concepto: "Igualas mensuales — enero",           importe: 54000, cliente: "Varios", iva: 21 },
+      { id: "mv-0102", fecha: "2026-01-28", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Subcontratación enero",               importe: 12000, cliente: "", iva: 21 },
+      { id: "mv-0103", fecha: "2026-01-20", tipo: "coste_dir", categoria: "Materiales",      concepto: "Materiales y hosting enero",          importe: 7200,  cliente: "", iva: 21 },
+      { id: "mv-0104", fecha: "2026-01-15", tipo: "coste_dir", categoria: "Otros directos",  concepto: "Otros costes directos enero",         importe: 4000,  cliente: "", iva: 21 },
+      { id: "mv-0105", fecha: "2026-01-05", tipo: "opex",      categoria: "Alquiler",        concepto: "Alquiler oficina — enero",            importe: 3000,  cliente: "", iva: 21 },
+      { id: "mv-0106", fecha: "2026-01-05", tipo: "opex",      categoria: "Software",        concepto: "Suscripciones SaaS — enero",          importe: 2300,  cliente: "", iva: 21 },
+      { id: "mv-0107", fecha: "2026-01-10", tipo: "opex",      categoria: "Marketing",       concepto: "Marketing y ads — enero",             importe: 4200,  cliente: "", iva: 21 },
+      { id: "mv-0108", fecha: "2026-01-28", tipo: "opex",      categoria: "Salarios",        concepto: "Salarios administrativos — enero",    importe: 11500, cliente: "", iva: 0 },
 
       /* ── Febrero 2026 ── */
-      { id: "mv-0201", fecha: "2026-02-28", tipo: "ingreso",   categoria: "Consultoría",     concepto: "Igualas mensuales — febrero",         importe: 55500, cliente: "Varios" },
-      { id: "mv-0202", fecha: "2026-02-26", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Subcontratación febrero",             importe: 12200, cliente: "" },
-      { id: "mv-0203", fecha: "2026-02-18", tipo: "coste_dir", categoria: "Materiales",      concepto: "Materiales y hosting febrero",        importe: 7500,  cliente: "" },
-      { id: "mv-0204", fecha: "2026-02-15", tipo: "coste_dir", categoria: "Otros directos",  concepto: "Otros costes directos febrero",       importe: 3900,  cliente: "" },
-      { id: "mv-0205", fecha: "2026-02-05", tipo: "opex",      categoria: "Alquiler",        concepto: "Alquiler oficina — febrero",          importe: 3000,  cliente: "" },
-      { id: "mv-0206", fecha: "2026-02-05", tipo: "opex",      categoria: "Software",        concepto: "Suscripciones SaaS — febrero",        importe: 2400,  cliente: "" },
-      { id: "mv-0207", fecha: "2026-02-10", tipo: "opex",      categoria: "Marketing",       concepto: "Marketing y ads — febrero",           importe: 4200,  cliente: "" },
-      { id: "mv-0208", fecha: "2026-02-27", tipo: "opex",      categoria: "Salarios",        concepto: "Salarios administrativos — febrero",  importe: 11600, cliente: "" },
+      { id: "mv-0201", fecha: "2026-02-28", tipo: "ingreso",   categoria: "Consultoría",     concepto: "Igualas mensuales — febrero",         importe: 55500, cliente: "Varios", iva: 21 },
+      { id: "mv-0202", fecha: "2026-02-26", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Subcontratación febrero",             importe: 12200, cliente: "", iva: 21 },
+      { id: "mv-0203", fecha: "2026-02-18", tipo: "coste_dir", categoria: "Materiales",      concepto: "Materiales y hosting febrero",        importe: 7500,  cliente: "", iva: 21 },
+      { id: "mv-0204", fecha: "2026-02-15", tipo: "coste_dir", categoria: "Otros directos",  concepto: "Otros costes directos febrero",       importe: 3900,  cliente: "", iva: 21 },
+      { id: "mv-0205", fecha: "2026-02-05", tipo: "opex",      categoria: "Alquiler",        concepto: "Alquiler oficina — febrero",          importe: 3000,  cliente: "", iva: 21 },
+      { id: "mv-0206", fecha: "2026-02-05", tipo: "opex",      categoria: "Software",        concepto: "Suscripciones SaaS — febrero",        importe: 2400,  cliente: "", iva: 21 },
+      { id: "mv-0207", fecha: "2026-02-10", tipo: "opex",      categoria: "Marketing",       concepto: "Marketing y ads — febrero",           importe: 4200,  cliente: "", iva: 21 },
+      { id: "mv-0208", fecha: "2026-02-27", tipo: "opex",      categoria: "Salarios",        concepto: "Salarios administrativos — febrero",  importe: 11600, cliente: "", iva: 0 },
 
       /* ── Marzo 2026 ── */
-      { id: "mv-0301", fecha: "2026-03-31", tipo: "ingreso",   categoria: "Consultoría",     concepto: "Igualas mensuales — marzo",           importe: 56000, cliente: "Varios" },
-      { id: "mv-0302", fecha: "2026-03-27", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Subcontratación marzo",               importe: 12400, cliente: "" },
-      { id: "mv-0303", fecha: "2026-03-18", tipo: "coste_dir", categoria: "Materiales",      concepto: "Materiales y hosting marzo",          importe: 7700,  cliente: "" },
-      { id: "mv-0304", fecha: "2026-03-15", tipo: "coste_dir", categoria: "Otros directos",  concepto: "Otros costes directos marzo",         importe: 3900,  cliente: "" },
-      { id: "mv-0305", fecha: "2026-03-05", tipo: "opex",      categoria: "Alquiler",        concepto: "Alquiler oficina — marzo",            importe: 3000,  cliente: "" },
-      { id: "mv-0306", fecha: "2026-03-05", tipo: "opex",      categoria: "Software",        concepto: "Suscripciones SaaS — marzo",          importe: 2500,  cliente: "" },
-      { id: "mv-0307", fecha: "2026-03-10", tipo: "opex",      categoria: "Marketing",       concepto: "Marketing y ads — marzo",             importe: 4200,  cliente: "" },
-      { id: "mv-0308", fecha: "2026-03-28", tipo: "opex",      categoria: "Salarios",        concepto: "Salarios administrativos — marzo",    importe: 11800, cliente: "" },
+      { id: "mv-0301", fecha: "2026-03-31", tipo: "ingreso",   categoria: "Consultoría",     concepto: "Igualas mensuales — marzo",           importe: 56000, cliente: "Varios", iva: 21 },
+      { id: "mv-0302", fecha: "2026-03-27", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Subcontratación marzo",               importe: 12400, cliente: "", iva: 21 },
+      { id: "mv-0303", fecha: "2026-03-18", tipo: "coste_dir", categoria: "Materiales",      concepto: "Materiales y hosting marzo",          importe: 7700,  cliente: "", iva: 21 },
+      { id: "mv-0304", fecha: "2026-03-15", tipo: "coste_dir", categoria: "Otros directos",  concepto: "Otros costes directos marzo",         importe: 3900,  cliente: "", iva: 21 },
+      { id: "mv-0305", fecha: "2026-03-05", tipo: "opex",      categoria: "Alquiler",        concepto: "Alquiler oficina — marzo",            importe: 3000,  cliente: "", iva: 21 },
+      { id: "mv-0306", fecha: "2026-03-05", tipo: "opex",      categoria: "Software",        concepto: "Suscripciones SaaS — marzo",          importe: 2500,  cliente: "", iva: 21 },
+      { id: "mv-0307", fecha: "2026-03-10", tipo: "opex",      categoria: "Marketing",       concepto: "Marketing y ads — marzo",             importe: 4200,  cliente: "", iva: 21 },
+      { id: "mv-0308", fecha: "2026-03-28", tipo: "opex",      categoria: "Salarios",        concepto: "Salarios administrativos — marzo",    importe: 11800, cliente: "", iva: 0 },
 
       /* ── Abril 2026 — mes en curso, detalle realista ── */
-      { id: "mv-0401", fecha: "2026-04-03", tipo: "ingreso",   categoria: "Consultoría",     concepto: "Iguala abril — Cliente A",                   importe: 18500, cliente: "Cliente A" },
-      { id: "mv-0402", fecha: "2026-04-08", tipo: "ingreso",   categoria: "Proyecto",        concepto: "Hito 2 web corporativa — Cliente B",         importe: 12000, cliente: "Cliente B" },
-      { id: "mv-0403", fecha: "2026-04-15", tipo: "ingreso",   categoria: "Consultoría",     concepto: "Iguala abril — Cliente C",                   importe: 14200, cliente: "Cliente C" },
-      { id: "mv-0404", fecha: "2026-04-18", tipo: "ingreso",   categoria: "Proyecto",        concepto: "Landing page entregada — Cliente D",         importe: 8500,  cliente: "Cliente D" },
-      { id: "mv-0405", fecha: "2026-04-05", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Freelance diseño — proyecto Cliente B",      importe: 4200,  cliente: "Cliente B" },
-      { id: "mv-0406", fecha: "2026-04-12", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Freelance dev — proyecto Cliente D",         importe: 3600,  cliente: "Cliente D" },
-      { id: "mv-0407", fecha: "2026-04-15", tipo: "coste_dir", categoria: "Materiales",      concepto: "Hosting y dominios — Q2",                    importe: 480,   cliente: "" },
-      { id: "mv-0408", fecha: "2026-04-02", tipo: "opex",      categoria: "Alquiler",        concepto: "Alquiler oficina Palma — abril",             importe: 3000,  cliente: "" },
-      { id: "mv-0409", fecha: "2026-04-03", tipo: "opex",      categoria: "Software",        concepto: "Suscripciones SaaS — abril",                 importe: 2450,  cliente: "" },
-      { id: "mv-0410", fecha: "2026-04-10", tipo: "opex",      categoria: "Marketing",       concepto: "Ads LinkedIn — campaña Q2",                  importe: 1800,  cliente: "" },
-      { id: "mv-0411", fecha: "2026-04-17", tipo: "opex",      categoria: "Marketing",       concepto: "Rediseño materiales comerciales",            importe: 2400,  cliente: "" },
-      { id: "mv-0412", fecha: "2026-04-30", tipo: "opex",      categoria: "Salarios",        concepto: "Salarios administrativos — abril",           importe: 11900, cliente: "" },
+      { id: "mv-0401", fecha: "2026-04-03", tipo: "ingreso",   categoria: "Consultoría",     concepto: "Iguala abril — Cliente A",                   importe: 18500, cliente: "Cliente A", iva: 21 },
+      { id: "mv-0402", fecha: "2026-04-08", tipo: "ingreso",   categoria: "Proyecto",        concepto: "Hito 2 web corporativa — Cliente B",         importe: 12000, cliente: "Cliente B", iva: 21 },
+      { id: "mv-0403", fecha: "2026-04-15", tipo: "ingreso",   categoria: "Consultoría",     concepto: "Iguala abril — Cliente C",                   importe: 14200, cliente: "Cliente C", iva: 21 },
+      { id: "mv-0404", fecha: "2026-04-18", tipo: "ingreso",   categoria: "Proyecto",        concepto: "Landing page entregada — Cliente D",         importe: 8500,  cliente: "Cliente D", iva: 21 },
+      { id: "mv-0405", fecha: "2026-04-05", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Freelance diseño — proyecto Cliente B",      importe: 4200,  cliente: "Cliente B", iva: 21 },
+      { id: "mv-0406", fecha: "2026-04-12", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Freelance dev — proyecto Cliente D",         importe: 3600,  cliente: "Cliente D", iva: 21 },
+      { id: "mv-0407", fecha: "2026-04-15", tipo: "coste_dir", categoria: "Materiales",      concepto: "Hosting y dominios — Q2",                    importe: 480,   cliente: "", iva: 21 },
+      { id: "mv-0408", fecha: "2026-04-02", tipo: "opex",      categoria: "Alquiler",        concepto: "Alquiler oficina Palma — abril",             importe: 3000,  cliente: "", iva: 21 },
+      { id: "mv-0409", fecha: "2026-04-03", tipo: "opex",      categoria: "Software",        concepto: "Suscripciones SaaS — abril",                 importe: 2450,  cliente: "", iva: 21 },
+      { id: "mv-0410", fecha: "2026-04-10", tipo: "opex",      categoria: "Marketing",       concepto: "Ads LinkedIn — campaña Q2",                  importe: 1800,  cliente: "", iva: 21 },
+      { id: "mv-0411", fecha: "2026-04-17", tipo: "opex",      categoria: "Marketing",       concepto: "Rediseño materiales comerciales",            importe: 2400,  cliente: "", iva: 21 },
+      { id: "mv-0412", fecha: "2026-04-30", tipo: "opex",      categoria: "Salarios",        concepto: "Salarios administrativos — abril",           importe: 11900, cliente: "", iva: 0 },
     ];
 
     /* Catálogo sugerido de categorías por tipo — no limita (el usuario puede escribir libre) */
@@ -935,6 +944,33 @@
 
     const TIPO_LABEL = { ingreso: "Ingreso", coste_dir: "Coste directo", opex: "OPEX" };
     const TIPO_COLOR = { ingreso: "#4FA68C", coste_dir: "#3869AB", opex: "#AB8338" };
+
+    /* IVA — los importes de los movimientos son la BASE IMPONIBLE (sin IVA).
+       El total con IVA y la liquidación trimestral se calculan a partir de aquí.
+       Tipos vigentes en España: 0 % (exento), 4 % (superreducido), 10 % (reducido), 21 % (general). */
+    const TIPOS_IVA = [0, 4, 10, 21];
+    const IVA_DEFAULT = 21;
+    function calcIVA(importe, tipo) { return Number(importe || 0) * Number(tipo || 0) / 100; }
+    function calcTotalConIVA(importe, tipo) { return Number(importe || 0) + calcIVA(importe, tipo); }
+    /* Trimestre (0-3) de un mes (0-11): T1=Ene-Mar, T2=Abr-Jun, T3=Jul-Sep, T4=Oct-Dic */
+    function trimestreDeMes(mes) { return Math.floor(mes / 3); }
+    function mesesDeTrimestre(t) { return [t * 3, t * 3 + 1, t * 3 + 2]; }
+    /* Liquidación de IVA por trimestre y año:
+       repercutido = sum(IVA de ingresos) — el IVA cobrado al cliente
+       soportado   = sum(IVA de costes_dir + opex) — el IVA pagado a proveedores
+       a_liquidar  = repercutido − soportado (positivo: a pagar; negativo: devolución/compensar) */
+    function ivaTrimestre(movs, year, trimestre) {
+      var meses = mesesDeTrimestre(trimestre);
+      var rep = 0, sop = 0;
+      movs.forEach(function(m) {
+        var p = parseFechaISO(m.fecha);
+        if (!p || p.year !== year || meses.indexOf(p.month) === -1) return;
+        var ivaMov = calcIVA(m.importe, m.iva == null ? IVA_DEFAULT : m.iva);
+        if (m.tipo === "ingreso") rep += ivaMov;
+        else if (m.tipo === "coste_dir" || m.tipo === "opex") sop += ivaMov;
+      });
+      return { repercutido: rep, soportado: sop, aLiquidar: rep - sop };
+    }
 
     /* Helpers: parsear fecha ISO + utilidades de derivación */
     function parseFechaISO(f) {
@@ -1064,7 +1100,10 @@
         { value: "coste_dir", label: "Coste dir." },
         { value: "opex",      label: "OPEX" },
       ];
-      return React.createElement("div", { className: "crux-row", style: { display: "grid", gridTemplateColumns: "130px 130px 170px 1fr 170px 140px 36px", gap: 0, padding: "8px 18px", borderBottom: idx < total - 1 ? "1px solid " + C.border : "none", alignItems: "center" } },
+      var ivaOpts = TIPOS_IVA.map(function(v) { return { value: String(v), label: v + " %" }; });
+      var ivaActual = m.iva == null ? IVA_DEFAULT : Number(m.iva);
+      var totalConIVA = calcTotalConIVA(m.importe, ivaActual);
+      return React.createElement("div", { className: "crux-row", style: { display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 130px 130px 70px 36px", gap: 0, padding: "8px 18px", borderBottom: idx < total - 1 ? "1px solid " + C.border : "none", alignItems: "center" } },
         /* Fecha */
         React.createElement("input", {
           type: "date", value: m.fecha || "",
@@ -1106,8 +1145,31 @@
         React.createElement(EditableText, { value: m.concepto || "", onChange: function(v) { updateMov(m.id, "concepto", v); }, style: { fontWeight: 400, fontSize: 12 } }),
         /* Cliente */
         React.createElement(EditableText, { value: m.cliente || "", onChange: function(v) { updateMov(m.id, "cliente", v); }, style: { fontWeight: 400, fontSize: 11, color: C.textDim } }),
-        /* Importe */
-        React.createElement(EditableCell, { value: Number(m.importe || 0), onChange: function(v) { updateMov(m.id, "importe", Number(v) || 0); }, style: { fontSize: 13, fontWeight: 600, color: tone, textAlign: "right" } }),
+        /* Importe — base imponible (sin IVA), con total c/IVA debajo en pequeño */
+        React.createElement("div", { style: { display: "flex", flexDirection: "column", alignItems: "stretch" } },
+          React.createElement(EditableCell, { value: Number(m.importe || 0), onChange: function(v) { updateMov(m.id, "importe", Number(v) || 0); }, style: { fontSize: 13, fontWeight: 600, color: tone, textAlign: "right" } }),
+          ivaActual > 0 ? React.createElement("span", { title: "Total con IVA " + ivaActual + " %", style: { textAlign: "right", fontSize: 9, fontFamily: mono, color: C.textDim, paddingRight: 8, marginTop: 1 } }, fmt(Math.round(totalConIVA)) + " € c/IVA") : null
+        ),
+        /* IVA — selector pequeño, chevron al tono del tipo */
+        React.createElement("div", { style: { padding: "0 4px 0 0" } },
+          React.createElement(SelectField, {
+            value: String(ivaActual),
+            onChange: function(v) { updateMov(m.id, "iva", Number(v)); },
+            options: ivaOpts,
+            size: "xs",
+            ariaLabel: "Tipo de IVA",
+            chevronColor: C.textDim,
+            style: {
+              background: "transparent",
+              borderColor: "transparent",
+              color: C.textSec,
+              fontWeight: 600,
+              fontSize: 10,
+              fontFamily: mono,
+              width: "100%",
+            }
+          })
+        ),
         /* Delete — doble clic para confirmar (sin modal nativo) */
         React.createElement("button", {
           onClick: function() { if (armado) { removeMov(m.id); } else { setArmado(true); } },
@@ -1195,7 +1257,7 @@
         var p = parseFechaISO(today);
         var fecha = (p && p.year === selAnyo && p.month === selMes && !vistaAnual) ? today : (selAnyo + "-" + String(selMes + 1).padStart(2, "0") + "-15");
         if (vistaAnual) fecha = today;
-        var nuevo = { id: nuevoMovId(), fecha: fecha, tipo: tipo, categoria: (CATEGORIAS[tipo] && CATEGORIAS[tipo][0]) || "", concepto: "", importe: 0, cliente: "" };
+        var nuevo = { id: nuevoMovId(), fecha: fecha, tipo: tipo, categoria: (CATEGORIAS[tipo] && CATEGORIAS[tipo][0]) || "", concepto: "", importe: 0, cliente: "", iva: IVA_DEFAULT };
         setMovimientos(function(ms) { return [nuevo].concat(ms); });
       };
 
@@ -1284,15 +1346,16 @@
           {/* Tabla de movimientos */}
           <Card style={{ padding: 0, overflow: "hidden" }}>
             <div style={{ overflowX: "auto" }}>
-              <div style={{ minWidth: 1080 }}>
+              <div style={{ minWidth: 1140 }}>
                 {/* Header */}
-                <div style={{ display: "grid", gridTemplateColumns: "130px 130px 170px 1fr 170px 140px 36px", gap: 0, padding: "12px 18px", borderBottom: "1px solid " + C.border, background: C.surfaceHover, fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 130px 130px 70px 36px", gap: 0, padding: "12px 18px", borderBottom: "1px solid " + C.border, background: C.surfaceHover, fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 }}>
                   <span>Fecha</span>
                   <span>Tipo</span>
                   <span>Categoría</span>
                   <span>Concepto</span>
                   <span>Cliente</span>
-                  <span style={{ textAlign: "right" }}>Importe</span>
+                  <span style={{ textAlign: "right" }}>Importe (base)</span>
+                  <span style={{ textAlign: "center" }}>IVA</span>
                   <span></span>
                 </div>
                 {/* Rows */}
@@ -1313,22 +1376,29 @@
                     removeMov: removeMov,
                   });
                 })}
-                {/* Footer con totales */}
-                {filtrados.length > 0 && (
-                  <div style={{ display: "grid", gridTemplateColumns: "130px 130px 170px 1fr 170px 140px 36px", gap: 0, padding: "12px 18px", borderTop: "2px solid " + C.border, background: C.surfaceHover, alignItems: "center" }}>
-                    <span style={{ gridColumn: "1 / 6", fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 }}>
-                      Total {vistaAnual ? "año " + selAnyo : MESES_NOMBRE[selMes] + " " + selAnyo} · {filtroTipo === "todos" ? "todos los tipos" : TIPO_LABEL[filtroTipo]}
-                    </span>
-                    <span style={{ textAlign: "right", fontSize: 14, fontFamily: mono, fontWeight: 700, color: C.white }}>
-                      {fmt(
-                        (filtroTipo === "todos" || filtroTipo === "ingreso" ? totPeriodo.ingreso : 0)
-                        + (filtroTipo === "coste_dir" ? totPeriodo.coste_dir : 0)
-                        + (filtroTipo === "opex" ? totPeriodo.opex : 0)
-                      )} €
-                    </span>
-                    <span></span>
-                  </div>
-                )}
+                {/* Footer con totales (base + IVA) */}
+                {filtrados.length > 0 && (function(){
+                  var totalBase = (filtroTipo === "todos" || filtroTipo === "ingreso" ? totPeriodo.ingreso : 0)
+                                + (filtroTipo === "coste_dir" ? totPeriodo.coste_dir : 0)
+                                + (filtroTipo === "opex" ? totPeriodo.opex : 0);
+                  var totalIVA = filtrados.reduce(function(s, m) {
+                    if (filtroTipo !== "todos" && m.tipo !== filtroTipo) return s;
+                    return s + calcIVA(m.importe, m.iva == null ? IVA_DEFAULT : m.iva);
+                  }, 0);
+                  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 130px 130px 70px 36px", gap: 0, padding: "12px 18px", borderTop: "2px solid " + C.border, background: C.surfaceHover, alignItems: "center" } },
+                    React.createElement("span", { style: { gridColumn: "1 / 6", fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 } },
+                      "Total " + (vistaAnual ? "año " + selAnyo : MESES_NOMBRE[selMes] + " " + selAnyo) + " · " + (filtroTipo === "todos" ? "todos los tipos" : TIPO_LABEL[filtroTipo])
+                    ),
+                    React.createElement("div", { style: { textAlign: "right" } },
+                      React.createElement("div", { style: { fontSize: 14, fontFamily: mono, fontWeight: 700, color: C.white } }, fmt(Math.round(totalBase)) + " €"),
+                      totalIVA > 0 ? React.createElement("div", { style: { fontSize: 9, fontFamily: mono, color: C.textDim, marginTop: 2 } }, fmt(Math.round(totalBase + totalIVA)) + " € c/IVA") : null
+                    ),
+                    React.createElement("div", { style: { textAlign: "center" } },
+                      totalIVA > 0 ? React.createElement("span", { title: "IVA del periodo (todos los tipos seleccionados)", style: { fontSize: 11, fontFamily: mono, color: C.textDim, fontWeight: 600 } }, "+" + fmt(Math.round(totalIVA))) : React.createElement("span", { style: { fontSize: 10, color: C.textDim } }, "—")
+                    ),
+                    React.createElement("span", null)
+                  );
+                })()}
               </div>
             </div>
           </Card>
@@ -2257,6 +2327,56 @@
               </div>
             </Card>
           )}
+
+          {/* ── IVA trimestral del año en curso ── */}
+          {(function(){
+            var trims = [0, 1, 2, 3].map(function(t) { return Object.assign({ q: t }, ivaTrimestre(movimientos, hoyAnyo, t)); });
+            var trimActual = trimestreDeMes(hoyMes);
+            var totalAnual = trims.reduce(function(a, t) { return { rep: a.rep + t.repercutido, sop: a.sop + t.soportado, liq: a.liq + t.aLiquidar }; }, { rep: 0, sop: 0, liq: 0 });
+            var hayDatos = totalAnual.rep > 0 || totalAnual.sop > 0;
+            return React.createElement(Card, { style: { marginBottom: 16 } },
+              React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 } },
+                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10 } },
+                  React.createElement(CardLabel, null, "IVA Trimestral " + hoyAnyo),
+                  React.createElement("span", { style: { fontSize: 8, color: C.accent, background: C.accentGlow, padding: "2px 6px", borderRadius: 3, fontWeight: 700, letterSpacing: 0.4 } }, "DERIVADO")
+                ),
+                React.createElement("span", { style: { fontSize: 11, color: C.textDim, fontStyle: "italic" } }, "Repercutido − Soportado de los movimientos del trimestre")
+              ),
+              !hayDatos ? React.createElement("div", { style: { padding: "20px 0", textAlign: "center", fontSize: 11, color: C.textDim } }, "Sin movimientos con IVA este año.") :
+              React.createElement("div", { className: "crux-grid-4", style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10 } },
+                trims.map(function(t) {
+                  var esActual = t.q === trimActual;
+                  var aPagar = t.aLiquidar >= 0;
+                  var color = t.aLiquidar > 0 ? C.amber : t.aLiquidar < 0 ? C.green : C.textDim;
+                  return React.createElement("div", { key: t.q, style: { background: esActual ? C.accentGlow : "rgba(255,255,255,0.02)", borderRadius: 8, padding: "14px 14px", borderLeft: "3px solid " + (esActual ? C.accent : C.border) } },
+                    React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 } },
+                      React.createElement("span", { style: { fontSize: 11, fontWeight: 700, color: esActual ? C.accent2 : C.textSec, letterSpacing: 0.4 } }, "Q" + (t.q + 1)),
+                      esActual ? React.createElement("span", { style: { fontSize: 8, color: C.accent, background: "rgba(56,105,171,0.18)", padding: "1px 6px", borderRadius: 3, fontWeight: 700, letterSpacing: 0.4 } }, "ACTUAL") : null
+                    ),
+                    React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "3px 0" } },
+                      React.createElement("span", { style: { fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.3 } }, "Repercutido"),
+                      React.createElement("span", { style: { fontSize: 11, fontFamily: mono, color: C.text } }, fmt(Math.round(t.repercutido)) + " €")
+                    ),
+                    React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "3px 0" } },
+                      React.createElement("span", { style: { fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.3 } }, "Soportado"),
+                      React.createElement("span", { style: { fontSize: 11, fontFamily: mono, color: C.text } }, "−" + fmt(Math.round(t.soportado)) + " €")
+                    ),
+                    React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "8px 0 0", marginTop: 6, borderTop: "1px solid " + C.border } },
+                      React.createElement("span", { style: { fontSize: 9, fontWeight: 700, color: C.textSec, textTransform: "uppercase", letterSpacing: 0.3 } }, aPagar ? "A pagar" : "A devolver"),
+                      React.createElement("span", { style: { fontSize: 14, fontFamily: mono, fontWeight: 700, color: color } }, (t.aLiquidar > 0 ? "+" : "") + fmt(Math.round(t.aLiquidar)) + " €")
+                    )
+                  );
+                })
+              ),
+              hayDatos ? React.createElement("div", { style: { paddingTop: 12, borderTop: "1px solid " + C.border, marginTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center" } },
+                React.createElement("span", { style: { fontSize: 10, color: C.textDim, fontStyle: "italic" } }, "Liquidación trimestral mod. 303 — modelo simplificado"),
+                React.createElement("div", { style: { display: "flex", gap: 16, alignItems: "baseline" } },
+                  React.createElement("span", { style: { fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.4, fontWeight: 700 } }, "Saldo anual:"),
+                  React.createElement("span", { style: { fontSize: 14, fontFamily: mono, fontWeight: 700, color: totalAnual.liq > 0 ? C.amber : totalAnual.liq < 0 ? C.green : C.textDim } }, (totalAnual.liq > 0 ? "+" : "") + fmt(Math.round(totalAnual.liq)) + " €")
+                )
+              ) : null
+            );
+          })()}
 
           {/* ── Cuentas por Cobrar (estático, a día de hoy) ── */}
           <Card style={{ marginBottom: 16 }}>
