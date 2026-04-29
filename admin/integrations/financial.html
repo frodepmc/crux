@@ -202,22 +202,19 @@
   </style>
 </head>
 <body>
-  <!-- CRUX · Logo + Back-to-hub fijo arriba a la izquierda -->
-  <div id="crux-topleft"
-       style="position:fixed;top:14px;left:16px;z-index:9998;display:inline-flex;align-items:center;gap:16px;">
-    <img src="../../crux-logo-header.png" alt="CRUX Consulting" id="crux-toplogo"
-         style="height:30px;width:auto;object-fit:contain;filter:brightness(0) invert(1) drop-shadow(0 2px 6px rgba(0,0,0,0.4));" />
-    <a href="/admin/hub" id="crux-backhub" title="Volver al hub"
-       style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:#78B7EE;background:rgba(19,37,60,0.85);border:1px solid rgba(120,183,238,0.3);border-radius:2px;text-decoration:none;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:color .2s,background .2s,border-color .2s,transform .25s cubic-bezier(0.16,1,0.3,1)">
-      <span style="font-size:13px">&#8592;</span>
-      <span>Hub interno</span>
-    </a>
-  </div>
+  <!-- CRUX · Logo fijo arriba-izquierda como link al hub interno -->
+  <a href="/admin/hub" id="crux-toplink" title="Volver al hub interno"
+     style="position:fixed;top:14px;left:16px;z-index:9998;display:inline-flex;align-items:center;text-decoration:none;outline:none;">
+    <img src="../../crux-logo-header.png" alt="CRUX Consulting · Hub interno" id="crux-toplogo"
+         style="height:32px;width:auto;object-fit:contain;filter:brightness(0) invert(1) drop-shadow(0 2px 6px rgba(0,0,0,0.4));" />
+  </a>
   <style>
-    #crux-backhub:hover { background: rgba(120,183,238,0.12); border-color: #78B7EE; color: #E6EDF6; transform: translateY(-1px); }
-    #crux-toplogo { transition: opacity .2s, transform .25s cubic-bezier(0.16,1,0.3,1); opacity: 0.95; }
-    #crux-toplogo:hover { opacity: 1; transform: translateY(-1px); }
-    @media (max-width: 640px) { #crux-backhub span:last-child { display: none; } #crux-backhub { padding: 8px 10px; } #crux-toplogo { height: 26px; } }
+    #crux-toplink { transition: transform .25s cubic-bezier(0.16,1,0.3,1); }
+    #crux-toplogo { transition: opacity .2s; opacity: 0.92; }
+    #crux-toplink:hover #crux-toplogo { opacity: 1; }
+    #crux-toplink:hover { transform: translateY(-1px); }
+    #crux-toplink:focus-visible { outline: 2px solid #78B7EE; outline-offset: 4px; border-radius: 4px; }
+    @media (max-width: 640px) { #crux-toplogo { height: 26px; } }
   </style>
 
   <div id="root"></div>
