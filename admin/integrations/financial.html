@@ -889,47 +889,47 @@
     const defaultMovimientos = [
       /* ── Enero 2026 — cierre agregado ── */
       { id: "mv-0101", fecha: "2026-01-31", tipo: "ingreso",   categoria: "Consultoría",     concepto: "Igualas mensuales — enero",           importe: 54000, cliente: "Varios", iva: 21 },
-      { id: "mv-0102", fecha: "2026-01-28", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Subcontratación enero",               importe: 12000, cliente: "", iva: 21 },
-      { id: "mv-0103", fecha: "2026-01-20", tipo: "coste_dir", categoria: "Materiales",      concepto: "Materiales y hosting enero",          importe: 7200,  cliente: "", iva: 21 },
-      { id: "mv-0104", fecha: "2026-01-15", tipo: "coste_dir", categoria: "Otros directos",  concepto: "Otros costes directos enero",         importe: 4000,  cliente: "", iva: 21 },
-      { id: "mv-0105", fecha: "2026-01-05", tipo: "opex",      categoria: "Alquiler",        concepto: "Alquiler oficina — enero",            importe: 3000,  cliente: "", iva: 21 },
-      { id: "mv-0106", fecha: "2026-01-05", tipo: "opex",      categoria: "Software",        concepto: "Suscripciones SaaS — enero",          importe: 2300,  cliente: "", iva: 21 },
-      { id: "mv-0107", fecha: "2026-01-10", tipo: "opex",      categoria: "Marketing",       concepto: "Marketing y ads — enero",             importe: 4200,  cliente: "", iva: 21 },
-      { id: "mv-0108", fecha: "2026-01-28", tipo: "opex",      categoria: "Salarios",        concepto: "Salarios administrativos — enero",    importe: 11500, cliente: "", iva: 0 },
+      { id: "mv-0102", fecha: "2026-01-28", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Subcontratación enero",               importe: 12000, cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0103", fecha: "2026-01-20", tipo: "coste_dir", categoria: "Materiales",      concepto: "Materiales y hosting enero",          importe: 7200,  cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0104", fecha: "2026-01-15", tipo: "coste_dir", categoria: "Otros directos",  concepto: "Otros costes directos enero",         importe: 4000,  cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0105", fecha: "2026-01-05", tipo: "opex",      categoria: "Alquiler",        concepto: "Alquiler oficina — enero",            importe: 3000,  cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0106", fecha: "2026-01-05", tipo: "opex",      categoria: "Software",        concepto: "Suscripciones SaaS — enero",          importe: 2300,  cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0107", fecha: "2026-01-10", tipo: "opex",      categoria: "Marketing",       concepto: "Marketing y ads — enero",             importe: 4200,  cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0108", fecha: "2026-01-28", tipo: "opex",      categoria: "Salarios",        concepto: "Salarios administrativos — enero",    importe: 11500, cliente: "", iva: 0, ivaDeducible: true },
 
       /* ── Febrero 2026 ── */
       { id: "mv-0201", fecha: "2026-02-28", tipo: "ingreso",   categoria: "Consultoría",     concepto: "Igualas mensuales — febrero",         importe: 55500, cliente: "Varios", iva: 21 },
-      { id: "mv-0202", fecha: "2026-02-26", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Subcontratación febrero",             importe: 12200, cliente: "", iva: 21 },
-      { id: "mv-0203", fecha: "2026-02-18", tipo: "coste_dir", categoria: "Materiales",      concepto: "Materiales y hosting febrero",        importe: 7500,  cliente: "", iva: 21 },
-      { id: "mv-0204", fecha: "2026-02-15", tipo: "coste_dir", categoria: "Otros directos",  concepto: "Otros costes directos febrero",       importe: 3900,  cliente: "", iva: 21 },
-      { id: "mv-0205", fecha: "2026-02-05", tipo: "opex",      categoria: "Alquiler",        concepto: "Alquiler oficina — febrero",          importe: 3000,  cliente: "", iva: 21 },
-      { id: "mv-0206", fecha: "2026-02-05", tipo: "opex",      categoria: "Software",        concepto: "Suscripciones SaaS — febrero",        importe: 2400,  cliente: "", iva: 21 },
-      { id: "mv-0207", fecha: "2026-02-10", tipo: "opex",      categoria: "Marketing",       concepto: "Marketing y ads — febrero",           importe: 4200,  cliente: "", iva: 21 },
-      { id: "mv-0208", fecha: "2026-02-27", tipo: "opex",      categoria: "Salarios",        concepto: "Salarios administrativos — febrero",  importe: 11600, cliente: "", iva: 0 },
+      { id: "mv-0202", fecha: "2026-02-26", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Subcontratación febrero",             importe: 12200, cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0203", fecha: "2026-02-18", tipo: "coste_dir", categoria: "Materiales",      concepto: "Materiales y hosting febrero",        importe: 7500,  cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0204", fecha: "2026-02-15", tipo: "coste_dir", categoria: "Otros directos",  concepto: "Otros costes directos febrero",       importe: 3900,  cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0205", fecha: "2026-02-05", tipo: "opex",      categoria: "Alquiler",        concepto: "Alquiler oficina — febrero",          importe: 3000,  cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0206", fecha: "2026-02-05", tipo: "opex",      categoria: "Software",        concepto: "Suscripciones SaaS — febrero",        importe: 2400,  cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0207", fecha: "2026-02-10", tipo: "opex",      categoria: "Marketing",       concepto: "Marketing y ads — febrero",           importe: 4200,  cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0208", fecha: "2026-02-27", tipo: "opex",      categoria: "Salarios",        concepto: "Salarios administrativos — febrero",  importe: 11600, cliente: "", iva: 0, ivaDeducible: true },
 
       /* ── Marzo 2026 ── */
       { id: "mv-0301", fecha: "2026-03-31", tipo: "ingreso",   categoria: "Consultoría",     concepto: "Igualas mensuales — marzo",           importe: 56000, cliente: "Varios", iva: 21 },
-      { id: "mv-0302", fecha: "2026-03-27", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Subcontratación marzo",               importe: 12400, cliente: "", iva: 21 },
-      { id: "mv-0303", fecha: "2026-03-18", tipo: "coste_dir", categoria: "Materiales",      concepto: "Materiales y hosting marzo",          importe: 7700,  cliente: "", iva: 21 },
-      { id: "mv-0304", fecha: "2026-03-15", tipo: "coste_dir", categoria: "Otros directos",  concepto: "Otros costes directos marzo",         importe: 3900,  cliente: "", iva: 21 },
-      { id: "mv-0305", fecha: "2026-03-05", tipo: "opex",      categoria: "Alquiler",        concepto: "Alquiler oficina — marzo",            importe: 3000,  cliente: "", iva: 21 },
-      { id: "mv-0306", fecha: "2026-03-05", tipo: "opex",      categoria: "Software",        concepto: "Suscripciones SaaS — marzo",          importe: 2500,  cliente: "", iva: 21 },
-      { id: "mv-0307", fecha: "2026-03-10", tipo: "opex",      categoria: "Marketing",       concepto: "Marketing y ads — marzo",             importe: 4200,  cliente: "", iva: 21 },
-      { id: "mv-0308", fecha: "2026-03-28", tipo: "opex",      categoria: "Salarios",        concepto: "Salarios administrativos — marzo",    importe: 11800, cliente: "", iva: 0 },
+      { id: "mv-0302", fecha: "2026-03-27", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Subcontratación marzo",               importe: 12400, cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0303", fecha: "2026-03-18", tipo: "coste_dir", categoria: "Materiales",      concepto: "Materiales y hosting marzo",          importe: 7700,  cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0304", fecha: "2026-03-15", tipo: "coste_dir", categoria: "Otros directos",  concepto: "Otros costes directos marzo",         importe: 3900,  cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0305", fecha: "2026-03-05", tipo: "opex",      categoria: "Alquiler",        concepto: "Alquiler oficina — marzo",            importe: 3000,  cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0306", fecha: "2026-03-05", tipo: "opex",      categoria: "Software",        concepto: "Suscripciones SaaS — marzo",          importe: 2500,  cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0307", fecha: "2026-03-10", tipo: "opex",      categoria: "Marketing",       concepto: "Marketing y ads — marzo",             importe: 4200,  cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0308", fecha: "2026-03-28", tipo: "opex",      categoria: "Salarios",        concepto: "Salarios administrativos — marzo",    importe: 11800, cliente: "", iva: 0, ivaDeducible: true },
 
       /* ── Abril 2026 — mes en curso, detalle realista ── */
       { id: "mv-0401", fecha: "2026-04-03", tipo: "ingreso",   categoria: "Consultoría",     concepto: "Iguala abril — Cliente A",                   importe: 18500, cliente: "Cliente A", iva: 21 },
       { id: "mv-0402", fecha: "2026-04-08", tipo: "ingreso",   categoria: "Proyecto",        concepto: "Hito 2 web corporativa — Cliente B",         importe: 12000, cliente: "Cliente B", iva: 21 },
       { id: "mv-0403", fecha: "2026-04-15", tipo: "ingreso",   categoria: "Consultoría",     concepto: "Iguala abril — Cliente C",                   importe: 14200, cliente: "Cliente C", iva: 21 },
       { id: "mv-0404", fecha: "2026-04-18", tipo: "ingreso",   categoria: "Proyecto",        concepto: "Landing page entregada — Cliente D",         importe: 8500,  cliente: "Cliente D", iva: 21 },
-      { id: "mv-0405", fecha: "2026-04-05", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Freelance diseño — proyecto Cliente B",      importe: 4200,  cliente: "Cliente B", iva: 21 },
-      { id: "mv-0406", fecha: "2026-04-12", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Freelance dev — proyecto Cliente D",         importe: 3600,  cliente: "Cliente D", iva: 21 },
-      { id: "mv-0407", fecha: "2026-04-15", tipo: "coste_dir", categoria: "Materiales",      concepto: "Hosting y dominios — Q2",                    importe: 480,   cliente: "", iva: 21 },
-      { id: "mv-0408", fecha: "2026-04-02", tipo: "opex",      categoria: "Alquiler",        concepto: "Alquiler oficina Palma — abril",             importe: 3000,  cliente: "", iva: 21 },
-      { id: "mv-0409", fecha: "2026-04-03", tipo: "opex",      categoria: "Software",        concepto: "Suscripciones SaaS — abril",                 importe: 2450,  cliente: "", iva: 21 },
-      { id: "mv-0410", fecha: "2026-04-10", tipo: "opex",      categoria: "Marketing",       concepto: "Ads LinkedIn — campaña Q2",                  importe: 1800,  cliente: "", iva: 21 },
-      { id: "mv-0411", fecha: "2026-04-17", tipo: "opex",      categoria: "Marketing",       concepto: "Rediseño materiales comerciales",            importe: 2400,  cliente: "", iva: 21 },
-      { id: "mv-0412", fecha: "2026-04-30", tipo: "opex",      categoria: "Salarios",        concepto: "Salarios administrativos — abril",           importe: 11900, cliente: "", iva: 0 },
+      { id: "mv-0405", fecha: "2026-04-05", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Freelance diseño — proyecto Cliente B",      importe: 4200,  cliente: "Cliente B", iva: 21, ivaDeducible: true },
+      { id: "mv-0406", fecha: "2026-04-12", tipo: "coste_dir", categoria: "Subcontratación", concepto: "Freelance dev — proyecto Cliente D",         importe: 3600,  cliente: "Cliente D", iva: 21, ivaDeducible: true },
+      { id: "mv-0407", fecha: "2026-04-15", tipo: "coste_dir", categoria: "Materiales",      concepto: "Hosting y dominios — Q2",                    importe: 480,   cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0408", fecha: "2026-04-02", tipo: "opex",      categoria: "Alquiler",        concepto: "Alquiler oficina Palma — abril",             importe: 3000,  cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0409", fecha: "2026-04-03", tipo: "opex",      categoria: "Software",        concepto: "Suscripciones SaaS — abril",                 importe: 2450,  cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0410", fecha: "2026-04-10", tipo: "opex",      categoria: "Marketing",       concepto: "Ads LinkedIn — campaña Q2",                  importe: 1800,  cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0411", fecha: "2026-04-17", tipo: "opex",      categoria: "Marketing",       concepto: "Rediseño materiales comerciales",            importe: 2400,  cliente: "", iva: 21, ivaDeducible: true },
+      { id: "mv-0412", fecha: "2026-04-30", tipo: "opex",      categoria: "Salarios",        concepto: "Salarios administrativos — abril",           importe: 11900, cliente: "", iva: 0, ivaDeducible: true },
     ];
 
     /* Catálogo sugerido de categorías por tipo — no limita (el usuario puede escribir libre) */
@@ -954,19 +954,26 @@
     function mesesDeTrimestre(t) { return [t * 3, t * 3 + 1, t * 3 + 2]; }
     /* Liquidación de IVA por trimestre y año:
        repercutido = sum(IVA de ingresos) — el IVA cobrado al cliente
-       soportado   = sum(IVA de costes_dir + opex) — el IVA pagado a proveedores
-       a_liquidar  = repercutido − soportado (positivo: a pagar; negativo: devolución/compensar) */
+       soportado   = sum(IVA de costes_dir + opex CON ivaDeducible !== false) — solo
+                     los gastos marcados como deducibles cuentan (sin factura, gastos
+                     personales, etc. no son deducibles aunque lleven IVA).
+       a_liquidar  = repercutido − soportado (positivo: a pagar; negativo: devolución).
+       Default: ivaDeducible === undefined → tratado como deducible. */
+    function esIvaDeducible(m) { return m && m.ivaDeducible !== false; }
     function ivaTrimestre(movs, year, trimestre) {
       var meses = mesesDeTrimestre(trimestre);
-      var rep = 0, sop = 0;
+      var rep = 0, sop = 0, sopNoDeducible = 0;
       movs.forEach(function(m) {
         var p = parseFechaISO(m.fecha);
         if (!p || p.year !== year || meses.indexOf(p.month) === -1) return;
         var ivaMov = calcIVA(m.importe, m.iva == null ? IVA_DEFAULT : m.iva);
         if (m.tipo === "ingreso") rep += ivaMov;
-        else if (m.tipo === "coste_dir" || m.tipo === "opex") sop += ivaMov;
+        else if (m.tipo === "coste_dir" || m.tipo === "opex") {
+          if (esIvaDeducible(m)) sop += ivaMov;
+          else sopNoDeducible += ivaMov;
+        }
       });
-      return { repercutido: rep, soportado: sop, aLiquidar: rep - sop };
+      return { repercutido: rep, soportado: sop, soportadoNoDeducible: sopNoDeducible, aLiquidar: rep - sop };
     }
 
     /* Helpers: parsear fecha ISO + utilidades de derivación */
@@ -1100,7 +1107,9 @@
       var ivaOpts = TIPOS_IVA.map(function(v) { return { value: String(v), label: v + " %" }; });
       var ivaActual = m.iva == null ? IVA_DEFAULT : Number(m.iva);
       var totalConIVA = calcTotalConIVA(m.importe, ivaActual);
-      return React.createElement("div", { className: "crux-row", style: { display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 130px 130px 70px 36px", gap: 0, padding: "8px 18px", borderBottom: idx < total - 1 ? "1px solid " + C.border : "none", alignItems: "center" } },
+      var esGasto = m.tipo === "coste_dir" || m.tipo === "opex";
+      var ivaDeducible = esIvaDeducible(m);
+      return React.createElement("div", { className: "crux-row", style: { display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 120px 130px 130px 36px", gap: 0, padding: "8px 18px", borderBottom: idx < total - 1 ? "1px solid " + C.border : "none", alignItems: "center" } },
         /* Fecha */
         React.createElement("input", {
           type: "date", value: m.fecha || "",
@@ -1147,25 +1156,76 @@
           React.createElement(EditableCell, { value: Number(m.importe || 0), onChange: function(v) { updateMov(m.id, "importe", Number(v) || 0); }, style: { fontSize: 13, fontWeight: 600, color: tone, textAlign: "right" } }),
           ivaActual > 0 ? React.createElement("span", { title: "Total con IVA " + ivaActual + " %", style: { textAlign: "right", fontSize: 9, fontFamily: mono, color: C.textDim, paddingRight: 8, marginTop: 1 } }, fmt(Math.round(totalConIVA)) + " € c/IVA") : null
         ),
-        /* IVA — selector pequeño, chevron al tono del tipo */
-        React.createElement("div", { style: { padding: "0 4px 0 0" } },
-          React.createElement(SelectField, {
-            value: String(ivaActual),
-            onChange: function(v) { updateMov(m.id, "iva", Number(v)); },
-            options: ivaOpts,
-            size: "xs",
-            ariaLabel: "Tipo de IVA",
-            chevronColor: C.textDim,
+        /* IVA — selector pequeño + toggle deducible (solo gastos) */
+        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 4, padding: "0 4px 0 0" } },
+          React.createElement("div", { style: { flex: "1 1 auto", minWidth: 56 } },
+            React.createElement(SelectField, {
+              value: String(ivaActual),
+              onChange: function(v) { updateMov(m.id, "iva", Number(v)); },
+              options: ivaOpts,
+              size: "xs",
+              ariaLabel: "Tipo de IVA",
+              chevronColor: C.textDim,
+              style: {
+                background: "transparent",
+                borderColor: "transparent",
+                color: C.textSec,
+                fontWeight: 600,
+                fontSize: 10,
+                fontFamily: mono,
+                width: "100%",
+              }
+            })
+          ),
+          /* Toggle deducible — solo aparece para gastos */
+          esGasto ? React.createElement("button", {
+            type: "button",
+            onClick: function() { updateMov(m.id, "ivaDeducible", !ivaDeducible); },
+            title: ivaDeducible
+              ? "IVA deducible — se descuenta en la liquidación trimestral. Clic para marcar como NO deducible (sin factura, gasto personal, etc.)"
+              : "IVA NO deducible — no se descuenta en la liquidación. Clic para marcar como deducible.",
+            "aria-pressed": ivaDeducible,
             style: {
-              background: "transparent",
-              borderColor: "transparent",
-              color: C.textSec,
-              fontWeight: 600,
-              fontSize: 10,
-              fontFamily: mono,
-              width: "100%",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+              background: ivaDeducible ? "rgba(79,166,140,0.15)" : "rgba(107,114,128,0.08)",
+              color: ivaDeducible ? "#4FA68C" : C.textDim,
+              border: "1px solid " + (ivaDeducible ? "rgba(79,166,140,0.35)" : C.border),
+              borderRadius: 4,
+              padding: "3px 6px",
+              fontSize: 9,
+              fontWeight: 700,
+              letterSpacing: 0.4,
+              fontFamily: font,
+              cursor: "pointer",
+              textTransform: "uppercase",
+              transition: "all 0.15s",
+              flexShrink: 0,
+              outline: "none",
+            },
+            onMouseEnter: function(e) {
+              if (ivaDeducible) {
+                e.currentTarget.style.background = "rgba(79,166,140,0.22)";
+                e.currentTarget.style.borderColor = "rgba(79,166,140,0.55)";
+              } else {
+                e.currentTarget.style.background = "rgba(107,114,128,0.15)";
+                e.currentTarget.style.color = C.textSec;
+              }
+            },
+            onMouseLeave: function(e) {
+              if (ivaDeducible) {
+                e.currentTarget.style.background = "rgba(79,166,140,0.15)";
+                e.currentTarget.style.borderColor = "rgba(79,166,140,0.35)";
+              } else {
+                e.currentTarget.style.background = "rgba(107,114,128,0.08)";
+                e.currentTarget.style.color = C.textDim;
+              }
             }
-          })
+          },
+            React.createElement("span", { style: { width: 5, height: 5, borderRadius: "50%", background: "currentColor", display: "inline-block", boxShadow: ivaDeducible ? "0 0 4px currentColor" : "none" } }),
+            ivaDeducible ? "DED" : "N/D"
+          ) : React.createElement("span", { style: { fontSize: 9, color: C.textDim, fontWeight: 600, letterSpacing: 0.3, opacity: 0.5, paddingRight: 4 }, title: "El IVA repercutido siempre cuenta en la liquidación" }, "REP")
         ),
         /* Delete — doble clic para confirmar (sin modal nativo) */
         React.createElement("button", {
@@ -1255,6 +1315,7 @@
         var fecha = (p && p.year === selAnyo && p.month === selMes && !vistaAnual) ? today : (selAnyo + "-" + String(selMes + 1).padStart(2, "0") + "-15");
         if (vistaAnual) fecha = today;
         var nuevo = { id: nuevoMovId(), fecha: fecha, tipo: tipo, categoria: (CATEGORIAS[tipo] && CATEGORIAS[tipo][0]) || "", concepto: "", importe: 0, cliente: "", iva: IVA_DEFAULT };
+        if (tipo !== "ingreso") nuevo.ivaDeducible = true; /* gastos: deducible por defecto (asumimos factura formal) */
         setMovimientos(function(ms) { return [nuevo].concat(ms); });
       };
 
@@ -1343,16 +1404,16 @@
           {/* Tabla de movimientos */}
           <Card style={{ padding: 0, overflow: "hidden" }}>
             <div style={{ overflowX: "auto" }}>
-              <div style={{ minWidth: 1140 }}>
+              <div style={{ minWidth: 1180 }}>
                 {/* Header */}
-                <div style={{ display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 130px 130px 70px 36px", gap: 0, padding: "12px 18px", borderBottom: "1px solid " + C.border, background: C.surfaceHover, fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 120px 130px 130px 36px", gap: 0, padding: "12px 18px", borderBottom: "1px solid " + C.border, background: C.surfaceHover, fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 }}>
                   <span>Fecha</span>
                   <span>Tipo</span>
                   <span>Categoría</span>
                   <span>Concepto</span>
                   <span>Cliente</span>
                   <span style={{ textAlign: "right" }}>Importe (base)</span>
-                  <span style={{ textAlign: "center" }}>IVA</span>
+                  <span style={{ textAlign: "center" }} title="Tipo de IVA + flag deducible (gastos)">IVA · Ded.</span>
                   <span></span>
                 </div>
                 {/* Rows */}
@@ -1382,7 +1443,7 @@
                     if (filtroTipo !== "todos" && m.tipo !== filtroTipo) return s;
                     return s + calcIVA(m.importe, m.iva == null ? IVA_DEFAULT : m.iva);
                   }, 0);
-                  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 130px 130px 70px 36px", gap: 0, padding: "12px 18px", borderTop: "2px solid " + C.border, background: C.surfaceHover, alignItems: "center" } },
+                  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 120px 130px 130px 36px", gap: 0, padding: "12px 18px", borderTop: "2px solid " + C.border, background: C.surfaceHover, alignItems: "center" } },
                     React.createElement("span", { style: { gridColumn: "1 / 6", fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 } },
                       "Total " + (vistaAnual ? "año " + selAnyo : MESES_NOMBRE[selMes] + " " + selAnyo) + " · " + (filtroTipo === "todos" ? "todos los tipos" : TIPO_LABEL[filtroTipo])
                     ),
@@ -2329,8 +2390,8 @@
           {(function(){
             var trims = [0, 1, 2, 3].map(function(t) { return Object.assign({ q: t }, ivaTrimestre(movimientos, hoyAnyo, t)); });
             var trimActual = trimestreDeMes(hoyMes);
-            var totalAnual = trims.reduce(function(a, t) { return { rep: a.rep + t.repercutido, sop: a.sop + t.soportado, liq: a.liq + t.aLiquidar }; }, { rep: 0, sop: 0, liq: 0 });
-            var hayDatos = totalAnual.rep > 0 || totalAnual.sop > 0;
+            var totalAnual = trims.reduce(function(a, t) { return { rep: a.rep + t.repercutido, sop: a.sop + t.soportado, sopND: a.sopND + (t.soportadoNoDeducible || 0), liq: a.liq + t.aLiquidar }; }, { rep: 0, sop: 0, sopND: 0, liq: 0 });
+            var hayDatos = totalAnual.rep > 0 || totalAnual.sop > 0 || totalAnual.sopND > 0;
             return React.createElement(Card, { style: { marginBottom: 16 } },
               React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 } },
                 React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10 } },
@@ -2358,6 +2419,10 @@
                       React.createElement("span", { style: { fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.3 } }, "Soportado"),
                       React.createElement("span", { style: { fontSize: 11, fontFamily: mono, color: C.text } }, "−" + fmt(Math.round(t.soportado)) + " €")
                     ),
+                    t.soportadoNoDeducible > 0 ? React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "0 0 3px" }, title: "IVA pagado en gastos no deducibles (sin factura, gastos personales, etc.) — no se descuenta" },
+                      React.createElement("span", { style: { fontSize: 8, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.3, fontStyle: "italic" } }, "No deducible"),
+                      React.createElement("span", { style: { fontSize: 10, fontFamily: mono, color: C.textDim, fontStyle: "italic" } }, fmt(Math.round(t.soportadoNoDeducible)) + " €")
+                    ) : null,
                     React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "8px 0 0", marginTop: 6, borderTop: "1px solid " + C.border } },
                       React.createElement("span", { style: { fontSize: 9, fontWeight: 700, color: C.textSec, textTransform: "uppercase", letterSpacing: 0.3 } }, aPagar ? "A pagar" : "A devolver"),
                       React.createElement("span", { style: { fontSize: 14, fontFamily: mono, fontWeight: 700, color: color } }, (t.aLiquidar > 0 ? "+" : "") + fmt(Math.round(t.aLiquidar)) + " €")
