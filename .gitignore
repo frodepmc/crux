@@ -25,6 +25,9 @@ npm-debug.log*
 # Backups
 index.backup-*.html
 
+# Source artifacts (alta-res originals, drafts, internal docs)
+sources/
+
 # Debug / testing
 .playwright-mcp/
 test-results/
