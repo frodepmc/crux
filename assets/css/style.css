@@ -2792,6 +2792,36 @@ textarea:focus-visible {
     color: var(--accent);
 }
 
+.about__cta {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-top: clamp(1.5rem, 3vw, 2.5rem);
+    font-family: var(--font-brand);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-decoration: none;
+    transition: gap 0.4s var(--ease-out), color 0.3s ease;
+}
+
+.about__cta:hover {
+    gap: 1rem;
+    color: var(--accent-hover);
+}
+
+.about__cta-arrow {
+    font-family: var(--font-display);
+    font-size: 1.1em;
+    transition: transform 0.4s var(--ease-out);
+}
+
+.about__cta:hover .about__cta-arrow {
+    transform: translateX(4px);
+}
+
 /* ═══════════════════════════════════════
    CONTACT
    ═══════════════════════════════════════ */
