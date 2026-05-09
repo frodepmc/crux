@@ -32,3 +32,4 @@ pan2/
 
 # Local Claude Code session state
 .claude/
+.superpowers/
