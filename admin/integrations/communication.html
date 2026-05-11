@@ -1,0 +1,3017 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRUX · Comunicación PM ↔ Dev</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <!-- CRUX · Admin session guard (blocks render until verified) -->
+  <script>
+    (function () {
+      // Hide body until session is verified (prevents flash of content).
+      var styleEl = document.createElement('style');
+      styleEl.id = 'crux-admin-guard-style';
+      styleEl.textContent = 'body{visibility:hidden}html{background:#101010}#crux-guard-veil{position:fixed;inset:0;z-index:999999;background:#101010;color:#3869AB;display:flex;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.25em;text-transform:uppercase;visibility:visible}';
+      document.head.appendChild(styleEl);
+
+      // Veil mounted after DOM ready
+      document.addEventListener('DOMContentLoaded', function () {
+        if (document.getElementById('crux-guard-veil')) return;
+        var veil = document.createElement('div');
+        veil.id = 'crux-guard-veil';
+        veil.textContent = 'Verificando sesión…';
+        document.body.appendChild(veil);
+      });
+
+      // Dev-only bypass: en localhost + ?__preview, saltar verificación
+      var isLocal = /^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(window.location.hostname);
+      var wantsPreview = new URLSearchParams(window.location.search).has('__preview');
+      var reveal = function () {
+        var s = document.getElementById('crux-admin-guard-style');
+        if (s) s.remove();
+        var v = document.getElementById('crux-guard-veil');
+        if (v) v.remove();
+      };
+      if (isLocal && wantsPreview) { reveal(); return; }
+
+      fetch('/api/auth/verify', { method: 'GET', credentials: 'same-origin', cache: 'no-store' })
+        .then(function (r) {
+          if (!r.ok) throw new Error('unauth');
+          return r.json();
+        })
+        .then(reveal)
+        .catch(function () {
+          window.location.replace('/admin');
+        });
+    })();
+  </script>
+  <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABhSURBVFhH7c4xDQAgEATBe/4V4QMLJFhAQEJDdTPV5kv2Tt8O7B0csHdwwN7BAXsHB+wdHLB3cMDewQF7BwfsHRywd3DA3sEBewcH7B0csHdwwN7BAXsHB+wdHLB3cODdqeoA/kzpAx0AAAAASUVORK5CYII=" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+    html, body { color-scheme: dark; }
+    body { background: #101010; color: #E8E4E0; font-family: 'Instrument Sans', -apple-system, sans-serif; min-height: 100vh; }
+    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.65); cursor: pointer; opacity: 0.7; transition: opacity 0.15s; }
+    input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+    ::selection { background: rgba(56,105,171,0.25); color: #FAFAF8; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #262626; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3869AB66; }
+    * { scrollbar-width: thin; scrollbar-color: #262626 transparent; }
+
+    .crux-card { transition: border-color 0.2s ease, box-shadow 0.2s ease; border: 1px solid #262626; }
+    .crux-card:hover { border-color: #333; box-shadow: 0 2px 16px rgba(0,0,0,0.25); }
+
+    /* ─── Controls (Select / MultiSelect): editorial-flat, hairline, sharp ─── */
+    .crux-ctrl-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #161616;
+      border: 1px solid #2c2c2c;
+      border-radius: 3px;
+      color: #C8C2BC;
+      font-family: 'Instrument Sans', -apple-system, sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.1px;
+      padding: 9px 12px;
+      cursor: pointer;
+      position: relative;
+      transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+      white-space: nowrap;
+    }
+    .crux-ctrl-btn:hover {
+      background: #1c1c1c;
+      border-color: #3a3a3a;
+      color: #E8E4E0;
+    }
+    .crux-ctrl-btn[data-open="true"] {
+      background: #1c1c1c;
+      border-color: #3869AB;
+      color: #E8E4E0;
+    }
+    .crux-ctrl-btn[data-active="true"] {
+      background: #161616;
+      border-color: #3869AB;
+      color: #6A95C8;
+    }
+    .crux-ctrl-btn[data-active="true"]::after {
+      content: "";
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #3869AB;
+    }
+
+    /* ─── Buttons (Btn): editorial-flat, sharp 3px radius ─── */
+    .crux-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      border-radius: 3px;
+      padding: 8px 14px;
+      font-family: 'Instrument Sans', -apple-system, sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+      white-space: nowrap;
+    }
+    .crux-btn-primary {
+      background: #3869AB;
+      color: #FAFAF8;
+      border: 1px solid #3869AB;
+    }
+    .crux-btn-primary:hover { background: #4378BD; border-color: #4378BD; }
+    .crux-btn-primary:active { background: #335E9A; }
+    .crux-btn-ghost {
+      background: transparent;
+      color: #A09890;
+      border: 1px solid #2c2c2c;
+    }
+    .crux-btn-ghost:hover { background: #161616; border-color: #3a3a3a; color: #E8E4E0; }
+    .crux-btn-danger {
+      background: transparent;
+      color: #D96B6B;
+      border: 1px solid rgba(217,107,107,0.4);
+    }
+    .crux-btn-danger:hover { background: rgba(217,107,107,0.08); border-color: #D96B6B; }
+
+    /* ─── Tool buttons (header): editorial-flat caps with accent on active ─── */
+    .crux-tool-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      border: 1px solid #262626;
+      border-radius: 3px;
+      padding: 8px 13px;
+      font-family: 'Instrument Sans', -apple-system, sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #807872;
+      cursor: pointer;
+      position: relative;
+      transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+      white-space: nowrap;
+    }
+    .crux-tool-btn:hover { background: #161616; border-color: #3a3a3a; color: #E8E4E0; }
+    .crux-tool-btn[data-active="true"] {
+      background: #161616;
+      border-color: #3869AB;
+      color: #6A95C8;
+    }
+    .crux-tool-btn[data-danger="true"] {
+      color: rgba(217,107,107,0.7);
+      border-color: rgba(217,107,107,0.25);
+    }
+    .crux-tool-btn[data-danger="true"]:hover {
+      background: rgba(217,107,107,0.06);
+      border-color: rgba(217,107,107,0.55);
+      color: #D96B6B;
+    }
+
+    /* ─── Editorial action link ("Ver X →"): caps + chevron que se desplaza ─── */
+    .crux-link-btn {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: transparent;
+      border: 1px solid #262626;
+      border-radius: 3px;
+      padding: 10px 14px;
+      font-family: 'Instrument Sans', -apple-system, sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #A09890;
+      cursor: pointer;
+      transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+      text-align: left;
+    }
+    .crux-link-btn:hover {
+      background: #161616;
+      border-color: #3869AB;
+      color: #6A95C8;
+    }
+    .crux-link-btn .crux-link-arrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .crux-link-btn .crux-link-rule {
+      display: inline-block;
+      width: 12px;
+      height: 1px;
+      background: #6B6560;
+      transition: width 160ms ease, background 160ms ease;
+    }
+    .crux-link-btn:hover .crux-link-rule {
+      width: 22px;
+      background: #3869AB;
+    }
+    .crux-link-btn .crux-link-tip {
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      font-size: 13px;
+      color: #6B6560;
+      line-height: 1;
+      transition: color 140ms ease;
+    }
+    .crux-link-btn:hover .crux-link-tip {
+      color: #6A95C8;
+    }
+    /* Variante secundaria, más compacta, para usar dentro de un Block */
+    .crux-link-btn-sm {
+      padding: 8px 12px;
+      font-size: 10px;
+      letter-spacing: 0.6px;
+    }
+
+    @media (max-width: 768px) {
+      .crux-main { padding: 20px 16px !important; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" data-presets="react">
+    /** @jsxRuntime classic */
+    const { useState, useEffect, useCallback, useRef, useMemo } = React;
+
+    /* ─── Tokens ─── */
+    const C = {
+      bg: "#101010", surface: "#181818", surface2: "#1e1e1e",
+      border: "#262626", borderLight: "#2a2a2a",
+      accent: "#3869AB", accentMuted: "#3869AB88",
+      accentGlow: "rgba(56,105,171,0.08)", accentGlow2: "rgba(56,105,171,0.15)",
+      green: "#5CB88A", greenBg: "rgba(92,184,138,0.10)",
+      red: "#D96B6B", redBg: "rgba(217,107,107,0.10)",
+      amber: "#D4A84A", amberBg: "rgba(212,168,74,0.10)",
+      text: "#E8E4E0", textSec: "#A09890", textDim: "#6B6560", white: "#FAFAF8",
+    };
+    const font = "'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif";
+    const mono = "'JetBrains Mono', 'SF Mono', monospace";
+
+    const STORAGE_KEY = "crux.comunicacion.v1";
+    const USUARIO_KEY = "crux.usuarioActualId";
+
+    /* Icono CRUX (diamante 4-pétalos). Color original azul; lo renderizamos blanco con CSS filter. */
+    const CRUX_LOGO = "data:image/png;base64,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";
+
+    function getInitials(nombre) {
+      return nombre.trim().split(/\s+/).map(s => s[0] || "").join("").slice(0, 2).toUpperCase();
+    }
+
+    /* Equipo seed (provisional, se moverá a store en Task 3) */
+    const EQUIPO_SEED = [
+      { id: "u_pedro", nombre: "Pedro Castrillo", iniciales: "PC", rol: "PM", color: C.accent, gmail: "pedro.castrillo@gmail.com" },
+      { id: "u_calum", nombre: "Calum", iniciales: "CL", rol: "Dev", color: C.amber, gmail: "calum@gmail.com" },
+      { id: "u_carlos", nombre: "Carlos Canet", iniciales: "CC", rol: "Dev/PM", color: C.green, gmail: "carlos.canet@gmail.com" },
+      { id: "u_tecnico", nombre: "Técnico SaaS", iniciales: "TS", rol: "Técnico SaaS", color: C.red, gmail: "soporte@gmail.com" },
+    ];
+
+    function genId(prefix = "id") {
+      return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    function nowISO() { return new Date().toISOString(); }
+    function todayISO() { return new Date().toISOString().slice(0, 10); }
+
+    function getMetricasCliente(store, clienteId) {
+      const proyectos = store.getProyectos(clienteId);
+      const its = proyectos.flatMap(p => store.getIteraciones(p.id, { incluirArchivadas: true }));
+      const pendientes = its.filter(it => it.estado === "pendiente").length;
+      const proceso = its.filter(it => it.estado === "en_proceso").length;
+      /* peor salud agregada */
+      const orden = { saludable: 0, atencion: 1, riesgo: 2 };
+      const peor = proyectos.reduce((acc, p) => orden[p.salud] > orden[acc] ? p.salud : acc, "saludable");
+      return { numProyectos: proyectos.length, pendientes, proceso, salud: peor };
+    }
+
+    const TIPOS = [
+      { id: "diseño", label: "Diseño", color: C.amber },
+      { id: "frontend", label: "Frontend", color: C.accent },
+      { id: "backend", label: "Backend", color: C.red },
+      { id: "copy", label: "Copy", color: C.green },
+      { id: "seo", label: "SEO", color: C.textSec },
+      { id: "saas", label: "SaaS", color: "#9B7BC2" },
+      { id: "otro", label: "Otro", color: C.textDim },
+    ];
+    const ESTADOS = [
+      { id: "pendiente", label: "Pendiente", color: C.amber },
+      { id: "en_proceso", label: "En proceso", color: C.accent },
+      { id: "hecha", label: "Hecha", color: C.green },
+      { id: "descartada", label: "Descartada", color: C.textDim },
+    ];
+    const tipoOf = (id) => TIPOS.find(t => t.id === id) || TIPOS[TIPOS.length - 1];
+    const estadoOf = (id) => ESTADOS.find(e => e.id === id) || ESTADOS[0];
+
+    function diasHasta(fechaStr) {
+      if (!fechaStr) return null;
+      const ms = new Date(fechaStr) - new Date();
+      return Math.ceil(ms / 86400000);
+    }
+    function formatRelDate(iso) {
+      if (!iso) return "—";
+      const d = new Date(iso);
+      const diff = Math.floor((Date.now() - d.getTime()) / 86400000);
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      if (diff === 0) return `hoy ${hh}:${mm}`;
+      if (diff === 1) return "ayer";
+      if (diff < 7) return `hace ${diff} d`;
+      return d.toISOString().slice(0, 10);
+    }
+
+    const SEED = () => {
+      const u_pedro = "u_pedro", u_calum = "u_calum", u_carlos = "u_carlos", u_tecnico = "u_tecnico";
+      const cli1 = genId("cli"), cli2 = genId("cli");
+      const proy1 = genId("proy");
+      return {
+        equipo: EQUIPO_SEED.map(m => ({ ...m, iniciales: m.iniciales || getInitials(m.nombre) })),
+        clientes: [
+          { id: cli1, nombre: "Farmacia La Rambla", notas: "Cliente recurrente, contacto: María García", fechaAlta: "2026-03-15" },
+          { id: cli2, nombre: "Cliente Demo", notas: "Cliente de ejemplo — bórralo cuando añadas el tuyo.", fechaAlta: todayISO() },
+        ],
+        proyectos: [
+          {
+            id: proy1, clienteId: cli1, nombre: "Web corporativa",
+            url: "farmaciarambla.es", tipoPropuesta: "PROC-OPS-002",
+            fechaAlta: "2026-03-15", fechaEntrega: "2026-06-15",
+            stack: { frontend: "Next.js 14", backend: "pan SaaS", hosting: "Vercel", dominioDNS: "Namecheap" },
+            briefing: "Web institucional + landing de captación para servicio a domicilio. SEO local fuerte (Barcelona, Eixample). Foco en confianza y rapidez.",
+            salud: "saludable", bloqueoActual: "",
+            equipoIds: [u_pedro, u_calum, u_carlos, u_tecnico],
+            hitos: [
+              { id: genId("hito"), nombre: "Revisión QA", fecha: "2026-05-09", descripcion: "Validar el flujo completo de contacto, navegación y formularios antes de mostrar al cliente. Checklist en /docs/qa-rambla.md.", cumplido: false },
+              { id: genId("hito"), nombre: "Validación cliente", fecha: "2026-05-21", descripcion: "Reunión con María García para revisar la web casi-final y recoger últimos ajustes. Avisar 5 días antes para reservar agenda.", cumplido: false },
+              { id: genId("hito"), nombre: "Lanzamiento", fecha: "2026-06-15", descripcion: "Go-live con DNS apuntando, monitorización activa, SEO indexable y formulario de contacto conectado a CRM.", cumplido: false },
+            ],
+          },
+        ],
+        iteraciones: [
+          { id: genId("it"), proyectoId: proy1, descripcion: "Cambia el logo de cabecera por el nuevo en SVG (lo dejé en /assets/logo-v2.svg). Que mantenga la altura de 32px en escritorio y 24px en móvil.", fechaCreacion: nowISO(), autorId: u_pedro, tipo: "diseño", estado: "pendiente", asignadoId: null, enlace: "", comentarios: [] },
+          { id: genId("it"), proyectoId: proy1, descripcion: "Endpoint /api/contacto está devolviendo 500 cuando el campo \"teléfono\" llega vacío. El cliente ha avisado dos veces ya. Hay que validar mejor o dejarlo opcional.", fechaCreacion: "2026-05-02T17:08:00.000Z", autorId: u_pedro, tipo: "backend", estado: "en_proceso", asignadoId: u_calum, enlace: "", comentarios: [] },
+          { id: genId("it"), proyectoId: proy1, descripcion: "Calum, en /servicios el bloque \"Horarios\" no respeta el padding del resto. Está pegado a los lados en móvil. Aplica el mismo wrapper que /nosotros.", fechaCreacion: "2026-04-28T10:22:00.000Z", autorId: u_carlos, tipo: "frontend", estado: "pendiente", asignadoId: null, enlace: "",
+            comentarios: [
+              { id: genId("c"), autorId: u_calum, texto: "Visto. ¿Refactor el wrapper a un componente reutilizable o lo aplico solo en /servicios?", fecha: "2026-04-28T11:05:00.000Z" },
+              { id: genId("c"), autorId: u_carlos, texto: "Solo /servicios por ahora, refactor lo metemos en el próximo sprint.", fecha: "2026-04-28T11:10:00.000Z" },
+            ] },
+          { id: genId("it"), proyectoId: proy1, descripcion: "El cliente quiere cambiar \"farmacia online\" por \"farmacia con servicio a domicilio\" en la home y en el meta description.", fechaCreacion: "2026-04-27T16:30:00.000Z", autorId: u_pedro, tipo: "copy", estado: "pendiente", asignadoId: null, enlace: "", comentarios: [] },
+          { id: genId("it"), proyectoId: proy1, descripcion: "Faltan los structured data de LocalBusiness en la home. Sin eso no aparecerá en Google Maps con horarios.", fechaCreacion: "2026-04-24T09:15:00.000Z", autorId: u_carlos, tipo: "seo", estado: "pendiente", asignadoId: null, enlace: "", comentarios: [] },
+        ],
+      };
+    };
+
+    function makeStore(storageKey) {
+      function load() {
+        try {
+          const raw = localStorage.getItem(storageKey);
+          if (raw) return JSON.parse(raw);
+        } catch (e) { console.warn("Store corrupto, regenerando seed", e); }
+        const seeded = SEED();
+        localStorage.setItem(storageKey, JSON.stringify(seeded));
+        return seeded;
+      }
+      let state = load();
+      const listeners = new Set();
+      function persist() { localStorage.setItem(storageKey, JSON.stringify(state)); listeners.forEach(fn => fn()); }
+      function subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); }
+
+      return {
+        subscribe,
+        getState: () => state,
+        reset: () => { state = SEED(); persist(); },
+        clear: () => { localStorage.removeItem(storageKey); state = load(); listeners.forEach(fn => fn()); },
+
+        /* Clientes */
+        getClientes: () => state.clientes.slice(),
+        getCliente: (id) => state.clientes.find(c => c.id === id),
+        addCliente: (data) => { const c = { id: genId("cli"), nombre: "", notas: "", fechaAlta: todayISO(), archivado: false, fechaArchivado: null, ...data }; state.clientes.push(c); persist(); return c; },
+        updateCliente: (id, patch) => { state.clientes = state.clientes.map(c => c.id === id ? { ...c, ...patch } : c); persist(); return state.clientes.find(c => c.id === id); },
+        deleteCliente: (id) => { state.clientes = state.clientes.filter(c => c.id !== id); state.proyectos.filter(p => p.clienteId === id).forEach(p => state.iteraciones = state.iteraciones.filter(it => it.proyectoId !== p.id)); state.proyectos = state.proyectos.filter(p => p.clienteId !== id); persist(); },
+
+        /* Proyectos */
+        getProyectos: (clienteId) => state.proyectos.filter(p => p.clienteId === clienteId),
+        getProyecto: (id) => state.proyectos.find(p => p.id === id),
+        addProyecto: (clienteId, data) => {
+          const p = {
+            id: genId("proy"), clienteId, nombre: "", url: "", tipoPropuesta: "",
+            fechaAlta: todayISO(), fechaEntrega: "",
+            stack: { frontend: "", backend: "", hosting: "", dominioDNS: "" },
+            briefing: "", salud: "saludable", bloqueoActual: "",
+            equipoIds: [], hitos: [],
+            ...data,
+          };
+          state.proyectos.push(p); persist(); return p;
+        },
+        updateProyecto: (id, patch) => { state.proyectos = state.proyectos.map(p => p.id === id ? { ...p, ...patch } : p); persist(); return state.proyectos.find(p => p.id === id); },
+        deleteProyecto: (id) => { state.proyectos = state.proyectos.filter(p => p.id !== id); state.iteraciones = state.iteraciones.filter(it => it.proyectoId !== id); persist(); },
+
+        /* Iteraciones */
+        getIteraciones: (proyectoId, { incluirArchivadas = false } = {}) => {
+          let arr = state.iteraciones.filter(it => it.proyectoId === proyectoId);
+          if (!incluirArchivadas) arr = arr.filter(it => it.estado !== "hecha" && it.estado !== "descartada");
+          return arr.slice().sort((a, b) => b.fechaCreacion.localeCompare(a.fechaCreacion));
+        },
+        getIteracion: (id) => state.iteraciones.find(it => it.id === id),
+        addIteracion: (proyectoId, data) => {
+          const it = {
+            id: genId("it"), proyectoId, descripcion: "", fechaCreacion: nowISO(),
+            autorId: null, tipo: "otro", estado: "pendiente", asignadoId: null,
+            fechaArchivado: null, enlace: "", comentarios: [], hitoId: null, ...data,
+          };
+          state.iteraciones.push(it); persist(); return it;
+        },
+        updateIteracion: (id, patch) => {
+          state.iteraciones = state.iteraciones.map(it => {
+            if (it.id !== id) return it;
+            const next = { ...it, ...patch };
+            if ((patch.estado === "hecha" || patch.estado === "descartada") && !it.fechaArchivado) next.fechaArchivado = nowISO();
+            if (patch.estado === "pendiente" || patch.estado === "en_proceso") next.fechaArchivado = null;
+            return next;
+          });
+          persist();
+          return state.iteraciones.find(it => it.id === id);
+        },
+        deleteIteracion: (id) => { state.iteraciones = state.iteraciones.filter(it => it.id !== id); persist(); },
+
+        /* Hitos del proyecto */
+        getHito: (proyectoId, hitoId) => {
+          if (hitoId == null) return null;
+          const p = state.proyectos.find(x => x.id === proyectoId);
+          return p ? (p.hitos || []).find(h => h.id === hitoId) : undefined;
+        },
+        getIteracionesPorHito: (proyectoId, hitoId, { incluirArchivadas = false } = {}) => {
+          let arr = state.iteraciones.filter(it => it.proyectoId === proyectoId && (it.hitoId || null) === (hitoId || null));
+          if (!incluirArchivadas) arr = arr.filter(it => it.estado !== "hecha" && it.estado !== "descartada");
+          return arr.slice().sort((a, b) => b.fechaCreacion.localeCompare(a.fechaCreacion));
+        },
+        setHitoIteracion: (iteracionId, hitoId) => {
+          const it = state.iteraciones.find(x => x.id === iteracionId);
+          if (!it) return;
+          if (hitoId != null) {
+            const p = state.proyectos.find(x => x.id === it.proyectoId);
+            const ok = p && (p.hitos || []).some(h => h.id === hitoId);
+            if (!ok) { console.warn("setHitoIteracion: hitoId no pertenece al proyecto de la iteración", { iteracionId, hitoId }); return; }
+          }
+          state.iteraciones = state.iteraciones.map(x => x.id === iteracionId ? { ...x, hitoId: hitoId || null } : x);
+          persist();
+        },
+        addHitoEnProyecto: (proyectoId, data) => {
+          const nuevo = { id: genId("hito"), nombre: "", fecha: todayISO(), descripcion: "", cumplido: false, ...data };
+          state.proyectos = state.proyectos.map(p => p.id === proyectoId ? { ...p, hitos: [...(p.hitos || []), nuevo] } : p);
+          persist();
+          return nuevo;
+        },
+        deleteHito: (proyectoId, hitoId) => {
+          state.proyectos = state.proyectos.map(p => p.id === proyectoId ? { ...p, hitos: (p.hitos || []).filter(h => h.id !== hitoId) } : p);
+          state.iteraciones = state.iteraciones.map(it => (it.proyectoId === proyectoId && it.hitoId === hitoId) ? { ...it, hitoId: null } : it);
+          persist();
+        },
+
+        /* Comentarios */
+        addComentario: (iteracionId, data) => {
+          const c = { id: genId("c"), autorId: null, texto: "", fecha: nowISO(), ...data };
+          state.iteraciones = state.iteraciones.map(it => it.id === iteracionId ? { ...it, comentarios: [...it.comentarios, c] } : it);
+          persist();
+          return c;
+        },
+        deleteComentario: (iteracionId, comentarioId) => {
+          state.iteraciones = state.iteraciones.map(it => it.id === iteracionId ? { ...it, comentarios: it.comentarios.filter(c => c.id !== comentarioId) } : it);
+          persist();
+        },
+
+        /* Equipo */
+        getEquipo: () => state.equipo.slice(),
+        getMiembro: (id) => state.equipo.find(m => m.id === id),
+        addMiembro: (data) => { const m = { id: genId("u"), nombre: "", iniciales: "", rol: "Otro", color: C.textSec, gmail: "", ...data }; if (!m.iniciales) m.iniciales = getInitials(m.nombre); state.equipo.push(m); persist(); return m; },
+        updateMiembro: (id, patch) => { state.equipo = state.equipo.map(m => m.id === id ? { ...m, ...patch, iniciales: patch.nombre ? getInitials(patch.nombre) : m.iniciales } : m); persist(); return state.equipo.find(m => m.id === id); },
+        deleteMiembro: (id) => { state.equipo = state.equipo.filter(m => m.id !== id); persist(); },
+
+        /* Backup */
+        export: () => JSON.stringify(state, null, 2),
+        import: (jsonStr) => { state = JSON.parse(jsonStr); persist(); },
+      };
+    }
+
+    /* Hook React para suscribirse al store */
+    function useStore(store) {
+      const [, force] = useState(0);
+      useEffect(() => store.subscribe(() => force(n => n + 1)), [store]);
+      return store;
+    }
+
+    /* Instancia global */
+    const store = makeStore(STORAGE_KEY);
+
+    /* ─── Componentes base ─── */
+    function Card({ children, style = {}, ...rest }) {
+      return (
+        <div className="crux-card" style={Object.assign({}, { background: C.surface, borderRadius: 12, padding: 24 }, style)} {...rest}>
+          {children}
+        </div>
+      );
+    }
+
+    function Avatar({ nombre, color, size = 28, title }) {
+      return (
+        <div title={title || nombre} style={{
+          width: size, height: size, borderRadius: "50%", background: color,
+          color: C.bg, fontWeight: 800, fontSize: size * 0.42,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          flexShrink: 0, fontFamily: font,
+        }}>{getInitials(nombre)}</div>
+      );
+    }
+
+    /* ─── Helpers de hito ─── */
+    function hitoUrgencia(hito) {
+      if (!hito) return "ninguno";
+      if (hito.cumplido) return "cumplido";
+      if (!hito.fecha) return "sin-fecha";
+      const dias = diasHasta(hito.fecha);
+      if (dias < 0) return "atrasado";
+      if (dias <= 7) return "proximo";
+      return "lejano";
+    }
+
+    function hitoColor(urgencia) {
+      switch (urgencia) {
+        case "cumplido": return { fg: C.green, bg: C.greenBg, border: C.green };
+        case "atrasado": return { fg: C.red, bg: C.redBg, border: C.red };
+        case "proximo":  return { fg: C.amber, bg: C.amberBg, border: C.amber };
+        case "lejano":   return { fg: C.textSec, bg: "transparent", border: C.border };
+        case "sin-fecha":return { fg: C.textSec, bg: "transparent", border: C.border };
+        default:         return { fg: C.textDim, bg: "transparent", border: C.border };
+      }
+    }
+
+    function HitoChip({ hito, onClick, compact = false }) {
+      const sinHito = !hito;
+      const urgencia = sinHito ? "ninguno" : hitoUrgencia(hito);
+      const col = hitoColor(urgencia);
+      const label = sinHito ? "Sin hito" : (hito.nombre || "(sin nombre)");
+      const truncated = label.length > 28 ? label.slice(0, 26) + "…" : label;
+      const isClickable = typeof onClick === "function";
+      return (
+        <button
+          type="button"
+          onClick={isClickable ? (e) => { e.stopPropagation(); onClick(); } : undefined}
+          title={sinHito ? "Sin hito" : `${hito.nombre}${hito.fecha ? ` · ${hito.fecha}` : ""}`}
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 5,
+            background: col.bg, color: col.fg,
+            border: `1px solid ${col.border}`, borderRadius: 10,
+            padding: compact ? "2px 7px" : "3px 9px",
+            fontSize: compact ? 9.5 : 10.5, fontWeight: 600,
+            fontFamily: font, letterSpacing: 0.2,
+            cursor: isClickable ? "pointer" : "default",
+            whiteSpace: "nowrap", lineHeight: 1.3,
+          }}
+        >
+          <span style={{ width: 5, height: 5, borderRadius: "50%", background: col.fg, opacity: sinHito ? 0.5 : 1 }} />
+          <span>{truncated}</span>
+        </button>
+      );
+    }
+
+    function Modal({ open, onClose, title, children, footer, width = 480 }) {
+      useEffect(() => {
+        if (!open) return;
+        const onKey = (e) => { if (e.key === "Escape") onClose(); };
+        document.addEventListener("keydown", onKey);
+        document.body.style.overflow = "hidden";
+        return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+      }, [open, onClose]);
+      if (!open) return null;
+      return (
+        <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(2px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, width, maxWidth: "90vw", maxHeight: "85vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}>
+            <div style={{ padding: "18px 22px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: C.white }}>{title}</div>
+              <button onClick={onClose} style={{ background: "none", border: "none", color: C.textDim, fontSize: 18, cursor: "pointer", lineHeight: 1, padding: 4 }}>×</button>
+            </div>
+            <div style={{ padding: 22 }}>{children}</div>
+            {footer && <div style={{ padding: "14px 22px", borderTop: `1px solid ${C.border}`, display: "flex", justifyContent: "flex-end", gap: 8 }}>{footer}</div>}
+          </div>
+        </div>
+      );
+    }
+
+    /* ─── ConfirmDialog (custom dark, sustituye al window.confirm nativo) ─── */
+    const _confirmRef = { current: null };
+    function askConfirm(opts) {
+      const o = typeof opts === "string" ? { body: opts } : (opts || {});
+      if (_confirmRef.current) return _confirmRef.current(o);
+      return Promise.resolve(window.confirm(o.body || o.title || ""));
+    }
+
+    function ConfirmDialog() {
+      const [state, setState] = useState(null);
+      const confirmBtnRef = useRef(null);
+
+      useEffect(() => {
+        _confirmRef.current = (opts) => new Promise((resolve) => setState({ opts, resolve }));
+        return () => { _confirmRef.current = null; };
+      }, []);
+
+      useEffect(() => {
+        if (!state) return;
+        const finish = (result) => { state.resolve(result); setState(null); };
+        const t = setTimeout(() => confirmBtnRef.current && confirmBtnRef.current.focus(), 0);
+        const onKey = (e) => {
+          if (e.key === "Escape") { e.preventDefault(); e.stopImmediatePropagation(); finish(false); }
+          else if (e.key === "Enter") { e.preventDefault(); e.stopImmediatePropagation(); finish(true); }
+        };
+        document.addEventListener("keydown", onKey, true);
+        const prevOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        return () => {
+          clearTimeout(t);
+          document.removeEventListener("keydown", onKey, true);
+          document.body.style.overflow = prevOverflow;
+        };
+      }, [state]);
+
+      if (!state) return null;
+      const close = (result) => { state.resolve(result); setState(null); };
+      const o = state.opts;
+      const title = o.title || "¿Confirmar acción?";
+      const body = o.body || "";
+      const confirmText = o.confirmText || "Aceptar";
+      const cancelText = o.cancelText || "Cancelar";
+      const danger = !!o.danger;
+      return (
+        <div onClick={() => close(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(3px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000 }}>
+          <div onClick={(e) => e.stopPropagation()} role="alertdialog" aria-modal="true" aria-labelledby="confirm-dlg-title" style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, width: 420, maxWidth: "90vw", boxShadow: "0 24px 64px rgba(0,0,0,0.6)", overflow: "hidden" }}>
+            <div style={{ padding: "20px 22px 18px" }}>
+              <div id="confirm-dlg-title" style={{ fontSize: 15, fontWeight: 700, color: C.white, letterSpacing: -0.2, marginBottom: body ? 8 : 0 }}>{title}</div>
+              {body && <div style={{ fontSize: 12.5, color: C.textSec, lineHeight: 1.55 }}>{body}</div>}
+            </div>
+            <div style={{ padding: "12px 18px", borderTop: `1px solid ${C.border}`, display: "flex", justifyContent: "flex-end", gap: 8, background: C.surface2 }}>
+              <button onClick={() => close(false)} style={{ background: "transparent", color: C.textSec, border: `1px solid ${C.border}`, borderRadius: 6, padding: "7px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: font, letterSpacing: 0.3 }}>{cancelText}</button>
+              <button ref={confirmBtnRef} onClick={() => close(true)} style={{
+                background: danger ? `${C.red}1f` : C.accent,
+                color: danger ? C.red : C.white,
+                border: `1px solid ${danger ? C.red + "88" : C.accent}`,
+                borderRadius: 6, padding: "7px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: font, letterSpacing: 0.3,
+                outline: "none", transition: "background 0.15s, box-shadow 0.15s",
+              }} onFocus={(e) => { e.currentTarget.style.boxShadow = `0 0 0 2px ${(danger ? C.red : C.accent)}55`; }} onBlur={(e) => { e.currentTarget.style.boxShadow = "none"; }}>
+                {confirmText}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* Select dark personalizado (sustituye al <select> nativo que en Windows/Chrome se renderiza claro) */
+    function Select({ value, onChange, options, style = {}, buttonStyle = {}, placeholder = "—" }) {
+      const [open, setOpen] = useState(false);
+      const ref = useRef(null);
+      useEffect(() => {
+        const close = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+        document.addEventListener("mousedown", close);
+        return () => document.removeEventListener("mousedown", close);
+      }, []);
+      const current = options.find(o => o.value === value);
+      return (
+        <div ref={ref} style={Object.assign({ position: "relative" }, style)}>
+          <button type="button" data-open={open} onClick={() => setOpen(o => !o)} className="crux-ctrl-btn" style={Object.assign({}, {
+            width: "100%", justifyContent: "space-between",
+          }, buttonStyle)}>
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: current ? C.text : C.textDim }}>{current ? current.label : placeholder}</span>
+            <span style={{ color: C.textDim, fontSize: 9, flexShrink: 0 }}>▾</span>
+          </button>
+          {open && (
+            <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, minWidth: "100%", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: 4, zIndex: 200, boxShadow: "0 8px 24px rgba(0,0,0,0.5)", maxHeight: 280, overflow: "auto" }}>
+              {options.map(o => (
+                <button key={o.value} type="button" onClick={() => { onChange(o.value); setOpen(false); }} style={{
+                  display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left",
+                  background: o.value === value ? C.accentGlow : "transparent",
+                  border: "none", padding: "7px 10px", borderRadius: 5,
+                  color: o.value === value ? C.accent : C.text, fontSize: 12, fontFamily: font, cursor: "pointer", whiteSpace: "nowrap",
+                }} onMouseEnter={(e) => o.value !== value && (e.currentTarget.style.background = C.surface2)} onMouseLeave={(e) => o.value !== value && (e.currentTarget.style.background = "transparent")}>
+                  {o.color && <span style={{ width: 8, height: 8, borderRadius: "50%", background: o.color, flexShrink: 0 }} />}
+                  <span style={{ flex: 1 }}>{o.label}</span>
+                  {o.value === value && <span style={{ fontSize: 10, color: C.accent }}>✓</span>}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    /* MultiSelect dark con popover y pills internas. Reusa la estética de Select. */
+    function MultiSelect({ values, onChange, options, label = "Filtrar", style = {}, buttonStyle = {} }) {
+      const [open, setOpen] = useState(false);
+      const ref = useRef(null);
+      useEffect(() => {
+        const close = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+        document.addEventListener("mousedown", close);
+        return () => document.removeEventListener("mousedown", close);
+      }, []);
+      const active = values.length > 0;
+      const buttonLabel = active ? `${label} · ${values.length}` : label;
+      const toggle = (v) => onChange(values.includes(v) ? values.filter(x => x !== v) : [...values, v]);
+      return (
+        <div ref={ref} style={Object.assign({ position: "relative" }, style)}>
+          <button type="button" data-open={open} data-active={active} onClick={() => setOpen(o => !o)} className="crux-ctrl-btn" style={buttonStyle}>
+            <span>{buttonLabel}</span>
+            <span style={{ color: active ? C.accent : C.textDim, fontSize: 9 }}>▾</span>
+          </button>
+          {open && (
+            <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, minWidth: 200, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: 4, zIndex: 200, boxShadow: "0 8px 24px rgba(0,0,0,0.5)", maxHeight: 320, overflow: "auto" }}>
+              {options.map(o => {
+                const selected = values.includes(o.value);
+                return (
+                  <button key={o.value} type="button" onClick={() => toggle(o.value)} style={{
+                    display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left",
+                    background: selected ? C.accentGlow : "transparent",
+                    border: "none", padding: "7px 10px", borderRadius: 5,
+                    color: selected ? C.accent : C.text, fontSize: 12, fontFamily: font, cursor: "pointer",
+                  }} onMouseEnter={(e) => !selected && (e.currentTarget.style.background = C.surface2)} onMouseLeave={(e) => !selected && (e.currentTarget.style.background = "transparent")}>
+                    {o.color && <span style={{ width: 8, height: 8, borderRadius: "50%", background: o.color, flexShrink: 0 }} />}
+                    <span style={{ flex: 1 }}>{o.label}</span>
+                    {selected && <span style={{ color: C.accent, fontSize: 11 }}>✓</span>}
+                  </button>
+                );
+              })}
+              {active && (
+                <button type="button" onClick={() => onChange([])} style={{
+                  width: "100%", marginTop: 4, padding: "6px 10px", fontSize: 10,
+                  color: C.textDim, background: "transparent", border: `1px dashed ${C.border}`,
+                  borderRadius: 5, cursor: "pointer", fontFamily: font, letterSpacing: 0.5, textTransform: "uppercase",
+                }}>Limpiar selección</button>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    /* Form helpers */
+    function FormField({ label, children, hint, error }) {
+      return (
+        <div style={{ marginBottom: 14 }}>
+          <label style={{ display: "block", fontSize: 11, color: C.textDim, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 6 }}>{label}</label>
+          {children}
+          {error
+            ? <div style={{ fontSize: 10, color: C.red, marginTop: 4, fontWeight: 600 }}>{error}</div>
+            : (hint && <div style={{ fontSize: 10, color: C.textDim, marginTop: 4 }}>{hint}</div>)}
+        </div>
+      );
+    }
+    function TextInput(props) {
+      return <input {...props} style={Object.assign({}, { width: "100%", background: C.bg, border: `1px solid ${C.border}`, borderRadius: 6, padding: "8px 10px", color: C.text, fontFamily: font, fontSize: 13, outline: "none" }, props.style)} onFocus={(e) => { e.target.style.borderColor = C.accent; props.onFocus && props.onFocus(e); }} onBlur={(e) => { e.target.style.borderColor = C.border; props.onBlur && props.onBlur(e); }} />;
+    }
+    function TextArea(props) {
+      return <textarea {...props} style={Object.assign({}, { width: "100%", background: C.bg, border: `1px solid ${C.border}`, borderRadius: 6, padding: "8px 10px", color: C.text, fontFamily: font, fontSize: 13, outline: "none", minHeight: 80, resize: "vertical" }, props.style)} onFocus={(e) => { e.target.style.borderColor = C.accent; props.onFocus && props.onFocus(e); }} onBlur={(e) => { e.target.style.borderColor = C.border; props.onBlur && props.onBlur(e); }} />;
+    }
+    function Btn({ kind = "ghost", children, style = {}, ...rest }) {
+      return <button {...rest} className={`crux-btn crux-btn-${kind}`} style={style}>{children}</button>;
+    }
+
+    /* Iconos stroke 1.5 estilo lucide para los botones del header */
+    const HeaderIcons = {
+      Team: (
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="5.2" cy="5" r="2" />
+          <path d="M1.8 12c0-2 1.5-3.2 3.4-3.2s3.4 1.2 3.4 3.2" />
+          <circle cx="10.2" cy="4.4" r="1.6" />
+          <path d="M10.2 8.4c1.7 0 2.7 1 2.7 2.5" />
+        </svg>
+      ),
+      Gantt: (
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <rect x="2" y="3" width="6" height="2" rx="0.8" fill="currentColor" />
+          <rect x="5" y="6" width="7" height="2" rx="0.8" fill="currentColor" />
+          <rect x="3" y="9" width="5" height="2" rx="0.8" fill="currentColor" />
+        </svg>
+      ),
+      Reset: (
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M12 7a5 5 0 1 1-1.4-3.5" />
+          <path d="M12 1.8v3.5h-3.5" />
+        </svg>
+      ),
+      Archive: (
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="1.5" y="2.8" width="11" height="2.6" rx="0.6" />
+          <path d="M2.5 5.4v6.3h9V5.4" />
+          <path d="M5.5 8h3" />
+        </svg>
+      ),
+    };
+
+    /* Header tool button — editorial-flat caps con accent border en active */
+    function ToolBtn({ icon, children, onClick, active = false, danger = false, title, badge }) {
+      return (
+        <button
+          onClick={onClick}
+          title={title}
+          className="crux-tool-btn"
+          data-active={active || undefined}
+          data-danger={danger || undefined}
+        >
+          {icon && <span style={{ display: "inline-flex", color: "currentColor", flexShrink: 0 }}>{icon}</span>}
+          <span>{children}</span>
+          {badge != null && badge > 0 && (
+            <span style={{
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              minWidth: 16, height: 16, padding: "0 5px",
+              fontSize: 9, fontWeight: 700, fontFamily: mono, letterSpacing: 0,
+              color: active ? C.white : C.textSec,
+              background: active ? C.accent : "transparent",
+              border: `1px solid ${active ? C.accent : C.borderLight}`,
+              borderRadius: 2,
+              marginLeft: 2,
+            }}>{badge}</span>
+          )}
+        </button>
+      );
+    }
+
+    function Header({ usuarioActual, equipo, onChangeUsuario, onIrEquipo, onIrPlanificacion, onIrArchivados, onResetear, route, archivadosCount }) {
+      const [open, setOpen] = useState(false);
+      const ref = useRef(null);
+      useEffect(() => {
+        const close = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+        document.addEventListener("mousedown", close);
+        return () => document.removeEventListener("mousedown", close);
+      }, []);
+      return (
+        <header style={{ borderBottom: `1px solid ${C.border}`, padding: "18px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <img src={CRUX_LOGO} alt="CRUX" style={{ width: 38, height: 38, objectFit: "contain", filter: "brightness(0) invert(1)", flexShrink: 0 }} />
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: C.white, letterSpacing: -0.3 }}>CRUX  /  Comunicación SaaS</div>
+              <div style={{ fontSize: 11, color: C.textDim, letterSpacing: 0.3, marginTop: 2 }}>Dashboard PM ↔ Developers/Técnicos</div>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: 28 }}>
+              <ToolBtn icon={HeaderIcons.Team} active={route === "equipo"} onClick={onIrEquipo}>Equipo</ToolBtn>
+              <ToolBtn icon={HeaderIcons.Gantt} active={route === "planificacion"} onClick={onIrPlanificacion} title="Vista Gantt de proyectos e hitos">Planificación</ToolBtn>
+              <ToolBtn icon={HeaderIcons.Archive} active={route === "archivados"} onClick={onIrArchivados} title="Clientes archivados" badge={archivadosCount}>Archivados</ToolBtn>
+              <span style={{ width: 1, height: 20, background: C.border, margin: "0 4px" }} />
+              <ToolBtn icon={HeaderIcons.Reset} danger onClick={onResetear} title="Restaurar al estado inicial (seed)">Reset</ToolBtn>
+            </div>
+          </div>
+
+          <div ref={ref} style={{ position: "relative" }}>
+            <button onClick={() => setOpen(o => !o)} style={{
+              display: "flex", alignItems: "center", gap: 8, background: C.surface, border: `1px solid ${C.border}`,
+              borderRadius: 22, padding: "5px 14px 5px 5px", cursor: "pointer", fontFamily: font,
+              fontSize: 12, color: C.textSec,
+            }}>
+              <Avatar nombre={usuarioActual.nombre} color={usuarioActual.color} size={26} />
+              <span>{usuarioActual.nombre} · {usuarioActual.rol}</span>
+              <span style={{ color: C.textDim, fontSize: 10 }}>▾</span>
+            </button>
+            {open && (
+              <div style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: 6, minWidth: 220, zIndex: 100, boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}>
+                <div style={{ fontSize: 10, color: C.textDim, padding: "6px 10px", textTransform: "uppercase", letterSpacing: 0.6 }}>Cambiar identidad</div>
+                {equipo.map(m => (
+                  <button key={m.id} onClick={() => { onChangeUsuario(m.id); setOpen(false); }} style={{
+                    display: "flex", alignItems: "center", gap: 8, width: "100%",
+                    background: m.id === usuarioActual.id ? C.accentGlow : "transparent",
+                    border: "none", padding: "8px 10px", borderRadius: 6, cursor: "pointer",
+                    color: C.text, fontSize: 12, fontFamily: font, textAlign: "left",
+                  }}>
+                    <Avatar nombre={m.nombre} color={m.color} size={22} />
+                    <span style={{ flex: 1 }}>{m.nombre}</span>
+                    <span style={{ fontSize: 10, color: C.textDim }}>{m.rol}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </header>
+      );
+    }
+
+    function Breadcrumb({ trail, onNav }) {
+      return (
+        <div style={{ padding: "12px 32px", borderBottom: `1px solid ${C.border}`, fontSize: 12, color: C.textDim, display: "flex", alignItems: "center", gap: 8 }}>
+          {trail.map((t, i) => {
+            const isLast = i === trail.length - 1;
+            return (
+              <React.Fragment key={i}>
+                {isLast
+                  ? <span style={{ color: C.white, fontWeight: 700 }}>{t.label}</span>
+                  : <button onClick={() => onNav(t)} style={{ background: "none", border: "none", color: C.accent, fontWeight: 600, cursor: "pointer", fontSize: 12, fontFamily: font, padding: 0 }}>{t.label}</button>}
+                {!isLast && <span style={{ color: "#3a3a3a" }}>/</span>}
+              </React.Fragment>
+            );
+          })}
+        </div>
+      );
+    }
+
+    function HomeClientes({ store, onAbrirCliente, onNuevoCliente }) {
+      const clientes = store.getClientes().filter(c => !c.archivado);
+      const saludColor = (s) => s === "saludable" ? C.green : s === "atencion" ? C.amber : C.red;
+      const saludLabel = (s) => s === "saludable" ? "Saludable" : s === "atencion" ? "Atención" : "Riesgo";
+      const archivar = (cli) => store.updateCliente(cli.id, { archivado: true, fechaArchivado: nowISO() });
+      const eliminar = (cli) => askConfirm({
+        title: `Eliminar cliente "${cli.nombre}"`,
+        body: "Se borrarán también todos sus proyectos e iteraciones. Esta acción no se puede deshacer.",
+        confirmText: "Eliminar",
+        danger: true,
+      }).then(ok => { if (ok) store.deleteCliente(cli.id); });
+      return (
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 24 }}>
+            <div>
+              <h1 style={{ fontSize: 26, fontWeight: 700, color: C.white, letterSpacing: -0.6 }}>Clientes</h1>
+              <p style={{ fontSize: 12, color: C.textDim, marginTop: 4 }}>{clientes.length} cliente{clientes.length !== 1 ? "s" : ""} activo{clientes.length !== 1 ? "s" : ""}</p>
+            </div>
+            <button onClick={onNuevoCliente} style={{ background: C.accent, color: C.white, border: "none", borderRadius: 8, padding: "9px 16px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: font, letterSpacing: 0.3 }}>+ Nuevo cliente</button>
+          </div>
+
+          {clientes.length === 0 ? (
+            <Card>
+              <div style={{ padding: "48px 20px", textAlign: "center" }}>
+                <div style={{ fontSize: 14, color: C.textSec, marginBottom: 8 }}>No hay clientes activos</div>
+                <div style={{ fontSize: 12, color: C.textDim }}>Crea uno con "+ Nuevo cliente" o restaura desde archivados.</div>
+              </div>
+            </Card>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+              {clientes.map(cli => {
+                const m = getMetricasCliente(store, cli.id);
+                return (
+                  <ClienteCard
+                    key={cli.id}
+                    cli={cli}
+                    metricas={m}
+                    onAbrir={() => onAbrirCliente(cli.id)}
+                    saludColor={saludColor}
+                    saludLabel={saludLabel}
+                    acciones={[
+                      { label: "Archivar", onClick: () => archivar(cli) },
+                      { label: "Eliminar", onClick: () => eliminar(cli), danger: true },
+                    ]}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function ClienteCard({ cli, metricas, onAbrir, saludColor, saludLabel, acciones }) {
+      const [hover, setHover] = useState(false);
+      const [menuOpen, setMenuOpen] = useState(false);
+      const menuRef = useRef(null);
+      useEffect(() => {
+        if (!menuOpen) return;
+        const close = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false); };
+        document.addEventListener("mousedown", close);
+        return () => document.removeEventListener("mousedown", close);
+      }, [menuOpen]);
+      const m = metricas;
+      const accionesVisibles = hover || menuOpen;
+      return (
+        <Card style={{ padding: 20 }} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+          <div onClick={onAbrir} style={{ cursor: "pointer" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14, gap: 10 }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: C.white, letterSpacing: -0.3, minWidth: 0, flex: 1, wordBreak: "break-word" }}>{cli.nombre}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 10, fontWeight: 700, color: saludColor(m.salud), whiteSpace: "nowrap" }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: saludColor(m.salud) }} /> {saludLabel(m.salud)}
+                </span>
+                <div ref={menuRef} style={{ position: "relative", opacity: accionesVisibles ? 1 : 0, pointerEvents: accionesVisibles ? "auto" : "none", transition: "opacity 0.15s ease" }}>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setMenuOpen(o => !o); }}
+                    title="Acciones"
+                    style={{
+                      background: menuOpen ? C.surface2 : "transparent",
+                      border: `1px solid ${menuOpen ? C.borderLight : C.border}`,
+                      borderRadius: 6, color: C.textSec,
+                      width: 26, height: 26, display: "flex", alignItems: "center", justifyContent: "center",
+                      cursor: "pointer", padding: 0, fontSize: 14, lineHeight: 1, fontFamily: font,
+                    }}
+                  >⋯</button>
+                  {menuOpen && (
+                    <div onClick={(e) => e.stopPropagation()} style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: 4, minWidth: 150, zIndex: 30, boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}>
+                      {acciones.map((a, i) => (
+                        <button
+                          key={i}
+                          onClick={() => { setMenuOpen(false); a.onClick(); }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = a.danger ? `${C.red}1a` : C.surface2}
+                          onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                          style={{
+                            display: "block", width: "100%", textAlign: "left",
+                            background: "transparent", border: "none",
+                            padding: "7px 10px", borderRadius: 5, fontSize: 12, fontFamily: font,
+                            color: a.danger ? C.red : C.text, cursor: "pointer",
+                          }}
+                        >{a.label}</button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, paddingTop: 12, borderTop: `1px solid ${C.border}` }}>
+              <div><div style={{ fontFamily: mono, fontSize: 18, fontWeight: 700, color: C.white }}>{m.numProyectos}</div><div style={{ fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.6, marginTop: 2 }}>Proyectos</div></div>
+              <div><div style={{ fontFamily: mono, fontSize: 18, fontWeight: 700, color: C.amber }}>{m.pendientes}</div><div style={{ fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.6, marginTop: 2 }}>Pendientes</div></div>
+              <div><div style={{ fontFamily: mono, fontSize: 18, fontWeight: 700, color: C.accent }}>{m.proceso}</div><div style={{ fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.6, marginTop: 2 }}>En proceso</div></div>
+            </div>
+          </div>
+        </Card>
+      );
+    }
+
+    function NuevoClienteModal({ open, onClose, onCrear }) {
+      const [nombre, setNombre] = useState("");
+      const [notas, setNotas] = useState("");
+      const [fechaAlta, setFechaAlta] = useState(todayISO());
+      useEffect(() => { if (open) { setNombre(""); setNotas(""); setFechaAlta(todayISO()); } }, [open]);
+      const submit = () => {
+        if (!nombre.trim()) return;
+        onCrear({ nombre: nombre.trim(), notas: notas.trim(), fechaAlta });
+        onClose();
+      };
+      return (
+        <Modal open={open} onClose={onClose} title="Nuevo cliente" footer={<><Btn onClick={onClose}>Cancelar</Btn><Btn kind="primary" onClick={submit}>Crear</Btn></>}>
+          <FormField label="Nombre del cliente">
+            <TextInput value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Farmacia X, Restaurante Y..." autoFocus />
+          </FormField>
+          <FormField label="Fecha de alta">
+            <TextInput type="date" value={fechaAlta} onChange={(e) => setFechaAlta(e.target.value)} />
+          </FormField>
+          <FormField label="Notas (opcional)" hint="Contacto, contexto, lo que quieras recordar.">
+            <TextArea value={notas} onChange={(e) => setNotas(e.target.value)} placeholder="Contacto: María García..." />
+          </FormField>
+        </Modal>
+      );
+    }
+
+    function VistaCliente({ store, clienteId, onAbrirProyecto, onNuevoProyecto, onEditarCliente }) {
+      const cli = store.getCliente(clienteId);
+      if (!cli) return <Card><p style={{ color: C.red }}>Cliente no encontrado.</p></Card>;
+      const proyectos = store.getProyectos(clienteId);
+      const m = getMetricasCliente(store, clienteId);
+      const saludColor = (s) => s === "saludable" ? C.green : s === "atencion" ? C.amber : C.red;
+      const saludLabel = (s) => s === "saludable" ? "Saludable" : s === "atencion" ? "Atención" : "Riesgo";
+
+      return (
+        <div>
+          {/* Banner */}
+          <Card style={{ marginBottom: 18, padding: "22px 24px", background: `linear-gradient(135deg, ${C.surface} 0%, ${C.surface2} 100%)` }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
+              <div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: C.white, letterSpacing: -0.4 }}>{cli.nombre}</div>
+                <div style={{ fontSize: 11, color: C.textDim, marginTop: 4 }}>Alta: {cli.fechaAlta}{cli.notas ? ` · ${cli.notas}` : ""}</div>
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <Btn onClick={onEditarCliente}>Editar cliente</Btn>
+                <Btn kind="primary" onClick={onNuevoProyecto}>+ Nuevo proyecto</Btn>
+              </div>
+            </div>
+          </Card>
+
+          {/* Lista de proyectos */}
+          <div style={{ marginBottom: 12, fontSize: 11, fontWeight: 700, color: C.textDim, letterSpacing: 0.7, textTransform: "uppercase" }}>Proyectos · {proyectos.length}</div>
+
+          {proyectos.length === 0 ? (
+            <Card><p style={{ color: C.textDim, fontSize: 13, textAlign: "center", padding: "20px 0" }}>Aún no hay proyectos para este cliente. Click en "+ Nuevo proyecto" para empezar.</p></Card>
+          ) : (
+            <div style={{ display: "grid", gap: 10 }}>
+              {proyectos.map(p => {
+                const its = store.getIteraciones(p.id, { incluirArchivadas: true });
+                const pend = its.filter(it => it.estado === "pendiente").length;
+                const proc = its.filter(it => it.estado === "en_proceso").length;
+                const hechMes = its.filter(it => it.estado === "hecha" && it.fechaArchivado && new Date(it.fechaArchivado) > new Date(Date.now() - 30 * 86400000)).length;
+                return (
+                  <Card key={p.id} style={{ cursor: "pointer", padding: "16px 20px" }}>
+                    <div onClick={() => onAbrirProyecto(p.id)} style={{ display: "grid", gridTemplateColumns: "2fr 1.2fr auto", gap: 16, alignItems: "center" }}>
+                      <div>
+                        <div style={{ fontSize: 15, fontWeight: 700, color: C.white }}>{p.nombre}</div>
+                        <div style={{ fontSize: 11, color: C.textDim, marginTop: 3 }}>{p.url || "—"}{p.tipoPropuesta ? ` · ${p.tipoPropuesta}` : ""}{p.fechaEntrega ? ` · entrega ${p.fechaEntrega}` : ""}</div>
+                      </div>
+                      <div style={{ display: "flex", gap: 16, fontSize: 11, color: C.textDim }}>
+                        <span><strong style={{ fontFamily: mono, color: C.amber, fontSize: 13 }}>{pend}</strong> pendientes</span>
+                        <span><strong style={{ fontFamily: mono, color: C.accent, fontSize: 13 }}>{proc}</strong> en proceso</span>
+                        <span><strong style={{ fontFamily: mono, color: C.green, fontSize: 13 }}>{hechMes}</strong> hechas (mes)</span>
+                      </div>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 10, fontWeight: 700, color: saludColor(p.salud) }}>
+                        <span style={{ width: 6, height: 6, borderRadius: "50%", background: saludColor(p.salud) }} /> {saludLabel(p.salud)}
+                      </span>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function EditarClienteModal({ open, onClose, cliente, onGuardar, onEliminar }) {
+      const [nombre, setNombre] = useState("");
+      const [notas, setNotas] = useState("");
+      const [fechaAlta, setFechaAlta] = useState("");
+      useEffect(() => { if (open && cliente) { setNombre(cliente.nombre); setNotas(cliente.notas || ""); setFechaAlta(cliente.fechaAlta); } }, [open, cliente]);
+      if (!cliente) return null;
+      const submit = () => { if (!nombre.trim()) return; onGuardar({ nombre: nombre.trim(), notas: notas.trim(), fechaAlta }); onClose(); };
+      const eliminar = () => {
+        askConfirm({
+          title: `Eliminar cliente "${cliente.nombre}"`,
+          body: "Se borrarán también todos sus proyectos e iteraciones. Esta acción no se puede deshacer.",
+          confirmText: "Eliminar",
+          danger: true,
+        }).then(ok => { if (ok) { onEliminar(); onClose(); } });
+      };
+      return (
+        <Modal open={open} onClose={onClose} title="Editar cliente" footer={<><Btn kind="danger" onClick={eliminar}>Eliminar</Btn><div style={{ flex: 1 }} /><Btn onClick={onClose}>Cancelar</Btn><Btn kind="primary" onClick={submit}>Guardar</Btn></>}>
+          <FormField label="Nombre"><TextInput value={nombre} onChange={(e) => setNombre(e.target.value)} /></FormField>
+          <FormField label="Fecha de alta"><TextInput type="date" value={fechaAlta} onChange={(e) => setFechaAlta(e.target.value)} /></FormField>
+          <FormField label="Notas"><TextArea value={notas} onChange={(e) => setNotas(e.target.value)} /></FormField>
+        </Modal>
+      );
+    }
+
+    function NuevoProyectoModal({ open, onClose, equipo, onCrear }) {
+      const [nombre, setNombre] = useState("");
+      const [url, setUrl] = useState("");
+      const [tipoPropuesta, setTipoPropuesta] = useState("");
+      const [fechaEntrega, setFechaEntrega] = useState("");
+      const [briefing, setBriefing] = useState("");
+      const [stack, setStack] = useState({ frontend: "", backend: "", hosting: "", dominioDNS: "" });
+      const [salud, setSalud] = useState("saludable");
+      const [equipoIds, setEquipoIds] = useState([]);
+      const [hitos, setHitos] = useState([]);
+
+      useEffect(() => {
+        if (open) {
+          setNombre(""); setUrl(""); setTipoPropuesta(""); setFechaEntrega("");
+          setBriefing(""); setStack({ frontend: "", backend: "", hosting: "", dominioDNS: "" });
+          setSalud("saludable"); setEquipoIds([]); setHitos([]);
+        }
+      }, [open]);
+
+      const submit = () => {
+        if (!nombre.trim()) return;
+        const hitosLimpios = hitos
+          .filter(h => h.nombre.trim() || h.fecha)
+          .map(h => ({ ...h, nombre: h.nombre.trim() }));
+        onCrear({ nombre: nombre.trim(), url: url.trim(), tipoPropuesta: tipoPropuesta.trim(), fechaEntrega, briefing: briefing.trim(), stack, salud, equipoIds, hitos: hitosLimpios });
+        onClose();
+      };
+
+      const toggleMiembro = (id) => setEquipoIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+
+      const addHito = () => setHitos(prev => [...prev, { id: genId("hito"), nombre: "", fecha: fechaEntrega || todayISO(), descripcion: "", cumplido: false }]);
+      const removeHito = (id) => setHitos(prev => prev.filter(h => h.id !== id));
+      const updateHito = (id, patch) => setHitos(prev => prev.map(h => h.id === id ? { ...h, ...patch } : h));
+
+      return (
+        <Modal open={open} onClose={onClose} title="Nuevo proyecto" width={620} footer={<><Btn onClick={onClose}>Cancelar</Btn><Btn kind="primary" onClick={submit}>Crear proyecto</Btn></>}>
+          <FormField label="Nombre del proyecto"><TextInput value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Web corporativa, App móvil..." autoFocus /></FormField>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+            <FormField label="URL"><TextInput value={url} onChange={(e) => setUrl(e.target.value)} placeholder="ejemplo.com" /></FormField>
+            <FormField label="Tipo propuesta"><TextInput value={tipoPropuesta} onChange={(e) => setTipoPropuesta(e.target.value)} placeholder="PROC-OPS-002" /></FormField>
+            <FormField label="Fecha entrega"><TextInput type="date" value={fechaEntrega} onChange={(e) => setFechaEntrega(e.target.value)} /></FormField>
+            <FormField label="Estado de salud">
+              <Select value={salud} onChange={setSalud} options={[
+                { value: "saludable", label: "Saludable", color: C.green },
+                { value: "atencion", label: "Atención", color: C.amber },
+                { value: "riesgo", label: "Riesgo", color: C.red },
+              ]} buttonStyle={{ padding: "8px 10px", fontSize: 13 }} />
+            </FormField>
+          </div>
+
+          <FormField label="Stack técnico">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              <TextInput value={stack.frontend} onChange={(e) => setStack(s => ({ ...s, frontend: e.target.value }))} placeholder="Frontend (Next.js 14)" />
+              <TextInput value={stack.backend} onChange={(e) => setStack(s => ({ ...s, backend: e.target.value }))} placeholder="Backend (pan SaaS)" />
+              <TextInput value={stack.hosting} onChange={(e) => setStack(s => ({ ...s, hosting: e.target.value }))} placeholder="Hosting (Vercel)" />
+              <TextInput value={stack.dominioDNS} onChange={(e) => setStack(s => ({ ...s, dominioDNS: e.target.value }))} placeholder="Dominio/DNS (Namecheap)" />
+            </div>
+          </FormField>
+
+          <FormField label="Briefing"><TextArea value={briefing} onChange={(e) => setBriefing(e.target.value)} placeholder="Objetivos, alcance, fuera de alcance..." /></FormField>
+
+          <FormField label="Equipo asignado">
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {equipo.map(m => (
+                <button key={m.id} onClick={() => toggleMiembro(m.id)} style={{ display: "flex", alignItems: "center", gap: 6, background: equipoIds.includes(m.id) ? C.accentGlow : C.bg, border: `1px solid ${equipoIds.includes(m.id) ? C.accent : C.border}`, borderRadius: 3, padding: "4px 10px 4px 4px", cursor: "pointer", fontFamily: font, fontSize: 11, color: equipoIds.includes(m.id) ? C.accent : C.textSec }}>
+                  <Avatar nombre={m.nombre} color={m.color} size={20} />
+                  {m.nombre}
+                </button>
+              ))}
+            </div>
+          </FormField>
+
+          <FormField label="Hitos del proyecto" hint="Define los puntos clave de entrega ahora — luego podrás asociar iteraciones a cada hito.">
+            {hitos.length === 0 ? (
+              <div style={{
+                padding: "16px 14px",
+                border: `1px dashed ${C.border}`,
+                borderRadius: 4,
+                background: C.bg,
+                fontSize: 12,
+                color: C.textDim,
+                fontFamily: font,
+                marginBottom: 8,
+                display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+              }}>
+                <span>Sin hitos. Puedes definirlos ahora o más tarde desde la ficha.</span>
+              </div>
+            ) : (
+              <div style={{ border: `1px solid ${C.border}`, borderRadius: 4, overflow: "hidden", marginBottom: 8 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "auto 1fr 130px auto", gap: 0, alignItems: "center", background: C.bg, padding: "6px 12px", borderBottom: `1px solid ${C.border}`, fontSize: 9, fontFamily: mono, letterSpacing: 0.6, textTransform: "uppercase", color: C.textDim }}>
+                  <span style={{ width: 8, marginRight: 8 }}>·</span>
+                  <span>Nombre</span>
+                  <span>Fecha</span>
+                  <span style={{ width: 28 }}></span>
+                </div>
+                {hitos.slice().sort((a, b) => (a.fecha || "").localeCompare(b.fecha || "")).map((h, idx) => {
+                  const u = hitoUrgencia(h);
+                  const col = hitoColor(u);
+                  return (
+                    <div key={h.id} style={{ display: "grid", gridTemplateColumns: "auto 1fr 130px auto", gap: 0, alignItems: "center", background: C.surface, padding: "8px 12px", borderBottom: idx < hitos.length - 1 ? `1px solid ${C.border}` : "none" }}>
+                      <span title={u} style={{ width: 8, height: 8, borderRadius: "50%", background: col.fg, marginRight: 8, flexShrink: 0 }} />
+                      <input
+                        value={h.nombre}
+                        onChange={(e) => updateHito(h.id, { nombre: e.target.value })}
+                        placeholder="Lanzamiento, QA, validación cliente…"
+                        style={{ background: "transparent", border: "none", color: C.text, fontFamily: font, fontSize: 13, outline: "none", padding: "4px 0", width: "100%" }}
+                      />
+                      <input
+                        type="date"
+                        value={h.fecha || ""}
+                        onChange={(e) => updateHito(h.id, { fecha: e.target.value })}
+                        style={{ background: "transparent", border: "none", color: C.textSec, fontFamily: mono, fontSize: 11, outline: "none", padding: "4px 0", width: "100%" }}
+                      />
+                      <button
+                        onClick={() => removeHito(h.id)}
+                        title="Eliminar hito"
+                        style={{ background: "transparent", border: "none", color: C.textDim, cursor: "pointer", padding: "4px 6px", borderRadius: 3, fontSize: 14, lineHeight: 1 }}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = C.red; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = C.textDim; }}
+                      >×</button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            <Btn onClick={addHito}>+ Añadir hito</Btn>
+          </FormField>
+        </Modal>
+      );
+    }
+
+    function SidePanel({ store, proyecto, onVerFichaCompleta, onVerHitos }) {
+      const equipo = store.getEquipo();
+      const miembros = proyecto.equipoIds.map(id => equipo.find(m => m.id === id)).filter(Boolean);
+      const proxHito = proyecto.hitos.slice().sort((a, b) => a.fecha.localeCompare(b.fecha))[0];
+      const dias = proxHito ? diasHasta(proxHito.fecha) : null;
+      const colorDias = dias == null ? C.textDim : dias <= 7 ? C.red : dias <= 21 ? C.amber : C.green;
+      const saludColor = proyecto.salud === "saludable" ? C.green : proyecto.salud === "atencion" ? C.amber : C.red;
+      const saludLabel = proyecto.salud === "saludable" ? "Saludable" : proyecto.salud === "atencion" ? "Atención" : "Riesgo";
+      const copy = (text) => navigator.clipboard?.writeText(text);
+
+      const Block = ({ label, children }) => (
+        <div style={{ marginBottom: 22 }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 10 }}>{label}</div>
+          {children}
+        </div>
+      );
+      const Row = ({ k, v, link, onCopy }) => (
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "5px 0", color: C.textSec }}>
+          <span>{k}</span>
+          <span style={{ color: link ? C.accent : C.text, fontWeight: 600, fontFamily: mono, fontSize: 11, cursor: onCopy ? "pointer" : "default" }} onClick={onCopy} title={onCopy ? "Click para copiar" : ""}>{v || "—"}</span>
+        </div>
+      );
+
+      return (
+        <div style={{ padding: "0 4px" }}>
+          <Block label="Estado">
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: saludColor, fontSize: 11, fontWeight: 700 }}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: saludColor }} /> {saludLabel}
+            </span>
+            <Row k="Entrega" v={proyecto.fechaEntrega} />
+          </Block>
+
+          <Block label="Equipo">
+            <div style={{ display: "flex", gap: 5 }}>
+              {miembros.length === 0 ? <span style={{ fontSize: 12, color: C.textDim }}>Sin equipo asignado</span> :
+                miembros.map(m => <Avatar key={m.id} nombre={m.nombre} color={m.color} size={26} title={`${m.nombre} · ${m.rol}`} />)}
+            </div>
+          </Block>
+
+          <Block label="Ficha rápida">
+            <Row k="URL" v={proyecto.url} link onCopy={() => proyecto.url && copy(proyecto.url)} />
+            <Row k="Stack" v={proyecto.stack.frontend && proyecto.stack.backend ? `${proyecto.stack.frontend} + ${proyecto.stack.backend}` : (proyecto.stack.frontend || proyecto.stack.backend || "—")} />
+            <Row k="Hosting" v={proyecto.stack.hosting} />
+            <Row k="DNS" v={proyecto.stack.dominioDNS} />
+          </Block>
+
+          <Block label="Próximo hito">
+            {proxHito
+              ? <Row k={proxHito.nombre} v={dias != null ? (dias === 0 ? "hoy" : dias < 0 ? `hace ${-dias} d` : `en ${dias} d`) : proxHito.fecha} />
+              : <div style={{ fontSize: 12, color: C.textDim }}>Sin hitos definidos</div>}
+            {proxHito && dias != null && <div style={{ fontSize: 10, color: colorDias, marginTop: 4 }}>{proxHito.fecha}</div>}
+            {proyecto.hitos.length > 0 && (
+              <button onClick={onVerHitos} className="crux-link-btn crux-link-btn-sm" style={{ marginTop: 12 }}>
+                <span>Ver timeline de hitos</span>
+                <span className="crux-link-arrow">
+                  <span className="crux-link-rule" />
+                  <span className="crux-link-tip">→</span>
+                </span>
+              </button>
+            )}
+          </Block>
+
+          <button onClick={onVerFichaCompleta} className="crux-link-btn" style={{ marginTop: 6 }}>
+            <span>Ver ficha completa</span>
+            <span className="crux-link-arrow">
+              <span className="crux-link-rule" />
+              <span className="crux-link-tip">→</span>
+            </span>
+          </button>
+        </div>
+      );
+    }
+
+    function ListaIteraciones({ store, proyectoId, initialOpts }) {
+      const [filtroEstado, setFiltroEstado] = useState("activas"); // activas | hechas | descartadas | todas
+      const [filtroTipos, setFiltroTipos] = useState([]); // [] = todos
+      const [query, setQuery] = useState("");
+      const [expandidoId, setExpandidoId] = useState(null);
+      const [editandoId, setEditandoId] = useState(null);
+      const [filtroHitoId, setFiltroHitoId] = useState(null); // null = sin filtro · "__sin__" = solo sin hito · id = ese hito
+      const viewModeKey = `crux.comunicacion.v1.proyecto.${proyectoId}.iteracionesView`;
+      const [viewMode, setViewMode] = useState(() => {
+        try { return localStorage.getItem(viewModeKey) || "lista"; } catch { return "lista"; }
+      });
+      useEffect(() => {
+        try { localStorage.setItem(viewModeKey, viewMode); } catch {}
+      }, [viewMode, viewModeKey]);
+
+      useEffect(() => {
+        if (!initialOpts) return;
+        if (initialOpts.viewMode) setViewMode(initialOpts.viewMode);
+        if (initialOpts.filtroHitoId !== undefined) setFiltroHitoId(initialOpts.filtroHitoId || null);
+      }, [initialOpts]);
+
+      const [hitoColapsados, setHitoColapsados] = useState({}); // { [hitoId|"__sin__"]: true } = colapsado
+      const toggleHitoColapso = (key) => setHitoColapsados(prev => ({ ...prev, [key]: !prev[key] }));
+
+      const [vistaOpen, setVistaOpen] = useState(false);
+      const vistaRef = useRef(null);
+      useEffect(() => {
+        const close = (e) => { if (vistaRef.current && !vistaRef.current.contains(e.target)) setVistaOpen(false); };
+        document.addEventListener("mousedown", close);
+        return () => document.removeEventListener("mousedown", close);
+      }, []);
+
+      useEffect(() => {
+        const onKey = (e) => {
+          if (e.key === "/" && !["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName)) {
+            e.preventDefault();
+            document.getElementById("iter-search")?.focus();
+          }
+        };
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
+      }, []);
+
+      const equipo = store.getEquipo();
+      const all = store.getIteraciones(proyectoId, { incluirArchivadas: true });
+      const proyecto = store.getProyecto(proyectoId);
+      const hitosProyecto = (proyecto?.hitos || []).slice().sort((a, b) => (a.fecha || "").localeCompare(b.fecha || ""));
+
+      const visibles = all.filter(it => {
+        if (filtroEstado === "activas" && (it.estado === "hecha" || it.estado === "descartada")) return false;
+        if (filtroEstado === "hechas" && it.estado !== "hecha") return false;
+        if (filtroEstado === "descartadas" && it.estado !== "descartada") return false;
+        if (filtroTipos.length > 0 && !filtroTipos.includes(it.tipo)) return false;
+        if (query.trim() && !it.descripcion.toLowerCase().includes(query.toLowerCase())) return false;
+        if (filtroHitoId === "__sin__" && it.hitoId) return false;
+        if (filtroHitoId && filtroHitoId !== "__sin__" && it.hitoId !== filtroHitoId) return false;
+        return true;
+      });
+
+      const counts = {
+        activas: all.filter(it => it.estado === "pendiente" || it.estado === "en_proceso").length,
+        hechas: all.filter(it => it.estado === "hecha").length,
+        descartadas: all.filter(it => it.estado === "descartada").length,
+        todas: all.length,
+      };
+
+      const toggleTipo = (id) => setFiltroTipos(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+
+      const Pill = ({ active, onClick, children, color }) => (
+        <button onClick={onClick} style={{
+          fontSize: 11, padding: "4px 10px", borderRadius: 12,
+          background: active ? `${color || C.accent}26` : C.surface,
+          color: active ? (color || C.accent) : C.textSec,
+          border: `1px solid ${active ? (color || C.accent) : C.border}`,
+          fontWeight: 600, cursor: "pointer", fontFamily: font, letterSpacing: 0.2,
+        }}>{children}</button>
+      );
+
+      const usuarioActual = equipo.find(m => m.id === localStorage.getItem(USUARIO_KEY)) || equipo[0];
+
+      return (
+        <div>
+          {/* Quick add */}
+          <QuickAdd store={store} proyectoId={proyectoId} usuarioActual={usuarioActual} />
+
+          {/* Toolbar única: buscador + Estado select + Tipo multiselect + Toggle (si hay hitos) */}
+          <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 18, flexWrap: "wrap" }}>
+            <input id="iter-search" type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar en iteraciones... (atajo: /)" style={{
+              flex: 1, minWidth: 180, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8,
+              padding: "8px 12px", color: C.text, fontFamily: font, fontSize: 13, outline: "none",
+            }} onFocus={(e) => e.target.style.borderColor = C.accent} onBlur={(e) => e.target.style.borderColor = C.border} />
+            <Select
+              value={filtroEstado}
+              onChange={setFiltroEstado}
+              options={[
+                { value: "activas", label: `Activas (${counts.activas})` },
+                { value: "hechas", label: `Hechas (${counts.hechas})`, color: C.green },
+                { value: "descartadas", label: `Descartadas (${counts.descartadas})`, color: C.textDim },
+                { value: "todas", label: `Todas (${counts.todas})` },
+              ]}
+              buttonStyle={{ padding: "8px 10px", fontSize: 12, minWidth: 130 }}
+            />
+            <MultiSelect
+              values={filtroTipos}
+              onChange={setFiltroTipos}
+              options={TIPOS.map(t => ({ value: t.id, label: t.label, color: t.color }))}
+              label="Tipo"
+              buttonStyle={{ padding: "8px 10px", fontSize: 12, minWidth: 90 }}
+            />
+            {(() => {
+              const opts = [
+                { value: "lista", label: "Lista", desc: "Lineal, por fecha de creación" },
+                ...(hitosProyecto.length > 0 ? [{ value: "porHito", label: "Por hitos", desc: "Agrupado por hito del proyecto" }] : []),
+                { value: "porPersona", label: "Por persona", desc: "Agrupado por responsable de la iteración" },
+              ];
+              const current = opts.find(o => o.value === viewMode) || opts[0];
+              return (
+                <div ref={vistaRef} style={{ position: "relative", marginLeft: "auto", flexShrink: 0 }}>
+                  <button type="button" className="crux-ctrl-btn" data-open={vistaOpen || undefined}
+                    onClick={() => setVistaOpen(o => !o)}
+                    style={{ minWidth: 200, gap: 10, padding: "9px 14px" }}>
+                    <span style={{ fontSize: 9, fontFamily: mono, color: C.textDim, letterSpacing: 0.7, textTransform: "uppercase" }}>Vista</span>
+                    <span style={{ width: 1, height: 12, background: C.border }} />
+                    <span style={{ flex: 1, textAlign: "left", color: C.text }}>{current.label}</span>
+                    <span style={{ color: C.textDim, fontSize: 9 }}>▾</span>
+                  </button>
+                  {vistaOpen && (
+                    <div style={{ position: "absolute", top: "calc(100% + 4px)", right: 0, minWidth: 280, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 4, padding: 4, zIndex: 200, boxShadow: "0 12px 30px rgba(0,0,0,0.55)" }}>
+                      {opts.map(o => {
+                        const active = o.value === viewMode;
+                        return (
+                          <button key={o.value} type="button"
+                            onClick={() => { setViewMode(o.value); setVistaOpen(false); }}
+                            style={{
+                              display: "block", width: "100%", textAlign: "left",
+                              background: active ? C.accentGlow : "transparent",
+                              border: "none", padding: "10px 12px", borderRadius: 3,
+                              cursor: "pointer", fontFamily: font,
+                              borderLeft: `2px solid ${active ? C.accent : "transparent"}`,
+                            }}
+                            onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = C.surface2; }}
+                            onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = "transparent"; }}>
+                            <div style={{ fontSize: 12, fontWeight: 600, color: active ? C.accent : C.text, letterSpacing: 0.1 }}>{o.label}</div>
+                            <div style={{ fontSize: 10, color: C.textDim, marginTop: 2, fontFamily: font }}>{o.desc}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* Chip de filtro hito persistente */}
+          {filtroHitoId && (
+            <div style={{ marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 10, color: C.textDim, fontFamily: mono, letterSpacing: 0.5, textTransform: "uppercase" }}>Filtrar por hito:</span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: C.accentGlow, border: `1px solid ${C.accent}`, color: C.accent, borderRadius: 12, padding: "3px 4px 3px 10px", fontSize: 11, fontWeight: 600, fontFamily: font }}>
+                {filtroHitoId === "__sin__" ? "Sin hito" : (store.getHito(proyectoId, filtroHitoId)?.nombre || "(borrado)")}
+                <button onClick={() => setFiltroHitoId(null)} style={{ background: "none", border: "none", color: C.accent, cursor: "pointer", fontSize: 13, lineHeight: 1, padding: "0 4px" }} title="Quitar filtro">×</button>
+              </span>
+            </div>
+          )}
+
+          {/* Lista o agrupado por hito */}
+          {(() => {
+            if (visibles.length === 0) {
+              return <Card><p style={{ color: C.textDim, fontSize: 13, textAlign: "center", padding: "20px 0" }}>{all.length === 0 ? "Aún no hay iteraciones." : "Ningún resultado con los filtros actuales."}</p></Card>;
+            }
+
+            const renderTarjeta = (it) => {
+              const autor = equipo.find(m => m.id === it.autorId);
+              const tipo = tipoOf(it.tipo);
+              const est = estadoOf(it.estado);
+              const archivada = it.estado === "hecha" || it.estado === "descartada";
+              const expandida = expandidoId === it.id;
+              return (
+                <div key={it.id} style={{ borderBottom: `1px solid ${C.border}` }}>
+                  <div style={{ padding: "12px 4px", display: "grid", gridTemplateColumns: "auto 1fr auto auto", gap: 12, alignItems: "flex-start", opacity: archivada ? 0.55 : 1 }}>
+                    <button onClick={() => {
+                      const cycle = { pendiente: "en_proceso", en_proceso: "hecha", hecha: "pendiente", descartada: "pendiente" };
+                      const usuarioId = localStorage.getItem(USUARIO_KEY);
+                      store.updateIteracion(it.id, { estado: cycle[it.estado], asignadoId: cycle[it.estado] === "en_proceso" ? usuarioId : null });
+                    }} title="Click cicla: pendiente → en proceso → hecha → pendiente" style={{
+                      width: 16, height: 16, borderRadius: 3, border: `1.5px solid ${est.color}`,
+                      background: it.estado === "hecha" ? est.color : it.estado === "en_proceso" ? `${est.color}33` : "transparent",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      color: it.estado === "hecha" ? C.bg : est.color, fontSize: 10, fontWeight: 800,
+                      cursor: "pointer", marginTop: 4, padding: 0, flexShrink: 0,
+                    }}>{it.estado === "hecha" ? "✓" : it.estado === "en_proceso" ? "▸" : it.estado === "descartada" ? "×" : ""}</button>
+
+                    <div onClick={() => setExpandidoId(expandida ? null : it.id)} style={{ cursor: "pointer" }}>
+                      <div style={{ fontSize: 13, color: C.text, lineHeight: 1.5 }}>{it.descripcion}</div>
+                      <div style={{ fontSize: 10, color: C.textDim, marginTop: 4, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                        {autor && <><Avatar nombre={autor.nombre} color={autor.color} size={14} /> {autor.nombre}</>}
+                        <span style={{ color: tipo.color }}>· {tipo.label}</span>
+                        {it.estado === "en_proceso" && it.asignadoId && <span style={{ color: C.accent }}>· en proceso por {equipo.find(m => m.id === it.asignadoId)?.nombre || "?"}</span>}
+                        {it.comentarios.length > 0 && <span>· 💬 {it.comentarios.length}</span>}
+                        {viewMode !== "porHito" && (
+                          <span style={{ marginLeft: 2 }}>
+                            <HitoChip
+                              hito={it.hitoId ? store.getHito(it.proyectoId, it.hitoId) : null}
+                              onClick={() => setFiltroHitoId(it.hitoId || "__sin__")}
+                              compact
+                            />
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div style={{ fontSize: 10, color: C.textDim, fontFamily: mono, whiteSpace: "nowrap", marginTop: 2 }}>{formatRelDate(it.fechaCreacion)}</div>
+
+                    <MenuAcciones it={it} store={store} onEditar={() => setEditandoId(it.id)} />
+                  </div>
+
+                  {expandida && (
+                    <PanelExpandido it={it} store={store} equipo={equipo} usuarioId={localStorage.getItem(USUARIO_KEY)} onCerrar={() => setExpandidoId(null)} />
+                  )}
+                </div>
+              );
+            };
+
+            const PStat = ({ label, value, color }) => (
+              <span style={{ display: "inline-flex", alignItems: "baseline", gap: 5, padding: "4px 9px", border: `1px solid ${C.border}`, borderRadius: 3, fontFamily: mono, background: C.bg }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: color || C.text, letterSpacing: -0.3, lineHeight: 1 }}>{value}</span>
+                <span style={{ fontSize: 8.5, color: C.textDim, letterSpacing: 0.6, textTransform: "uppercase", lineHeight: 1 }}>{label}</span>
+              </span>
+            );
+
+            if (viewMode === "porPersona") {
+              const personaIdDe = (it) => it.asignadoId || it.autorId || null;
+              const ids = Array.from(new Set(visibles.map(personaIdDe)));
+              const grupos = ids.map(uid => ({
+                key: uid || "__sin__",
+                persona: uid ? equipo.find(m => m.id === uid) : null,
+                its: visibles.filter(it => personaIdDe(it) === uid),
+              }))
+                .filter(g => g.its.length > 0)
+                .sort((a, b) => {
+                  if (!a.persona !== !b.persona) return !a.persona ? 1 : -1;
+                  const aPend = a.its.filter(it => it.estado === "pendiente" || it.estado === "en_proceso").length;
+                  const bPend = b.its.filter(it => it.estado === "pendiente" || it.estado === "en_proceso").length;
+                  if (aPend !== bPend) return bPend - aPend;
+                  return (a.persona?.nombre || "zz").localeCompare(b.persona?.nombre || "zz");
+                });
+
+              return (
+                <div>
+                  {grupos.map(g => {
+                    const total = g.its.length;
+                    const pend = g.its.filter(it => it.estado === "pendiente").length;
+                    const proc = g.its.filter(it => it.estado === "en_proceso").length;
+                    const hechas = g.its.filter(it => it.estado === "hecha").length;
+                    const persona = g.persona;
+                    return (
+                      <div key={g.key} style={{ marginBottom: 18, border: `1px solid ${C.border}`, borderRadius: 6, overflow: "hidden" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 14, alignItems: "center", background: C.surface, padding: "12px 16px", borderBottom: `1px solid ${C.border}` }}>
+                          {persona ? (
+                            <Avatar nombre={persona.nombre} color={persona.color} size={34} />
+                          ) : (
+                            <div style={{ width: 34, height: 34, borderRadius: "50%", background: C.bg, border: `1px dashed ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: C.textDim, fontFamily: mono }}>?</div>
+                          )}
+                          <div style={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
+                            <div style={{ fontSize: 13, fontWeight: 700, color: C.white, letterSpacing: -0.2 }}>{persona ? persona.nombre : "Sin asignar"}</div>
+                            <div style={{ fontSize: 9, color: C.textDim, fontFamily: mono, letterSpacing: 0.6, textTransform: "uppercase" }}>
+                              {persona?.rol || "—"}
+                            </div>
+                          </div>
+                          <div style={{ display: "flex", gap: 6 }}>
+                            <PStat label="Total" value={total} />
+                            {pend > 0 && <PStat label="Pend" value={pend} color={C.amber} />}
+                            {proc > 0 && <PStat label="En curso" value={proc} color={C.accent} />}
+                            {hechas > 0 && <PStat label="Hechas" value={hechas} color={C.green} />}
+                          </div>
+                        </div>
+                        <div style={{ background: C.bg }}>
+                          {g.its.map(renderTarjeta)}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            }
+
+            if (viewMode === "lista" || hitosProyecto.length === 0) {
+              return <div>{visibles.map(renderTarjeta)}</div>;
+            }
+
+            // Modo "Por hito": agrupar visibles por hitoId, secciones colapsables
+            const grupos = hitosProyecto.map(h => ({
+              key: h.id,
+              hito: h,
+              its: visibles.filter(it => it.hitoId === h.id),
+            }));
+            const sinHito = { key: "__sin__", hito: null, its: visibles.filter(it => !it.hitoId) };
+            const todos = [...grupos, sinHito].filter(g => g.its.length > 0);
+
+            if (todos.length === 0) {
+              return <Card><p style={{ color: C.textDim, fontSize: 13, textAlign: "center", padding: "20px 0" }}>Ningún resultado con los filtros actuales.</p></Card>;
+            }
+
+            return (
+              <div>
+                {todos.map(g => {
+                  const colapsado = !!hitoColapsados[g.key];
+                  const u = g.hito ? hitoUrgencia(g.hito) : "ninguno";
+                  const col = hitoColor(u);
+                  const pendientes = g.its.filter(it => it.estado === "pendiente").length;
+                  return (
+                    <div key={g.key} style={{ marginBottom: 18, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}>
+                      <button onClick={() => toggleHitoColapso(g.key)} style={{
+                        width: "100%", display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 12, alignItems: "center",
+                        background: C.surface, border: "none", padding: "10px 14px", cursor: "pointer", fontFamily: font, textAlign: "left",
+                        borderBottom: colapsado ? "none" : `1px solid ${C.border}`,
+                      }}>
+                        <span style={{ color: C.textDim, fontSize: 10, fontFamily: mono, width: 12 }}>{colapsado ? "▸" : "▾"}</span>
+                        <span style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                          <span style={{ width: 8, height: 8, borderRadius: "50%", background: col.fg, flexShrink: 0 }} />
+                          <span style={{ fontSize: 13, fontWeight: 700, color: C.white, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {g.hito ? (g.hito.nombre || "(sin nombre)") : "Sin hito"}
+                          </span>
+                          {g.hito?.fecha && <span style={{ fontSize: 10, color: C.textDim, fontFamily: mono, letterSpacing: 0.3 }}>· {g.hito.fecha}</span>}
+                        </span>
+                        <span style={{ fontSize: 10, color: C.textDim, fontFamily: mono, letterSpacing: 0.4, textTransform: "uppercase", whiteSpace: "nowrap" }}>
+                          {g.its.length} {g.its.length === 1 ? "iteración" : "iteraciones"}{pendientes > 0 && ` · ${pendientes} pend`}
+                        </span>
+                      </button>
+                      {!colapsado && (
+                        <div style={{ background: C.bg }}>
+                          {g.its.map(renderTarjeta)}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
+          <EditarIteracionModal
+            open={!!editandoId}
+            onClose={() => setEditandoId(null)}
+            iteracion={editandoId ? store.getIteracion(editandoId) : null}
+            equipo={equipo}
+            store={store}
+            onGuardar={(d) => store.updateIteracion(editandoId, d)}
+          />
+        </div>
+      );
+    }
+
+    function QuickAdd({ store, proyectoId, usuarioActual }) {
+      const [texto, setTexto] = useState("");
+      const [tipo, setTipo] = useState("diseño");
+      const [hitoId, setHitoId] = useState("");
+      const inputRef = useRef(null);
+      useEffect(() => {
+        const onKey = (e) => {
+          if (e.key === "n" && !["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName)) {
+            e.preventDefault();
+            inputRef.current?.focus();
+          }
+        };
+        document.addEventListener("keydown", onKey);
+        return () => document.removeEventListener("keydown", onKey);
+      }, []);
+      const proyecto = store.getProyecto(proyectoId);
+      const hitos = (proyecto?.hitos || []).slice().sort((a, b) => (a.fecha || "").localeCompare(b.fecha || ""));
+      const submit = () => {
+        if (!texto.trim()) return;
+        store.addIteracion(proyectoId, { descripcion: texto.trim(), autorId: usuarioActual.id, tipo, hitoId: hitoId || null });
+        setTexto("");
+        inputRef.current?.focus();
+      };
+      const hitoOptions = [
+        { value: "", label: "— Sin hito —" },
+        ...hitos.map(h => {
+          const u = hitoUrgencia(h);
+          return { value: h.id, label: h.nombre || "(sin nombre)", color: hitoColor(u).fg };
+        }),
+      ];
+      return (
+        <div style={{ display: "flex", gap: 8, marginBottom: 14, padding: "10px 12px", background: C.surface, border: `1px dashed ${C.border}`, borderRadius: 8 }}>
+          <span style={{ color: C.accent, fontSize: 16, fontWeight: 700, lineHeight: "30px" }}>+</span>
+          <input ref={inputRef} value={texto} onChange={(e) => setTexto(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submit()} placeholder="Añadir iteración rápida... (atajo: n)" style={{
+            flex: 1, background: "transparent", border: "none", color: C.text, fontFamily: font, fontSize: 13, outline: "none", padding: "6px 0",
+          }} />
+          <Select value={tipo} onChange={setTipo} options={TIPOS.map(t => ({ value: t.id, label: t.label, color: t.color }))} style={{ minWidth: 130 }} />
+          {hitos.length > 0 && (
+            <Select value={hitoId} onChange={setHitoId} options={hitoOptions} style={{ minWidth: 150 }} />
+          )}
+          <button onClick={submit} className="crux-btn crux-btn-primary">Añadir</button>
+        </div>
+      );
+    }
+
+    function MenuAcciones({ it, store, onEditar }) {
+      const [open, setOpen] = useState(false);
+      const ref = useRef(null);
+      useEffect(() => {
+        const close = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+        document.addEventListener("mousedown", close);
+        return () => document.removeEventListener("mousedown", close);
+      }, []);
+
+      const eliminar = () => {
+        askConfirm({
+          title: "Eliminar iteración",
+          body: "Se borrará definitivamente. Esta acción no se puede deshacer.",
+          confirmText: "Eliminar",
+          danger: true,
+        }).then(ok => { if (ok) store.deleteIteracion(it.id); });
+      };
+
+      const items = [
+        { label: "Editar", action: onEditar },
+        { label: "Marcar pendiente", action: () => store.updateIteracion(it.id, { estado: "pendiente", asignadoId: null }), disabled: it.estado === "pendiente" },
+        { label: "Marcar hecha", action: () => store.updateIteracion(it.id, { estado: "hecha" }), disabled: it.estado === "hecha" },
+        { label: "Descartar", action: () => store.updateIteracion(it.id, { estado: "descartada" }), disabled: it.estado === "descartada" },
+        { label: "Eliminar definitivamente", action: eliminar, danger: true },
+      ];
+
+      return (
+        <div ref={ref} style={{ position: "relative" }}>
+          <button onClick={() => setOpen(o => !o)} style={{ background: "none", border: "none", color: C.textDim, cursor: "pointer", padding: "2px 6px", fontSize: 14, lineHeight: 1, borderRadius: 4 }} title="Acciones">⋯</button>
+          {open && (
+            <div style={{ position: "absolute", top: "calc(100% + 4px)", right: 0, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: 4, minWidth: 200, zIndex: 50, boxShadow: "0 6px 18px rgba(0,0,0,0.3)" }}>
+              {items.map((i, idx) => (
+                <button key={idx} disabled={i.disabled} onClick={() => { i.action(); setOpen(false); }} style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
+                  width: "100%", textAlign: "left", background: "transparent", border: "none",
+                  padding: "7px 10px", borderRadius: 5, fontSize: 12, fontFamily: font,
+                  color: i.disabled ? C.textSec : i.danger ? C.red : C.text,
+                  cursor: i.disabled ? "default" : "pointer",
+                }} onMouseEnter={(e) => !i.disabled && (e.currentTarget.style.background = i.danger ? `${C.red}1a` : C.surface2)} onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>
+                  <span>{i.label}</span>
+                  {i.disabled && <span style={{ fontSize: 10, color: C.textDim, fontStyle: "italic" }}>actual</span>}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function PanelExpandido({ it, store, equipo, usuarioId, onCerrar }) {
+      const [comentario, setComentario] = useState("");
+      const enviar = () => {
+        if (!comentario.trim()) return;
+        store.addComentario(it.id, { autorId: usuarioId, texto: comentario.trim() });
+        setComentario("");
+      };
+      const borrarComent = (cId) => {
+        askConfirm({
+          title: "Borrar comentario",
+          body: "Esta acción no se puede deshacer.",
+          confirmText: "Borrar",
+          danger: true,
+        }).then(ok => { if (ok) store.deleteComentario(it.id, cId); });
+      };
+      const autorOf = (id) => equipo.find(m => m.id === id);
+
+      return (
+        <div style={{ padding: "0 4px 16px 32px", background: C.surface }}>
+          <div style={{ background: C.bg, borderRadius: 8, padding: 14, border: `1px solid ${C.border}` }}>
+            <div style={{ fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 8 }}>Descripción completa</div>
+            <div style={{ fontSize: 13, color: C.text, lineHeight: 1.6, whiteSpace: "pre-wrap", marginBottom: 14 }}>{it.descripcion}</div>
+            {it.enlace && <div style={{ marginBottom: 12 }}><a href={it.enlace} target="_blank" rel="noreferrer" style={{ color: C.accent, fontSize: 12 }}>↗ {it.enlace}</a></div>}
+
+            <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 12 }}>
+              <div style={{ fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 8 }}>Comentarios ({it.comentarios.length})</div>
+              {it.comentarios.length === 0 && <div style={{ fontSize: 12, color: C.textDim, fontStyle: "italic", marginBottom: 12 }}>Aún no hay comentarios.</div>}
+              {it.comentarios.map(c => {
+                const a = autorOf(c.autorId);
+                return (
+                  <div key={c.id} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 10, marginBottom: 10, alignItems: "flex-start" }}>
+                    {a ? <Avatar nombre={a.nombre} color={a.color} size={22} /> : <div style={{ width: 22 }} />}
+                    <div>
+                      <div style={{ fontSize: 11, color: C.white, fontWeight: 700 }}>{a?.nombre || "?"} <span style={{ color: C.textDim, fontWeight: 400, marginLeft: 4 }}>{formatRelDate(c.fecha)}</span></div>
+                      <div style={{ fontSize: 12, color: C.textSec, lineHeight: 1.5, marginTop: 2, whiteSpace: "pre-wrap" }}>{c.texto}</div>
+                    </div>
+                    <button onClick={() => borrarComent(c.id)} style={{ background: "none", border: "none", color: C.textDim, fontSize: 12, cursor: "pointer", padding: "2px 6px" }} title="Borrar comentario">×</button>
+                  </div>
+                );
+              })}
+
+              <div style={{ display: "flex", gap: 8, marginTop: 10, alignItems: "flex-start" }}>
+                <textarea value={comentario} onChange={(e) => setComentario(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) enviar(); }} placeholder="Añade un comentario... (Ctrl+Enter)" style={{ flex: 1, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 6, padding: "8px 10px", color: C.text, fontFamily: font, fontSize: 12, resize: "vertical", minHeight: 50, outline: "none" }} onFocus={(e) => e.target.style.borderColor = C.accent} onBlur={(e) => e.target.style.borderColor = C.border} />
+                <button onClick={enviar} className="crux-btn crux-btn-primary" style={{ alignSelf: "flex-start" }}>Enviar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function NuevoHitoMiniModal({ open, onClose, onCrear }) {
+      const [nombre, setNombre] = useState("");
+      const [fecha, setFecha] = useState(todayISO());
+      useEffect(() => { if (open) { setNombre(""); setFecha(todayISO()); } }, [open]);
+      const submit = () => {
+        if (!nombre.trim()) return;
+        onCrear({ nombre: nombre.trim(), fecha });
+        onClose();
+      };
+      return (
+        <Modal open={open} onClose={onClose} title="Nuevo hito" width={380} footer={<><Btn onClick={onClose}>Cancelar</Btn><Btn kind="primary" onClick={submit}>Crear hito</Btn></>}>
+          <FormField label="Nombre del hito"><TextInput value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Lanzamiento, QA, validación cliente..." autoFocus /></FormField>
+          <FormField label="Fecha"><TextInput type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} /></FormField>
+        </Modal>
+      );
+    }
+
+    function EditarIteracionModal({ open, onClose, iteracion, equipo, store, onGuardar }) {
+      const [descripcion, setDescripcion] = useState("");
+      const [tipo, setTipo] = useState("otro");
+      const [autorId, setAutorId] = useState(null);
+      const [enlace, setEnlace] = useState("");
+      const [hitoId, setHitoId] = useState("");
+      const [nuevoHitoOpen, setNuevoHitoOpen] = useState(false);
+      useEffect(() => {
+        if (open && iteracion) {
+          setDescripcion(iteracion.descripcion);
+          setTipo(iteracion.tipo);
+          setAutorId(iteracion.autorId);
+          setEnlace(iteracion.enlace || "");
+          setHitoId(iteracion.hitoId || "");
+          setNuevoHitoOpen(false);
+        }
+      }, [open, iteracion]);
+      if (!iteracion) return null;
+      const proyecto = store.getProyecto(iteracion.proyectoId);
+      const hitos = (proyecto?.hitos || []).slice().sort((a, b) => (a.fecha || "").localeCompare(b.fecha || ""));
+      const hitoOptions = [
+        { value: "", label: "— Sin hito —" },
+        ...hitos.map(h => {
+          const u = hitoUrgencia(h);
+          return { value: h.id, label: `${h.nombre || "(sin nombre)"}${h.fecha ? ` · ${h.fecha}` : ""}`, color: hitoColor(u).fg };
+        }),
+        { value: "__nuevo__", label: "+ Crear nuevo hito…", color: C.accent },
+      ];
+      const onChangeHito = (v) => {
+        if (v === "__nuevo__") { setNuevoHitoOpen(true); return; }
+        setHitoId(v);
+      };
+      const handleNuevoHito = (data) => {
+        const creado = store.addHitoEnProyecto(iteracion.proyectoId, data);
+        setHitoId(creado.id);
+      };
+      const submit = () => {
+        if (!descripcion.trim()) return;
+        onGuardar({ descripcion: descripcion.trim(), tipo, autorId, enlace: enlace.trim(), hitoId: hitoId || null });
+        onClose();
+      };
+      return (
+        <>
+          <Modal open={open} onClose={onClose} title="Editar iteración" footer={<><Btn onClick={onClose}>Cancelar</Btn><Btn kind="primary" onClick={submit}>Guardar</Btn></>}>
+            <FormField label="Descripción"><TextArea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} style={{ minHeight: 100 }} autoFocus /></FormField>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <FormField label="Tipo">
+                <Select value={tipo} onChange={setTipo} options={TIPOS.map(t => ({ value: t.id, label: t.label, color: t.color }))} buttonStyle={{ padding: "8px 10px", fontSize: 13 }} />
+              </FormField>
+              <FormField label="Autor">
+                <Select value={autorId || ""} onChange={(v) => setAutorId(v || null)} options={[{ value: "", label: "— Sin asignar —" }, ...equipo.map(m => ({ value: m.id, label: m.nombre, color: m.color }))]} buttonStyle={{ padding: "8px 10px", fontSize: 13 }} />
+              </FormField>
+            </div>
+            <FormField label="Hito (opcional)" hint="Asocia esta iteración al hito al que contribuye.">
+              <Select value={hitoId} onChange={onChangeHito} options={hitoOptions} buttonStyle={{ padding: "8px 10px", fontSize: 13 }} />
+            </FormField>
+            <FormField label="Enlace (opcional)" hint="URL a la página/sección donde está el cambio."><TextInput value={enlace} onChange={(e) => setEnlace(e.target.value)} placeholder="https://..." /></FormField>
+          </Modal>
+          <NuevoHitoMiniModal open={nuevoHitoOpen} onClose={() => setNuevoHitoOpen(false)} onCrear={handleNuevoHito} />
+        </>
+      );
+    }
+
+    function FichaCompletaModal({ open, onClose, proyecto, equipo, onGuardar, onEliminar }) {
+      const [draft, setDraft] = useState(null);
+      useEffect(() => { if (open && proyecto) setDraft(JSON.parse(JSON.stringify(proyecto))); }, [open, proyecto]);
+      if (!draft) return null;
+
+      const setField = (path, value) => {
+        setDraft(prev => {
+          const copy = JSON.parse(JSON.stringify(prev));
+          const parts = path.split(".");
+          let obj = copy;
+          for (let i = 0; i < parts.length - 1; i++) obj = obj[parts[i]];
+          obj[parts[parts.length - 1]] = value;
+          return copy;
+        });
+      };
+      const addHito = () => setDraft(prev => ({ ...prev, hitos: [...prev.hitos, { id: genId("hito"), nombre: "", fecha: todayISO(), descripcion: "", cumplido: false }] }));
+      const removeHito = (id) => setDraft(prev => ({ ...prev, hitos: prev.hitos.filter(h => h.id !== id) }));
+      const updateHito = (id, patch) => setDraft(prev => ({ ...prev, hitos: prev.hitos.map(h => h.id === id ? { ...h, ...patch } : h) }));
+      const toggleMiembro = (mid) => setDraft(prev => ({ ...prev, equipoIds: prev.equipoIds.includes(mid) ? prev.equipoIds.filter(x => x !== mid) : [...prev.equipoIds, mid] }));
+
+      const guardar = () => { onGuardar(draft); onClose(); };
+      const eliminar = () => {
+        askConfirm({
+          title: `Eliminar proyecto "${draft.nombre}"`,
+          body: "Se borrarán también todas sus iteraciones. Esta acción no se puede deshacer.",
+          confirmText: "Eliminar",
+          danger: true,
+        }).then(ok => { if (ok) { onEliminar(); onClose(); } });
+      };
+
+      return (
+        <Modal open={open} onClose={onClose} title={`Ficha completa · ${draft.nombre}`} width={680} footer={<><Btn kind="danger" onClick={eliminar}>Eliminar proyecto</Btn><div style={{ flex: 1 }} /><Btn onClick={onClose}>Cancelar</Btn><Btn kind="primary" onClick={guardar}>Guardar cambios</Btn></>}>
+          <FormField label="Nombre del proyecto"><TextInput value={draft.nombre} onChange={(e) => setField("nombre", e.target.value)} /></FormField>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+            <FormField label="URL"><TextInput value={draft.url} onChange={(e) => setField("url", e.target.value)} /></FormField>
+            <FormField label="Tipo propuesta"><TextInput value={draft.tipoPropuesta} onChange={(e) => setField("tipoPropuesta", e.target.value)} /></FormField>
+            <FormField label="Fecha alta"><TextInput type="date" value={draft.fechaAlta} onChange={(e) => setField("fechaAlta", e.target.value)} /></FormField>
+            <FormField label="Fecha entrega"><TextInput type="date" value={draft.fechaEntrega} onChange={(e) => setField("fechaEntrega", e.target.value)} /></FormField>
+            <FormField label="Salud">
+              <Select value={draft.salud} onChange={(v) => setField("salud", v)} options={[
+                { value: "saludable", label: "Saludable", color: C.green },
+                { value: "atencion", label: "Atención", color: C.amber },
+                { value: "riesgo", label: "Riesgo", color: C.red },
+              ]} buttonStyle={{ padding: "8px 10px", fontSize: 13 }} />
+            </FormField>
+            <FormField label="Bloqueo actual (opcional)"><TextInput value={draft.bloqueoActual} onChange={(e) => setField("bloqueoActual", e.target.value)} /></FormField>
+          </div>
+
+          <FormField label="Stack técnico">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              <TextInput value={draft.stack.frontend} onChange={(e) => setField("stack.frontend", e.target.value)} placeholder="Frontend" />
+              <TextInput value={draft.stack.backend} onChange={(e) => setField("stack.backend", e.target.value)} placeholder="Backend" />
+              <TextInput value={draft.stack.hosting} onChange={(e) => setField("stack.hosting", e.target.value)} placeholder="Hosting" />
+              <TextInput value={draft.stack.dominioDNS} onChange={(e) => setField("stack.dominioDNS", e.target.value)} placeholder="Dominio/DNS" />
+            </div>
+          </FormField>
+
+          <FormField label="Briefing"><TextArea value={draft.briefing} onChange={(e) => setField("briefing", e.target.value)} style={{ minHeight: 100 }} /></FormField>
+
+          <FormField label="Equipo asignado">
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {equipo.map(m => (
+                <button key={m.id} onClick={() => toggleMiembro(m.id)} style={{ display: "flex", alignItems: "center", gap: 6, background: draft.equipoIds.includes(m.id) ? C.accentGlow : C.bg, border: `1px solid ${draft.equipoIds.includes(m.id) ? C.accent : C.border}`, borderRadius: 3, padding: "4px 10px 4px 4px", cursor: "pointer", fontFamily: font, fontSize: 11, color: draft.equipoIds.includes(m.id) ? C.accent : C.textSec }}>
+                  <Avatar nombre={m.nombre} color={m.color} size={20} />
+                  {m.nombre}
+                </button>
+              ))}
+            </div>
+          </FormField>
+
+          <FormField label="Hitos del proyecto" hint="Puntos clave de entrega. Cada iteración puede asociarse a un hito.">
+            {draft.hitos.length === 0 ? (
+              <div style={{ padding: "16px 14px", border: `1px dashed ${C.border}`, borderRadius: 4, background: C.bg, fontSize: 12, color: C.textDim, fontFamily: font, marginBottom: 8 }}>
+                Sin hitos definidos. Pulsa "+ Añadir hito" para crear el primero.
+              </div>
+            ) : (
+              <div style={{ border: `1px solid ${C.border}`, borderRadius: 4, overflow: "hidden", marginBottom: 8 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "auto 1fr 130px auto", gap: 0, alignItems: "center", background: C.bg, padding: "6px 12px", borderBottom: `1px solid ${C.border}`, fontSize: 9, fontFamily: mono, letterSpacing: 0.6, textTransform: "uppercase", color: C.textDim }}>
+                  <span style={{ width: 8, marginRight: 8 }}>·</span>
+                  <span>Nombre</span>
+                  <span>Fecha</span>
+                  <span style={{ width: 28 }}></span>
+                </div>
+                {draft.hitos.slice().sort((a, b) => (a.fecha || "").localeCompare(b.fecha || "")).map((h, idx, arr) => {
+                  const u = hitoUrgencia(h);
+                  const col = hitoColor(u);
+                  return (
+                    <div key={h.id} style={{ display: "grid", gridTemplateColumns: "auto 1fr 130px auto", gap: 0, alignItems: "center", background: C.surface, padding: "8px 12px", borderBottom: idx < arr.length - 1 ? `1px solid ${C.border}` : "none" }}>
+                      <span title={u} style={{ width: 8, height: 8, borderRadius: "50%", background: col.fg, marginRight: 8, flexShrink: 0 }} />
+                      <input
+                        value={h.nombre}
+                        onChange={(e) => updateHito(h.id, { nombre: e.target.value })}
+                        placeholder="Lanzamiento, QA, validación cliente…"
+                        style={{ background: "transparent", border: "none", color: C.text, fontFamily: font, fontSize: 13, outline: "none", padding: "4px 0", width: "100%" }}
+                      />
+                      <input
+                        type="date"
+                        value={h.fecha || ""}
+                        onChange={(e) => updateHito(h.id, { fecha: e.target.value })}
+                        style={{ background: "transparent", border: "none", color: C.textSec, fontFamily: mono, fontSize: 11, outline: "none", padding: "4px 0", width: "100%" }}
+                      />
+                      <button
+                        onClick={() => removeHito(h.id)}
+                        title="Eliminar hito"
+                        style={{ background: "transparent", border: "none", color: C.textDim, cursor: "pointer", padding: "4px 6px", borderRadius: 3, fontSize: 14, lineHeight: 1 }}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = C.red; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = C.textDim; }}
+                      >×</button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            <Btn onClick={addHito}>+ Añadir hito</Btn>
+          </FormField>
+        </Modal>
+      );
+    }
+
+    function VistaEquipo({ store, onVolver }) {
+      const equipo = store.getEquipo();
+      const [editando, setEditando] = useState(null);
+      const [nuevo, setNuevo] = useState(false);
+
+      return (
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 24 }}>
+            <div>
+              <h1 style={{ fontSize: 24, fontWeight: 700, color: C.white, letterSpacing: -0.5 }}>Equipo</h1>
+              <p style={{ fontSize: 12, color: C.textDim, marginTop: 4 }}>{equipo.length} miembros · usados como autores en iteraciones y comentarios</p>
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <Btn onClick={onVolver}>← Volver</Btn>
+              <Btn kind="primary" onClick={() => setNuevo(true)}>+ Nuevo miembro</Btn>
+            </div>
+          </div>
+
+          <Card>
+            {equipo.map((m, i) => (
+              <div key={m.id} style={{ display: "grid", gridTemplateColumns: "auto 1.6fr 0.9fr 1.8fr 0.9fr auto", gap: 14, alignItems: "center", padding: "10px 0", borderBottom: i < equipo.length - 1 ? `1px solid ${C.border}` : "none" }}>
+                <Avatar nombre={m.nombre} color={m.color} size={32} />
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: C.white }}>{m.nombre}</div>
+                  <div style={{ fontSize: 10, color: C.textDim, fontFamily: mono }}>{m.iniciales}</div>
+                </div>
+                <div style={{ fontSize: 12, color: C.textSec }}>{m.rol}</div>
+                <div style={{ fontSize: 12, color: C.textSec, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {m.gmail ? (
+                    <a href={`mailto:${m.gmail}`} title={m.gmail} style={{ color: C.textSec, textDecoration: "none", borderBottom: `1px dashed ${C.border}` }} onMouseEnter={(e) => { e.currentTarget.style.color = C.accent; e.currentTarget.style.borderBottomColor = C.accent; }} onMouseLeave={(e) => { e.currentTarget.style.color = C.textSec; e.currentTarget.style.borderBottomColor = C.border; }}>{m.gmail}</a>
+                  ) : (
+                    <span style={{ color: C.textDim, fontFamily: mono, fontSize: 11 }}>—</span>
+                  )}
+                </div>
+                <div style={{ fontSize: 11, color: C.textDim, fontFamily: mono }}>{m.color}</div>
+                <Btn onClick={() => setEditando(m)}>Editar</Btn>
+              </div>
+            ))}
+          </Card>
+
+          <MiembroModal open={!!editando || nuevo} onClose={() => { setEditando(null); setNuevo(false); }} miembro={editando} onGuardar={(d) => editando ? store.updateMiembro(editando.id, d) : store.addMiembro(d)} onEliminar={editando ? () => store.deleteMiembro(editando.id) : null} />
+        </div>
+      );
+    }
+
+    function MiembroModal({ open, onClose, miembro, onGuardar, onEliminar }) {
+      const [nombre, setNombre] = useState("");
+      const [rol, setRol] = useState("Otro");
+      const [gmail, setGmail] = useState("");
+      const [color, setColor] = useState(C.accent);
+      const [errorGmail, setErrorGmail] = useState("");
+      useEffect(() => {
+        if (open) {
+          setNombre(miembro?.nombre || "");
+          setRol(miembro?.rol || "Otro");
+          setGmail(miembro?.gmail || "");
+          setColor(miembro?.color || C.accent);
+          setErrorGmail("");
+        }
+      }, [open, miembro]);
+      const submit = () => {
+        if (!nombre.trim()) return;
+        const g = gmail.trim();
+        if (g && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g)) { setErrorGmail("Email inválido"); return; }
+        onGuardar({ nombre: nombre.trim(), rol, color, gmail: g });
+        onClose();
+      };
+      const eliminar = () => {
+        askConfirm({
+          title: `Eliminar miembro "${miembro.nombre}"`,
+          body: "Las iteraciones que lo tengan como autor mantendrán su id huérfano.",
+          confirmText: "Eliminar",
+          danger: true,
+        }).then(ok => { if (ok) { onEliminar(); onClose(); } });
+      };
+
+      const colors = [C.accent, C.green, C.amber, C.red, "#9B7BC2", "#5BC0BE", "#E8A87C", C.textSec];
+
+      return (
+        <Modal open={open} onClose={onClose} title={miembro ? "Editar miembro" : "Nuevo miembro"} footer={<>{miembro && <Btn kind="danger" onClick={eliminar}>Eliminar</Btn>}<div style={{ flex: 1 }} /><Btn onClick={onClose}>Cancelar</Btn><Btn kind="primary" onClick={submit}>Guardar</Btn></>}>
+          <FormField label="Nombre"><TextInput value={nombre} onChange={(e) => setNombre(e.target.value)} autoFocus /></FormField>
+          <FormField label="Rol">
+            <Select value={rol} onChange={setRol} options={[
+              { value: "PM", label: "PM" },
+              { value: "Dev", label: "Dev" },
+              { value: "Dev/PM", label: "Dev/PM" },
+              { value: "Técnico SaaS", label: "Técnico SaaS" },
+              { value: "Otro", label: "Otro" },
+            ]} buttonStyle={{ padding: "8px 10px", fontSize: 13 }} />
+          </FormField>
+          <FormField label="Gmail" hint="Email de contacto. Se usa como mailto: en la lista del equipo." error={errorGmail}>
+            <TextInput type="email" value={gmail} onChange={(e) => { setGmail(e.target.value); if (errorGmail) setErrorGmail(""); }} placeholder="nombre@gmail.com" autoComplete="email" />
+          </FormField>
+          <FormField label="Color del avatar">
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {colors.map(c => (
+                <button key={c} onClick={() => setColor(c)} style={{ width: 28, height: 28, borderRadius: "50%", background: c, border: color === c ? `2px solid ${C.white}` : `2px solid transparent`, cursor: "pointer" }} />
+              ))}
+            </div>
+          </FormField>
+        </Modal>
+      );
+    }
+
+    function VistaHitos({ store, proyectoId, onVolver, onVerIteracionesDeHito }) {
+      const proyecto = store.getProyecto(proyectoId);
+      const cliente = proyecto && store.getCliente(proyecto.clienteId);
+      const [editandoId, setEditandoId] = useState(null);
+      if (!proyecto) return <Card><p style={{ color: C.red }}>Proyecto no encontrado.</p></Card>;
+
+      const setHitos = (newHitos) => store.updateProyecto(proyectoId, { hitos: newHitos });
+      const updateHito = (id, patch) => setHitos(proyecto.hitos.map(h => h.id === id ? { ...h, ...patch } : h));
+      const removeHito = (id) => {
+        const its = store.getIteracionesPorHito(proyectoId, id, { incluirArchivadas: true });
+        const cuerpoExtra = its.length > 0
+          ? `Este hito tiene ${its.length} ${its.length === 1 ? "iteración asociada" : "iteraciones asociadas"} — pasarán a "Sin hito". `
+          : "";
+        askConfirm({
+          title: "Eliminar hito",
+          body: `${cuerpoExtra}Esta acción no se puede deshacer.`,
+          confirmText: "Eliminar",
+          danger: true,
+        }).then(ok => { if (ok) store.deleteHito(proyectoId, id); });
+      };
+      const addHito = () => {
+        const nuevo = { id: genId("hito"), nombre: "Nuevo hito", fecha: todayISO(), descripcion: "", cumplido: false };
+        setHitos([...proyecto.hitos, nuevo]);
+        setEditandoId(nuevo.id);
+      };
+      const toggleCumplido = (h) => updateHito(h.id, { cumplido: !h.cumplido, fechaCumplido: !h.cumplido ? todayISO() : null });
+
+      /* Pendientes en orden cronológico arriba; cumplidos al final manteniendo su orden por fecha. */
+      const ordenados = proyecto.hitos.slice().sort((a, b) => {
+        if (!!a.cumplido !== !!b.cumplido) return a.cumplido ? 1 : -1;
+        return (a.fecha || "").localeCompare(b.fecha || "");
+      });
+      const pendientes = proyecto.hitos.filter(h => !h.cumplido).length;
+      const cumplidosCount = proyecto.hitos.filter(h => h.cumplido).length;
+
+      return (
+        <div style={{ maxWidth: 880, margin: "0 auto" }}>
+          {/* Cabecera */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 32, flexWrap: "wrap", gap: 16 }}>
+            <div>
+              <div style={{ fontSize: 11, color: C.textDim, letterSpacing: 0.6, marginBottom: 6, textTransform: "uppercase", fontWeight: 700 }}>{cliente?.nombre} · {proyecto.nombre}</div>
+              <h1 style={{ fontSize: 30, fontWeight: 700, color: C.white, letterSpacing: -0.7, lineHeight: 1.1 }}>Hitos del proyecto</h1>
+              <p style={{ fontSize: 13, color: C.textSec, marginTop: 8 }}>
+                {proyecto.hitos.length === 0 ? "Aún no hay hitos definidos." : (
+                  <>
+                    {proyecto.hitos.length} hitos
+                    {pendientes > 0 && <> · <span style={{ color: C.amber }}>{pendientes} pendiente{pendientes !== 1 ? "s" : ""}</span></>}
+                    {cumplidosCount > 0 && <> · <span style={{ color: C.green }}>{cumplidosCount} cumplido{cumplidosCount !== 1 ? "s" : ""}</span></>}
+                  </>
+                )}
+              </p>
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <Btn onClick={onVolver}>← Volver al proyecto</Btn>
+              <Btn kind="primary" onClick={addHito}>+ Nuevo hito</Btn>
+            </div>
+          </div>
+
+          {ordenados.length === 0 ? (
+            <Card style={{ padding: 48, textAlign: "center" }}>
+              <div style={{ fontSize: 14, color: C.textSec, marginBottom: 6 }}>Aún no hay hitos en este proyecto.</div>
+              <div style={{ fontSize: 12, color: C.textDim }}>Click en "+ Nuevo hito" para añadir el primero.</div>
+            </Card>
+          ) : (
+            <div style={{ position: "relative", paddingLeft: 36 }}>
+              {/* Línea vertical del timeline */}
+              <div style={{ position: "absolute", left: 12, top: 16, bottom: 16, width: 2, background: `linear-gradient(180deg, ${C.border} 0%, ${C.border} 70%, transparent 100%)` }}></div>
+
+              {ordenados.map((h) => {
+                const dias = diasHasta(h.fecha);
+                const cumplido = !!h.cumplido;
+                const atrasado = !cumplido && dias != null && dias < 0;
+                const dotColor = cumplido ? C.green : atrasado ? C.red : (dias <= 7 ? C.red : dias <= 21 ? C.amber : C.green);
+                const estadoLabel = cumplido ? "Cumplido" : (dias == null ? "Sin fecha" : atrasado ? `Atrasado · hace ${-dias} d` : (dias === 0 ? "Hoy" : `En ${dias} días`));
+                const editando = editandoId === h.id;
+
+                return (
+                  <div key={h.id} style={{ position: "relative", marginBottom: 16 }}>
+                    {/* Dot */}
+                    <div style={{ position: "absolute", left: -32, top: 18, width: 16, height: 16, borderRadius: "50%", background: cumplido ? dotColor : C.bg, border: `2px solid ${dotColor}`, boxShadow: `0 0 0 4px ${C.bg}`, display: "flex", alignItems: "center", justifyContent: "center", color: C.bg, fontSize: 9, fontWeight: 800, zIndex: 2 }}>
+                      {cumplido && "✓"}
+                    </div>
+
+                    <Card style={{ padding: 18, opacity: cumplido ? 0.65 : 1, transition: "opacity 0.2s" }}>
+                      {editando ? (
+                        <div>
+                          <div style={{ display: "grid", gridTemplateColumns: "2.2fr 1fr", gap: 10, marginBottom: 10 }}>
+                            <TextInput value={h.nombre} onChange={(e) => updateHito(h.id, { nombre: e.target.value })} placeholder="Nombre del hito" autoFocus />
+                            <TextInput type="date" value={h.fecha} onChange={(e) => updateHito(h.id, { fecha: e.target.value })} />
+                          </div>
+                          <TextArea value={h.descripcion || ""} onChange={(e) => updateHito(h.id, { descripcion: e.target.value })} placeholder="Descripción breve: qué pasa, criterios de éxito, dependencias, riesgos..." style={{ minHeight: 80, marginBottom: 10 }} />
+                          <div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }}>
+                            <Btn kind="danger" onClick={() => removeHito(h.id)}>Eliminar</Btn>
+                            <div style={{ flex: 1 }} />
+                            <Btn kind="primary" onClick={() => setEditandoId(null)}>Hecho</Btn>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: h.descripcion ? 12 : 8 }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: 16, fontWeight: 700, color: cumplido ? C.textSec : C.white, letterSpacing: -0.2, textDecoration: cumplido ? "line-through" : "none" }}>{h.nombre || <span style={{ color: C.textDim, fontStyle: "italic" }}>Sin nombre</span>}</div>
+                              <div style={{ fontSize: 10, fontFamily: mono, color: C.textDim, marginTop: 4 }}>
+                                {h.fecha || "—"}{cumplido && h.fechaCumplido && ` · cumplido ${h.fechaCumplido}`}
+                                {(() => {
+                                  const its = store.getIteracionesPorHito(proyectoId, h.id);
+                                  const pend = its.filter(it => it.estado === "pendiente").length;
+                                  if (its.length === 0) return null;
+                                  return <> · {its.length} {its.length === 1 ? "iteración" : "iteraciones"}{pend > 0 ? ` · ${pend} pendiente${pend !== 1 ? "s" : ""}` : ""}</>;
+                                })()}
+                              </div>
+                            </div>
+                            <span style={{ fontSize: 9, fontWeight: 700, color: dotColor, padding: "4px 9px", borderRadius: 12, background: `${dotColor}1a`, letterSpacing: 0.5, textTransform: "uppercase", whiteSpace: "nowrap" }}>{estadoLabel}</span>
+                          </div>
+
+                          {h.descripcion && (
+                            <p style={{ fontSize: 13, color: C.textSec, lineHeight: 1.65, whiteSpace: "pre-wrap", marginTop: 10, marginBottom: 14 }}>{h.descripcion}</p>
+                          )}
+
+                          <div style={{ display: "flex", gap: 8, marginTop: 12, paddingTop: h.descripcion ? 0 : 4, flexWrap: "wrap" }}>
+                            <button onClick={() => toggleCumplido(h)} style={{ background: cumplido ? `${C.green}1a` : "transparent", border: `1px solid ${cumplido ? C.green : C.border}`, borderRadius: 6, padding: "5px 12px", fontSize: 11, fontWeight: 600, color: cumplido ? C.green : C.textSec, cursor: "pointer", fontFamily: font, letterSpacing: 0.3 }}>
+                              {cumplido ? "✓ Cumplido" : "Marcar cumplido"}
+                            </button>
+                            <Btn onClick={() => setEditandoId(h.id)}>Editar</Btn>
+                            {store.getIteracionesPorHito(proyectoId, h.id).length > 0 && (
+                              <Btn onClick={() => onVerIteracionesDeHito && onVerIteracionesDeHito(h.id)}>Ver iteraciones →</Btn>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </Card>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function VistaProyecto({ store, proyectoId, onVerFichaCompleta, onVerHitos, usuarioActual, routeOpts }) {
+      const proyecto = store.getProyecto(proyectoId);
+      if (!proyecto) return <Card><p style={{ color: C.red }}>Proyecto no encontrado.</p></Card>;
+      const cliente = store.getCliente(proyecto.clienteId);
+      return (
+        <div>
+          <div style={{ marginBottom: 18 }}>
+            <div style={{ fontSize: 24, fontWeight: 700, color: C.white, letterSpacing: -0.5 }}>{proyecto.nombre}</div>
+            <div style={{ fontSize: 11, color: C.textDim, marginTop: 4 }}>{cliente?.nombre}{proyecto.tipoPropuesta ? ` · ${proyecto.tipoPropuesta}` : ""}</div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 32 }}>
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.7 }}>Iteraciones</div>
+              </div>
+              <ListaIteraciones store={store} proyectoId={proyecto.id} initialOpts={routeOpts} />
+            </div>
+            <SidePanel store={store} proyecto={proyecto} onVerFichaCompleta={onVerFichaCompleta} onVerHitos={onVerHitos} />
+          </div>
+        </div>
+      );
+    }
+
+    /* ─── Vista Planificación (calendario tipo Gantt con lane-packing) ─── */
+    function VistaGantt({ store, onAbrirProyecto }) {
+      const clientes = store.getClientes().filter(c => !c.archivado);
+      const todos = clientes.flatMap(c => store.getProyectos(c.id).map(p => ({ ...p, _clienteNombre: c.nombre })));
+      const proyectos = todos
+        .filter(p => p.fechaAlta && p.fechaEntrega)
+        .sort((a, b) => a.fechaAlta.localeCompare(b.fechaAlta));
+      const sinFechas = todos.length - proyectos.length;
+
+      if (proyectos.length === 0) {
+        return (
+          <div>
+            <div style={{ marginBottom: 24 }}>
+              <h1 style={{ fontSize: 24, fontWeight: 700, color: C.white, letterSpacing: -0.5 }}>Planificación</h1>
+              <p style={{ fontSize: 12, color: C.textDim, marginTop: 4 }}>Calendario de proyectos · superposiciones por carriles</p>
+            </div>
+            <Card>
+              <div style={{ padding: "60px 20px", textAlign: "center" }}>
+                <div style={{ fontSize: 14, color: C.textSec, marginBottom: 8 }}>Sin proyectos para planificar</div>
+                <div style={{ fontSize: 12, color: C.textDim }}>Crea un proyecto con fecha de alta y fecha de entrega para verlo aquí.</div>
+                {sinFechas > 0 && <div style={{ fontSize: 11, color: C.textDim, marginTop: 14, fontFamily: mono, letterSpacing: 0.4, textTransform: "uppercase" }}>{sinFechas} proyecto{sinFechas !== 1 ? "s" : ""} sin fechas asignadas</div>}
+              </div>
+            </Card>
+          </div>
+        );
+      }
+
+      const parseDate = (iso) => new Date(iso + "T00:00:00Z");
+      const dayMs = 86400000;
+
+      let minD = parseDate(proyectos[0].fechaAlta);
+      let maxD = parseDate(proyectos[0].fechaEntrega);
+      proyectos.forEach(p => {
+        const a = parseDate(p.fechaAlta), b = parseDate(p.fechaEntrega);
+        if (a < minD) minD = a;
+        if (b > maxD) maxD = b;
+        (p.hitos || []).forEach(h => {
+          if (h.fecha) {
+            const d = parseDate(h.fecha);
+            if (d < minD) minD = d;
+            if (d > maxD) maxD = d;
+          }
+        });
+      });
+
+      /* Padding lateral de un mes a cada lado, snap al 1º del mes anterior y último día del mes posterior */
+      const start = new Date(Date.UTC(minD.getUTCFullYear(), minD.getUTCMonth() - 1, 1));
+      const end = new Date(Date.UTC(maxD.getUTCFullYear(), maxD.getUTCMonth() + 2, 0));
+      const totalDays = Math.round((end - start) / dayMs) + 1;
+      const dayWidth = Math.max(8, Math.min(22, 1100 / totalDays));
+      const timelineWidth = totalDays * dayWidth;
+
+      const today = parseDate(todayISO());
+      const todayDay = Math.floor((today - start) / dayMs);
+      const todayInRange = today >= start && today <= end;
+
+      /* Eje superior: meses */
+      const months = [];
+      let cur = new Date(start);
+      while (cur < end) {
+        const next = new Date(Date.UTC(cur.getUTCFullYear(), cur.getUTCMonth() + 1, 1));
+        const monthEnd = next > end ? end : next;
+        months.push({
+          label: cur.toLocaleString("es", { month: "short", timeZone: "UTC" }).replace(".", ""),
+          year: cur.getUTCFullYear(),
+          left: ((cur - start) / dayMs) * dayWidth,
+          width: ((monthEnd - cur) / dayMs) * dayWidth,
+          isFirstOfYear: cur.getUTCMonth() === 0,
+        });
+        cur = next;
+      }
+
+      /* Eje inferior: numeritos de día (1, 5, 10, 15, 20, 25) por mes */
+      const dayLabels = [];
+      months.forEach(m => {
+        const monthStartDay = Math.round(m.left / dayWidth);
+        const monthDays = Math.round(m.width / dayWidth);
+        [5, 10, 15, 20, 25].forEach(d => {
+          if (d <= monthDays) {
+            dayLabels.push({ left: (monthStartDay + d - 1) * dayWidth, label: d, isMid: d === 15 });
+          }
+        });
+      });
+
+      /* Fines de semana: cada par sábado-domingo */
+      const startDay = start.getUTCDay(); /* 0=Dom..6=Sab */
+      const firstSat = (6 - startDay + 7) % 7;
+      const weekends = [];
+      for (let d = firstSat; d < totalDays; d += 7) {
+        weekends.push({ left: d * dayWidth, width: Math.min(2, totalDays - d) * dayWidth });
+      }
+
+      /* Lunes para línea de inicio de semana */
+      const firstMon = startDay === 1 ? 7 : (1 - startDay + 7) % 7;
+      const mondays = [];
+      for (let d = firstMon; d < totalDays; d += 7) mondays.push(d * dayWidth);
+
+      /* Lane-packing: cada proyecto al lane más bajo libre por orden de fechaAlta */
+      const lanesEnd = []; /* último endMs por lane */
+      const projectLanes = new Map();
+      for (const p of proyectos) {
+        const startMs = parseDate(p.fechaAlta).getTime();
+        const endMs = parseDate(p.fechaEntrega).getTime();
+        let lane = lanesEnd.findIndex(e => e < startMs);
+        if (lane === -1) { lane = lanesEnd.length; lanesEnd.push(0); }
+        lanesEnd[lane] = endMs;
+        projectLanes.set(p.id, lane);
+      }
+      const totalLanes = lanesEnd.length;
+
+      const SALUD = {
+        saludable: { color: C.green, label: "Saludable" },
+        atencion: { color: C.amber, label: "Atención" },
+        riesgo: { color: C.red, label: "Riesgo" },
+      };
+
+      const offsetOf = (iso) => ((parseDate(iso) - start) / dayMs) * dayWidth;
+      const fmt = (iso) => parseDate(iso).toLocaleString("es", { month: "short", day: "numeric", timeZone: "UTC" }).replace(".", "");
+
+      const LANE_H = 44;
+      const BAR_H = 30;
+      const HEADER_H = 56;
+      const PAD_V = 16;
+      const bodyH = totalLanes * LANE_H + PAD_V * 2;
+
+      const rangeLabel = `${start.toLocaleString("es", { month: "short", year: "numeric", timeZone: "UTC" }).replace(".", "")} → ${end.toLocaleString("es", { month: "short", year: "numeric", timeZone: "UTC" }).replace(".", "")}`;
+
+      const dayGridBg = `repeating-linear-gradient(to right, ${C.border}26 0px, ${C.border}26 1px, transparent 1px, transparent ${dayWidth}px)`;
+
+      return (
+        <div>
+          <div style={{ marginBottom: 22, display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 12 }}>
+            <div>
+              <h1 style={{ fontSize: 24, fontWeight: 700, color: C.white, letterSpacing: -0.5 }}>Planificación</h1>
+              <p style={{ fontSize: 12, color: C.textDim, marginTop: 4 }}>
+                <span style={{ color: C.textSec }}>{proyectos.length}</span> proyecto{proyectos.length !== 1 ? "s" : ""} en seguimiento
+                {" · "}<span style={{ fontFamily: mono, letterSpacing: 0.3 }}>{rangeLabel}</span>
+                {totalLanes > 1 && <span>{" · "}<span style={{ color: C.textSec }}>{totalLanes}</span> carriles paralelos</span>}
+                {sinFechas > 0 && <span style={{ color: C.textDim }}>{" · "}{sinFechas} sin fechas</span>}
+              </p>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 10, color: C.textDim, fontFamily: mono, letterSpacing: 0.5, textTransform: "uppercase" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 6 }}><Dot c={C.green} /> Saludable</span>
+              <span style={{ display: "flex", alignItems: "center", gap: 6 }}><Dot c={C.amber} /> Atención</span>
+              <span style={{ display: "flex", alignItems: "center", gap: 6 }}><Dot c={C.red} /> Riesgo</span>
+              <span style={{ width: 1, height: 12, background: C.border }} />
+              <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ width: 7, height: 7, transform: "rotate(45deg)", background: C.white, borderRadius: 1 }} /> Hito
+              </span>
+            </div>
+          </div>
+
+          <Card style={{ padding: 0, overflow: "hidden", border: `1px solid ${C.border}` }}>
+            <div style={{ overflowX: "auto", overflowY: "visible" }}>
+              <div style={{ minWidth: timelineWidth, position: "relative" }}>
+
+                {/* EJE de dos pisos */}
+                <div style={{ position: "relative", height: HEADER_H, background: `linear-gradient(180deg, ${C.surface} 0%, ${C.surface2} 100%)`, borderBottom: `1px solid ${C.border}` }}>
+                  {/* Piso 1 — meses */}
+                  {months.map((m, i) => (
+                    <div key={`m${i}`} style={{ position: "absolute", left: m.left, top: 0, height: 32, width: m.width, borderLeft: i > 0 ? `1px solid ${C.borderLight}` : "none", padding: "10px 0 0 10px", display: "flex", alignItems: "baseline", gap: 5 }}>
+                      <span style={{ fontSize: 11, color: C.text, fontFamily: mono, letterSpacing: 0.7, textTransform: "uppercase", fontWeight: 700 }}>{m.label}</span>
+                      {m.isFirstOfYear && <span style={{ fontSize: 9, color: C.textDim, fontFamily: mono, letterSpacing: 0.4 }}>{m.year}</span>}
+                    </div>
+                  ))}
+                  {/* Piso 2 — numeritos de día */}
+                  <div style={{ position: "absolute", left: 0, top: 32, right: 0, height: HEADER_H - 32, borderTop: `1px solid ${C.border}` }}>
+                    {dayLabels.map((d, i) => (
+                      <div key={`d${i}`} style={{ position: "absolute", left: d.left - 8, top: 0, height: HEADER_H - 32, width: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <span style={{ fontSize: 9, color: d.isMid ? C.textSec : C.textDim, fontFamily: mono, letterSpacing: 0.3, fontWeight: d.isMid ? 600 : 400 }}>{d.label}</span>
+                      </div>
+                    ))}
+                    {todayInRange && (
+                      <div style={{ position: "absolute", left: todayDay * dayWidth - 14, top: 1, height: HEADER_H - 34, width: 30, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <span style={{ fontSize: 9, fontWeight: 700, color: C.accent, fontFamily: mono, letterSpacing: 0.5, background: C.bg, border: `1px solid ${C.accent}99`, borderRadius: 4, padding: "1px 6px", boxShadow: `0 0 8px ${C.accent}44` }}>HOY</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* CUERPO con grid de calendario + lane-packed bars */}
+                <div style={{ position: "relative", height: bodyH, background: C.surface }}>
+
+                  {/* Sombreado de fines de semana */}
+                  {weekends.map((w, i) => (
+                    <div key={`we${i}`} style={{ position: "absolute", left: w.left, top: 0, width: w.width, height: bodyH, background: "rgba(0,0,0,0.22)", pointerEvents: "none" }} />
+                  ))}
+
+                  {/* Grid de día (línea sutil cada día) */}
+                  <div style={{ position: "absolute", inset: 0, backgroundImage: dayGridBg, pointerEvents: "none" }} />
+
+                  {/* Líneas de inicio de semana (lunes) */}
+                  {mondays.map((left, i) => (
+                    <div key={`mo${i}`} style={{ position: "absolute", left, top: 0, width: 1, height: bodyH, background: C.border, opacity: 0.7, pointerEvents: "none" }} />
+                  ))}
+
+                  {/* Líneas de mes */}
+                  {months.slice(1).map((m, i) => (
+                    <div key={`mb${i}`} style={{ position: "absolute", left: m.left, top: 0, width: 1, height: bodyH, background: C.borderLight, pointerEvents: "none" }} />
+                  ))}
+
+                  {/* Banda HOY (toda la altura) */}
+                  {todayInRange && (
+                    <div style={{ position: "absolute", left: todayDay * dayWidth, top: 0, width: dayWidth, height: bodyH, background: `${C.accent}1f`, borderLeft: `1px solid ${C.accent}88`, borderRight: `1px solid ${C.accent}55`, pointerEvents: "none", zIndex: 1 }} />
+                  )}
+
+                  {/* Barras de proyecto en sus lanes */}
+                  {proyectos.map(p => {
+                    const left = offsetOf(p.fechaAlta);
+                    const width = Math.max(10, offsetOf(p.fechaEntrega) - left);
+                    const lane = projectLanes.get(p.id);
+                    const top = PAD_V + lane * LANE_H + (LANE_H - BAR_H) / 2;
+                    const salud = SALUD[p.salud] || { color: C.textSec, label: p.salud };
+                    return (
+                      <GanttBar
+                        key={p.id}
+                        proyecto={p}
+                        left={left}
+                        width={width}
+                        top={top}
+                        salud={salud}
+                        BAR_H={BAR_H}
+                        offsetOf={offsetOf}
+                        fmt={fmt}
+                        onClick={() => onAbrirProyecto(p.id)}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {sinFechas > 0 && (
+            <div style={{ marginTop: 14, fontSize: 11, color: C.textDim, fontFamily: mono, letterSpacing: 0.4, textTransform: "uppercase" }}>
+              · {sinFechas} proyecto{sinFechas !== 1 ? "s" : ""} oculto{sinFechas !== 1 ? "s" : ""} (sin fechas asignadas)
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function Dot({ c }) {
+      return <span style={{ width: 7, height: 7, borderRadius: "50%", background: c, display: "inline-block", boxShadow: `0 0 6px ${c}88` }} />;
+    }
+
+    function GanttBar({ proyecto, left, width, top, salud, BAR_H, offsetOf, fmt, onClick }) {
+      const [hover, setHover] = useState(false);
+      const cumplidos = (proyecto.hitos || []).filter(h => h.cumplido).length;
+      const totalHitos = (proyecto.hitos || []).length;
+      const showFull = width > 200;
+      const showMid = width > 110;
+      const showMin = width > 50;
+      return (
+        <>
+          <div
+            onClick={onClick}
+            onMouseEnter={() => setHover(true)}
+            onMouseLeave={() => setHover(false)}
+            title={`${proyecto.nombre} · ${proyecto._clienteNombre} · ${fmt(proyecto.fechaAlta)} → ${fmt(proyecto.fechaEntrega)}${totalHitos > 0 ? ` · ${cumplidos}/${totalHitos} hitos` : ""}`}
+            style={{
+              position: "absolute", left, top, width, height: BAR_H,
+              background: `linear-gradient(180deg, ${salud.color}40 0%, ${salud.color}1f 100%)`,
+              border: `1px solid ${salud.color}${hover ? "dd" : "88"}`,
+              borderRadius: 6,
+              boxShadow: hover ? `0 6px 18px rgba(0,0,0,0.4), 0 0 0 1px ${salud.color}44` : `0 1px 0 ${salud.color}28 inset`,
+              transition: "border-color 0.15s ease, box-shadow 0.2s ease, transform 0.15s ease",
+              transform: hover ? "translateY(-0.5px)" : "translateY(0)",
+              overflow: "hidden",
+              cursor: "pointer",
+              zIndex: hover ? 4 : 2,
+            }}
+          >
+            <div style={{ padding: "0 10px", height: "100%", display: "flex", alignItems: "center", gap: 8, whiteSpace: "nowrap" }}>
+              {showFull ? (
+                <>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: salud.color, boxShadow: `0 0 6px ${salud.color}`, flexShrink: 0 }} />
+                  <span style={{ fontSize: 12, color: C.white, fontWeight: 700, letterSpacing: -0.1, overflow: "hidden", textOverflow: "ellipsis", minWidth: 0 }}>{proyecto.nombre}</span>
+                  <span style={{ fontSize: 10, color: C.textSec, fontFamily: mono, letterSpacing: 0.4, textTransform: "uppercase", flexShrink: 1, overflow: "hidden", textOverflow: "ellipsis" }}>· {proyecto._clienteNombre}</span>
+                  {totalHitos > 0 && (
+                    <span style={{ marginLeft: "auto", fontSize: 9, color: salud.color, fontFamily: mono, letterSpacing: 0.4, textTransform: "uppercase", flexShrink: 0, paddingLeft: 8 }}>
+                      {cumplidos}/{totalHitos} hitos
+                    </span>
+                  )}
+                </>
+              ) : showMid ? (
+                <>
+                  <span style={{ width: 5, height: 5, borderRadius: "50%", background: salud.color, flexShrink: 0 }} />
+                  <span style={{ fontSize: 11, color: C.white, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", minWidth: 0 }}>{proyecto.nombre}</span>
+                  {totalHitos > 0 && (
+                    <span style={{ marginLeft: "auto", fontSize: 9, color: salud.color, fontFamily: mono, letterSpacing: 0.3, flexShrink: 0 }}>
+                      {cumplidos}/{totalHitos}
+                    </span>
+                  )}
+                </>
+              ) : showMin ? (
+                <span style={{ fontSize: 10, color: C.white, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis" }}>{proyecto.nombre}</span>
+              ) : null}
+            </div>
+          </div>
+
+          {/* Hitos como diamantes (eco del logo) anclados al borde superior de la barra */}
+          {(proyecto.hitos || []).filter(h => h.fecha).map(h => {
+            const hLeft = offsetOf(h.fecha);
+            const cumplido = !!h.cumplido;
+            return (
+              <div
+                key={h.id}
+                title={`${h.nombre || "Hito"} · ${fmt(h.fecha)}${cumplido ? " · cumplido" : ""}`}
+                style={{
+                  position: "absolute", left: hLeft - 5, top: top - 5, width: 10, height: 10,
+                  transform: "rotate(45deg)",
+                  background: cumplido ? salud.color : C.white,
+                  border: `1.5px solid ${cumplido ? salud.color : salud.color + "aa"}`,
+                  boxShadow: `0 0 10px ${cumplido ? salud.color : "#fff"}99, 0 0 0 2px ${C.surface}`,
+                  borderRadius: 1,
+                  zIndex: hover ? 5 : 3,
+                  pointerEvents: "none",
+                }}
+              />
+            );
+          })}
+        </>
+      );
+    }
+
+    /* ─── Vista Archivados ─── */
+    function VistaArchivados({ store, onAbrirCliente, onVolver }) {
+      const archivados = store.getClientes()
+        .filter(c => c.archivado)
+        .sort((a, b) => (b.fechaArchivado || "").localeCompare(a.fechaArchivado || ""));
+      const saludColor = (s) => s === "saludable" ? C.green : s === "atencion" ? C.amber : C.red;
+      const saludLabel = (s) => s === "saludable" ? "Saludable" : s === "atencion" ? "Atención" : "Riesgo";
+      const restaurar = (cli) => store.updateCliente(cli.id, { archivado: false, fechaArchivado: null });
+      const eliminar = (cli) => askConfirm({
+        title: `Eliminar cliente "${cli.nombre}"`,
+        body: "Se borrarán también todos sus proyectos e iteraciones. Esta acción no se puede deshacer.",
+        confirmText: "Eliminar definitivamente",
+        danger: true,
+      }).then(ok => { if (ok) store.deleteCliente(cli.id); });
+
+      const fmtFechaRel = (iso) => {
+        if (!iso) return "—";
+        const d = new Date(iso);
+        const days = Math.floor((Date.now() - d.getTime()) / 86400000);
+        if (days === 0) return "hoy";
+        if (days === 1) return "ayer";
+        if (days < 7) return `hace ${days} d`;
+        if (days < 30) return `hace ${Math.floor(days / 7)} sem`;
+        return d.toLocaleString("es", { month: "short", day: "numeric", year: "numeric" }).replace(".", "");
+      };
+
+      return (
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 24 }}>
+            <div>
+              <h1 style={{ fontSize: 26, fontWeight: 700, color: C.white, letterSpacing: -0.6 }}>Archivados</h1>
+              <p style={{ fontSize: 12, color: C.textDim, marginTop: 4 }}>
+                {archivados.length} cliente{archivados.length !== 1 ? "s" : ""} archivado{archivados.length !== 1 ? "s" : ""} · ocultos del listado principal y de planificación
+              </p>
+            </div>
+            <Btn onClick={onVolver}>← Volver a clientes</Btn>
+          </div>
+
+          {archivados.length === 0 ? (
+            <Card>
+              <div style={{ padding: "60px 20px", textAlign: "center" }}>
+                <div style={{ fontSize: 14, color: C.textSec, marginBottom: 8 }}>No hay clientes archivados</div>
+                <div style={{ fontSize: 12, color: C.textDim }}>Archiva un cliente desde la página principal con el menú ⋯ de su tarjeta.</div>
+              </div>
+            </Card>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 16 }}>
+              {archivados.map(cli => {
+                const m = getMetricasCliente(store, cli.id);
+                return (
+                  <ArchivadoCard
+                    key={cli.id}
+                    cli={cli}
+                    metricas={m}
+                    onAbrir={() => onAbrirCliente(cli.id)}
+                    onRestaurar={() => restaurar(cli)}
+                    onEliminar={() => eliminar(cli)}
+                    saludColor={saludColor}
+                    saludLabel={saludLabel}
+                    fmtFechaRel={fmtFechaRel}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function ArchivadoCard({ cli, metricas, onAbrir, onRestaurar, onEliminar, saludColor, saludLabel, fmtFechaRel }) {
+      const [hover, setHover] = useState(false);
+      const m = metricas;
+      return (
+        <div
+          onMouseEnter={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
+          style={{
+            background: C.surface, border: `1px solid ${hover ? C.borderLight : C.border}`,
+            borderRadius: 12, padding: 18, opacity: hover ? 1 : 0.85,
+            transition: "border-color 0.15s ease, opacity 0.15s ease",
+            position: "relative",
+          }}
+        >
+          {/* Banner de archivado */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, fontSize: 9, fontFamily: mono, letterSpacing: 0.6, textTransform: "uppercase", color: C.textDim }}>
+            <span>archivado · {fmtFechaRel(cli.fechaArchivado)}</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: saludColor(m.salud) }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: saludColor(m.salud) }} /> {saludLabel(m.salud)}
+            </span>
+          </div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: hover ? C.white : C.text, letterSpacing: -0.3, marginBottom: 4, cursor: "pointer" }} onClick={onAbrir}>{cli.nombre}</div>
+          {cli.notas && <div style={{ fontSize: 11, color: C.textDim, marginBottom: 12, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{cli.notas}</div>}
+          <div style={{ display: "flex", gap: 16, paddingTop: 12, borderTop: `1px solid ${C.border}`, marginBottom: 14 }}>
+            <div><span style={{ fontFamily: mono, fontSize: 14, fontWeight: 700, color: C.textSec }}>{m.numProyectos}</span> <span style={{ fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5 }}>proyectos</span></div>
+            <div><span style={{ fontFamily: mono, fontSize: 14, fontWeight: 700, color: C.textSec }}>{m.pendientes + m.proceso}</span> <span style={{ fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5 }}>iteraciones abiertas</span></div>
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Btn kind="primary" onClick={onRestaurar}>↺ Restaurar</Btn>
+            <div style={{ flex: 1 }} />
+            <Btn kind="danger" onClick={onEliminar}>Eliminar</Btn>
+          </div>
+        </div>
+      );
+    }
+
+    function App() {
+      const s = useStore(store);
+      const [route, setRoute] = useState({ view: "home" });
+      const equipo = s.getEquipo();
+      const [usuarioActualId, setUsuarioActualId] = useState(() => localStorage.getItem(USUARIO_KEY) || equipo[0].id);
+      const usuarioActual = equipo.find(m => m.id === usuarioActualId) || equipo[0];
+      const cambiar = (id) => { setUsuarioActualId(id); localStorage.setItem(USUARIO_KEY, id); };
+      const [modalNuevoCli, setModalNuevoCli] = useState(false);
+      const [modalEditarCli, setModalEditarCli] = useState(false);
+      const [modalNuevoProy, setModalNuevoProy] = useState(false);
+      const [modalFichaCompleta, setModalFichaCompleta] = useState(false);
+
+      const goHome = () => setRoute({ view: "home" });
+      const goCliente = (clienteId) => setRoute({ view: "cliente", clienteId });
+      const goProyecto = (proyectoId, opts) => {
+        const proy = s.getProyecto(proyectoId);
+        if (proy) setRoute({ view: "proyecto", clienteId: proy.clienteId, proyectoId, opts: opts || null });
+      };
+      const goEquipo = () => setRoute({ view: "equipo" });
+      const goPlanificacion = () => setRoute({ view: "planificacion" });
+      const goArchivados = () => setRoute({ view: "archivados" });
+      const goHitos = (proyectoId) => {
+        const proy = s.getProyecto(proyectoId);
+        setRoute({ view: "hitos", clienteId: proy.clienteId, proyectoId });
+      };
+
+      const resetear = () => {
+        askConfirm({
+          title: "Resetear todos los datos",
+          body: "Volverá al estado inicial (seed). Se perderán los cambios locales. Esta acción no se puede deshacer.",
+          confirmText: "Resetear",
+          danger: true,
+        }).then(ok => { if (ok) { s.reset(); goHome(); } });
+      };
+
+      const trail = [{ label: "Clientes", to: { view: "home" } }];
+      if (route.view === "equipo") trail.push({ label: "Equipo", to: { view: "equipo" } });
+      if (route.view === "planificacion") trail.push({ label: "Planificación", to: { view: "planificacion" } });
+      if (route.view === "archivados") trail.push({ label: "Archivados", to: { view: "archivados" } });
+      if (route.view === "cliente" || route.view === "proyecto" || route.view === "hitos") {
+        const cli = s.getCliente(route.clienteId);
+        if (cli) trail.push({ label: cli.nombre, to: { view: "cliente", clienteId: cli.id } });
+      }
+      if (route.view === "proyecto" || route.view === "hitos") {
+        const proy = s.getProyecto(route.proyectoId);
+        if (proy) trail.push({ label: proy.nombre, to: { view: "proyecto", clienteId: proy.clienteId, proyectoId: proy.id } });
+      }
+      if (route.view === "hitos") trail.push({ label: "Hitos", to: { view: "hitos", clienteId: route.clienteId, proyectoId: route.proyectoId } });
+
+      return (
+        <div style={{ background: C.bg, minHeight: "100vh", color: C.text }}>
+          <Header
+            usuarioActual={usuarioActual}
+            equipo={equipo}
+            onChangeUsuario={cambiar}
+            onIrEquipo={goEquipo}
+            onIrPlanificacion={goPlanificacion}
+            onIrArchivados={goArchivados}
+            onResetear={resetear}
+            route={route.view}
+            archivadosCount={s.getClientes().filter(c => c.archivado).length}
+          />
+          <Breadcrumb trail={trail} onNav={(t) => setRoute(t.to)} />
+          <main className="crux-main" style={{ padding: "28px 32px", maxWidth: 1280, margin: "0 auto" }}>
+            {route.view === "home" && (
+              <HomeClientes store={s} onAbrirCliente={goCliente} onNuevoCliente={() => setModalNuevoCli(true)} />
+            )}
+            {route.view === "cliente" && (
+              <VistaCliente
+                store={s}
+                clienteId={route.clienteId}
+                onAbrirProyecto={goProyecto}
+                onNuevoProyecto={() => setModalNuevoProy(true)}
+                onEditarCliente={() => setModalEditarCli(true)}
+              />
+            )}
+            {route.view === "proyecto" && (
+              <VistaProyecto
+                key={route.proyectoId}
+                store={s}
+                proyectoId={route.proyectoId}
+                onVerFichaCompleta={() => setModalFichaCompleta(true)}
+                onVerHitos={() => goHitos(route.proyectoId)}
+                usuarioActual={usuarioActual}
+                routeOpts={route.opts}
+              />
+            )}
+            {route.view === "hitos" && (
+              <VistaHitos
+                store={s}
+                proyectoId={route.proyectoId}
+                onVolver={() => goProyecto(route.proyectoId)}
+                onVerIteracionesDeHito={(hitoId) => goProyecto(route.proyectoId, { viewMode: "porHito", filtroHitoId: hitoId })}
+              />
+            )}
+            {route.view === "equipo" && (
+              <VistaEquipo store={s} onVolver={goHome} />
+            )}
+            {route.view === "planificacion" && (
+              <VistaGantt store={s} onAbrirProyecto={goProyecto} />
+            )}
+            {route.view === "archivados" && (
+              <VistaArchivados store={s} onAbrirCliente={goCliente} onVolver={goHome} />
+            )}
+          </main>
+          <NuevoClienteModal open={modalNuevoCli} onClose={() => setModalNuevoCli(false)} onCrear={(d) => s.addCliente(d)} />
+          <EditarClienteModal
+            open={modalEditarCli}
+            onClose={() => setModalEditarCli(false)}
+            cliente={route.view === "cliente" ? s.getCliente(route.clienteId) : null}
+            onGuardar={(d) => s.updateCliente(route.clienteId, d)}
+            onEliminar={() => { s.deleteCliente(route.clienteId); goHome(); }}
+          />
+          <NuevoProyectoModal
+            open={modalNuevoProy}
+            onClose={() => setModalNuevoProy(false)}
+            equipo={equipo}
+            onCrear={(d) => s.addProyecto(route.clienteId, d)}
+          />
+          <FichaCompletaModal
+            open={modalFichaCompleta}
+            onClose={() => setModalFichaCompleta(false)}
+            proyecto={route.view === "proyecto" ? s.getProyecto(route.proyectoId) : null}
+            equipo={equipo}
+            onGuardar={(d) => s.updateProyecto(route.proyectoId, d)}
+            onEliminar={() => { s.deleteProyecto(route.proyectoId); goCliente(route.clienteId); }}
+          />
+          <ConfirmDialog />
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+    /* ─── Test runner (?test=1) ─── */
+    if (typeof window !== "undefined" && window.location.search === "?test=1") {
+      const TEST_KEY = "_test_crux_comm";
+      const t = makeStore(TEST_KEY);
+      t.clear(); t.reset();
+      const results = [];
+      const assert = (cond, msg) => results.push({ ok: !!cond, msg });
+
+      /* Seed básico */
+      assert(t.getClientes().length === 2, "Seed: 2 clientes");
+      assert(t.getEquipo().length === 4, "Seed: 4 miembros equipo");
+
+      /* CRUD cliente */
+      const cli = t.addCliente({ nombre: "Test Cli" });
+      assert(t.getClientes().length === 3, "addCliente añade uno");
+      t.updateCliente(cli.id, { nombre: "Test Cli 2" });
+      assert(t.getCliente(cli.id).nombre === "Test Cli 2", "updateCliente cambia nombre");
+      t.deleteCliente(cli.id);
+      assert(t.getClientes().length === 2, "deleteCliente quita uno");
+
+      /* CRUD proyecto */
+      const cli2 = t.getClientes()[0];
+      const proy = t.addProyecto(cli2.id, { nombre: "Test Proy" });
+      assert(t.getProyectos(cli2.id).length === 2, "addProyecto añade al cliente correcto");
+      t.deleteProyecto(proy.id);
+      assert(t.getProyectos(cli2.id).length === 1, "deleteProyecto quita el correcto");
+
+      /* CRUD iteración + estado */
+      const proy0 = t.getProyectos(cli2.id)[0];
+      const itCount = t.getIteraciones(proy0.id).length;
+      const it = t.addIteracion(proy0.id, { descripcion: "Test", autorId: "u_pedro", tipo: "diseño" });
+      assert(t.getIteraciones(proy0.id).length === itCount + 1, "addIteracion añade activa");
+      t.updateIteracion(it.id, { estado: "hecha" });
+      assert(t.getIteracion(it.id).fechaArchivado, "updateIteracion(hecha) setea fechaArchivado");
+      assert(t.getIteraciones(proy0.id).length === itCount, "Hechas se ocultan por defecto");
+      assert(t.getIteraciones(proy0.id, { incluirArchivadas: true }).length === itCount + 1, "incluirArchivadas las muestra");
+      t.updateIteracion(it.id, { estado: "pendiente" });
+      assert(!t.getIteracion(it.id).fechaArchivado, "Volver a pendiente borra fechaArchivado");
+
+      /* Comentarios */
+      const iterCom = t.getIteraciones(proy0.id, { incluirArchivadas: true })[0];
+      const ccount = iterCom.comentarios.length;
+      t.addComentario(iterCom.id, { autorId: "u_calum", texto: "test" });
+      assert(t.getIteracion(iterCom.id).comentarios.length === ccount + 1, "addComentario añade al hilo");
+
+      /* Cascada delete cliente -> proyectos -> iteraciones */
+      const cliC = t.addCliente({ nombre: "Cascade" });
+      const proyC = t.addProyecto(cliC.id, { nombre: "P" });
+      t.addIteracion(proyC.id, { descripcion: "X" });
+      const totalIts = t.getState().iteraciones.length;
+      t.deleteCliente(cliC.id);
+      assert(!t.getCliente(cliC.id), "Cliente eliminado");
+      assert(t.getState().proyectos.find(p => p.id === proyC.id) === undefined, "Proyectos del cliente eliminados");
+      assert(t.getState().iteraciones.length === totalIts - 1, "Iteraciones del proyecto eliminadas");
+
+      /* Hitos: getHito, addHitoEnProyecto */
+      const proyH = t.getProyectos(t.getClientes()[0].id)[0];
+      const hitosIniciales = (proyH.hitos || []).length;
+      const nuevoHito = t.addHitoEnProyecto(proyH.id, { nombre: "Hito test", fecha: "2026-12-31" });
+      assert(t.getProyecto(proyH.id).hitos.length === hitosIniciales + 1, "addHitoEnProyecto añade hito al proyecto correcto");
+      assert(t.getHito(proyH.id, nuevoHito.id)?.nombre === "Hito test", "getHito recupera por id");
+      assert(t.getHito(proyH.id, "fake_id") === undefined, "getHito devuelve undefined para id inexistente");
+      assert(t.getHito(proyH.id, null) === null, "getHito(null) devuelve null");
+
+      /* setHitoIteracion: válido + cross-proyecto rechazo */
+      const itHito = t.addIteracion(proyH.id, { descripcion: "asignar hito" });
+      t.setHitoIteracion(itHito.id, nuevoHito.id);
+      assert(t.getIteracion(itHito.id).hitoId === nuevoHito.id, "setHitoIteracion asigna hito válido");
+      const otroProy = t.addProyecto(t.getClientes()[1].id, { nombre: "Otro proy" });
+      const hitoOtro = t.addHitoEnProyecto(otroProy.id, { nombre: "Otro hito", fecha: "2027-01-01" });
+      const prevHitoId = t.getIteracion(itHito.id).hitoId;
+      const warns = [];
+      const origWarn = console.warn;
+      console.warn = (...args) => warns.push(args);
+      t.setHitoIteracion(itHito.id, hitoOtro.id);
+      console.warn = origWarn;
+      assert(t.getIteracion(itHito.id).hitoId === prevHitoId, "setHitoIteracion no aplica si el hito es de otro proyecto");
+      assert(warns.length === 1, "setHitoIteracion warnea cuando rechaza");
+      t.setHitoIteracion(itHito.id, null);
+      assert(t.getIteracion(itHito.id).hitoId === null, "setHitoIteracion(null) desasigna");
+
+      /* getIteracionesPorHito */
+      t.setHitoIteracion(itHito.id, nuevoHito.id);
+      assert(t.getIteracionesPorHito(proyH.id, nuevoHito.id).length === 1, "getIteracionesPorHito devuelve la asignada");
+      assert(t.getIteracionesPorHito(proyH.id, null).length >= 1, "getIteracionesPorHito(null) devuelve huérfanas");
+
+      /* deleteHito: iteraciones pasan a hitoId=null, no se borran */
+      const itsAntes = t.getState().iteraciones.length;
+      t.deleteHito(proyH.id, nuevoHito.id);
+      assert(t.getHito(proyH.id, nuevoHito.id) === undefined, "deleteHito elimina del proyecto");
+      assert(t.getState().iteraciones.length === itsAntes, "deleteHito no borra iteraciones");
+      assert(t.getIteracion(itHito.id).hitoId === null, "deleteHito desasigna iteraciones");
+
+      /* Cleanup proyecto extra */
+      t.deleteProyecto(otroProy.id);
+      t.deleteIteracion(itHito.id);
+
+      /* Equipo */
+      const m = t.addMiembro({ nombre: "Nuevo Miembro" });
+      assert(m.iniciales === "NM", "addMiembro autogenera iniciales");
+      t.deleteMiembro(m.id);
+
+      /* Persistencia */
+      const t2 = makeStore(TEST_KEY);
+      assert(t2.getClientes().length === t.getClientes().length, "Otro store con mismo key lee mismo estado");
+
+      /* Limpieza final */
+      localStorage.removeItem(TEST_KEY);
+
+      /* Render resultados */
+      const root = document.getElementById("root");
+      const passed = results.filter(r => r.ok).length;
+      const total = results.length;
+      const allPass = passed === total;
+      root.innerHTML = `
+        <div style="padding:32px;font-family:${mono};color:${C.text};max-width:900px;margin:0 auto">
+          <h1 style="font-family:${font};font-size:22px;color:${allPass ? C.green : C.red};margin-bottom:16px">
+            ${allPass ? "✓" : "✗"} Tests · ${passed} / ${total} ${allPass ? "PASS" : "FAIL"}
+          </h1>
+          <pre style="background:${C.surface};border:1px solid ${C.border};border-radius:8px;padding:16px;font-size:12px;line-height:1.7;overflow:auto">
+${results.map(r => `${r.ok ? "  ✓" : "  ✗"}  ${r.msg}`).join("\n")}
+          </pre>
+        </div>`;
+      console.log(`Tests: ${passed}/${total}`, results);
+    }
+  </script>
+</body>
+</html>
