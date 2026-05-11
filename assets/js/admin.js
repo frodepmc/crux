@@ -48,6 +48,20 @@
         }
     }
 
+    async function apiMe() {
+        try {
+            const res = await fetch('/api/auth/me', {
+                method: 'GET',
+                credentials: 'same-origin',
+                cache: 'no-store',
+            });
+            if (!res.ok) return null;
+            return await res.json();
+        } catch (_) {
+            return null;
+        }
+    }
+
     /* ------- Guard ------- */
     // Dev-only bypass: solo sirve en localhost. En produccion no hace nada.
     function devPreviewSession() {
@@ -55,7 +69,12 @@
         const wants = new URLSearchParams(window.location.search).has('__preview');
         if (!isLocal || !wants) return null;
         return {
-            user: { username: 'preview@localhost', role: 'admin' },
+            username: 'preview@localhost',
+            name: 'Preview Local',
+            role: 'admin',
+            color: '#3869AB',
+            access: ['*'],
+            isAdmin: true,
             expiresAt: new Date(Date.now() + 3600 * 1000).toISOString(),
             _preview: true,
         };
@@ -65,18 +84,18 @@
     async function guard({ redirectTo = LOGIN_URL } = {}) {
         const fake = devPreviewSession();
         if (fake) return fake;
-        const session = await apiVerify();
-        if (!session || !session.user) {
+        const profile = await apiMe();
+        if (!profile || !profile.username) {
             window.location.replace(redirectTo);
             return null;
         }
-        return session;
+        return profile;
     }
 
     // Inverso: si ya hay sesion y estas en login, rebota al hub
     async function bounceIfAuthed({ target = HUB_URL } = {}) {
-        const session = await apiVerify();
-        if (session && session.user) {
+        const session = await apiMe();
+        if (session && session.username) {
             window.location.replace(target);
             return session;
         }
@@ -218,24 +237,24 @@
 
     /* ------- Hub init ------- */
     async function initHubPage() {
-        const session = await guard();
-        if (!session) return;
+        const profile = await guard();
+        if (!profile) return;
 
         // Pintar username en topbar
         const userEl = document.getElementById('adm-user-tag');
-        if (userEl && session.user?.username) userEl.textContent = session.user.username;
+        if (userEl && profile.username) userEl.textContent = profile.username;
 
         // Pintar role
         const roleEl = document.getElementById('adm-role-tag');
-        if (roleEl && session.user?.role) roleEl.textContent = session.user.role;
+        if (roleEl && profile.role) roleEl.textContent = profile.role;
 
         // Clock
         startClock(document.getElementById('adm-clock'));
 
         // Sidemeta: session expiry
         const expEl = document.getElementById('adm-session-exp');
-        if (expEl && session.expiresAt) {
-            const d = new Date(session.expiresAt);
+        if (expEl && profile.expiresAt) {
+            const d = new Date(profile.expiresAt);
             expEl.textContent = d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
         }
 
@@ -255,7 +274,7 @@
             const res = await fetch('/admin/integrations.json', { cache: 'no-store' });
             if (!res.ok) throw new Error('registry not found');
             const integrations = await res.json();
-            renderIntegrations(integrations, session);
+            renderIntegrations(integrations, profile);
         } catch (err) {
             console.error('[hub] registry error:', err);
             const grid = document.getElementById('adm-integrations');
@@ -276,7 +295,7 @@
         bolt: '<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg>',
     };
 
-    function renderIntegrations(list, session) {
+    function renderIntegrations(list, profile) {
         const grid = document.getElementById('adm-integrations');
         if (!grid) return;
         if (!Array.isArray(list) || list.length === 0) {
@@ -284,14 +303,21 @@
             return;
         }
 
-        const role = session?.user?.role || 'admin';
-        const html = list.map((item, i) => {
+        const access = Array.isArray(profile?.access) ? profile.access : [];
+        const hasAll = access.includes('*');
+
+        const visible = list.filter((item) => hasAll || access.includes(item.id));
+
+        if (visible.length === 0) {
+            grid.innerHTML = '<p class="adm-stage__sub">Tu cuenta no tiene integraciones asignadas. Habla con un admin.</p>';
+            return;
+        }
+
+        const html = visible.map((item, i) => {
             const num = String(i + 1).padStart(2, '0');
             const glyph = GLYPHS[item.icon] || GLYPHS.layers;
-            const allowedRoles = Array.isArray(item.roles) ? item.roles : ['admin'];
-            const hasAccess = allowedRoles.includes(role) || allowedRoles.includes('*');
-            const isLive = item.status === 'live' && hasAccess;
-            const tag = isLive ? 'Entrar' : (item.status === 'soon' ? 'Proximamente' : 'Sin acceso');
+            const isLive = item.status === 'live';
+            const tag = isLive ? 'Entrar' : 'Proximamente';
             const badgeClass = item.status === 'live'
                 ? 'adm-int__badge--live'
                 : (item.status === 'soon' ? 'adm-int__badge--soon' : '');
@@ -308,14 +334,11 @@
                         <span class="adm-int__num mono">· ${num} ·</span>
                         <span class="adm-int__badge ${badgeClass}">${badgeText}</span>
                     </div>
-                    <div class="adm-int__glyph">${glyph}</div>
+                    <div class="adm-int__glyph" aria-hidden="true">${glyph}</div>
                     <h3 class="adm-int__title">${escapeHtml(item.name)}</h3>
                     <p class="adm-int__desc">${escapeHtml(item.description || '')}</p>
-                    ${metaBits ? `<div class="adm-int__meta">${metaBits}</div>` : ''}
-                    <span class="adm-int__cta">
-                        <span>${tag}</span>
-                        <span class="adm-int__cta-arrow">\u2192</span>
-                    </span>
+                    <div class="adm-int__meta">${metaBits}</div>
+                    <div class="adm-int__cta">${tag} <span aria-hidden="true">\u2192</span></div>
                 </${wrapTag}>
             `;
         }).join('');
