@@ -413,6 +413,7 @@
 
       function persist() {
         clearTimeout(saveTimer);
+        saveError = null;                 // si había error previo, el usuario está editando de nuevo
         saveTimer = setTimeout(persistNow, SAVE_DEBOUNCE_MS);
         notify();                         // UI re-renderiza inmediato con el cambio in-memory
       }
@@ -452,6 +453,7 @@
         isReady: () => state !== null,
         isSaving: () => saving,
         saveError: () => saveError,
+        retryLastSave: () => persistNow(),
         getState: () => state,
         reset: async () => { state = SEED(); await persistNow(); notify(); },
         clear: async () => { state = SEED(); await persistNow(); notify(); },
@@ -563,7 +565,7 @@
 
         /* Backup */
         export: () => JSON.stringify(state, null, 2),
-        import: (jsonStr) => { state = JSON.parse(jsonStr); persist(); },
+        import: (jsonStr) => { state = JSON.parse(jsonStr); persistNow(); notify(); },
       };
     }
 
@@ -2876,7 +2878,7 @@
           )}
           {store.saveError() && (
             <div style={{ position: "fixed", top: 12, right: 16, zIndex: 1000, padding: "6px 12px", background: C.redBg, border: `1px solid ${C.red}`, borderRadius: 4, color: C.red, fontFamily: mono, fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer" }}
-              onClick={() => store.reset().catch(()=>{})}>
+              onClick={() => store.retryLastSave().catch(()=>{})}>
               Error guardando — click para reintentar
             </div>
           )}
