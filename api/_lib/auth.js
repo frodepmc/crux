@@ -1,7 +1,7 @@
 // api/_lib/auth.js
 // Helpers compartidos para autenticacion de admin.
-// - Lee usuarios desde env var ADMIN_USERS (JSON: [{u, p, role}])
-// - Firma/verifica JWT HS256 con JWT_SECRET
+// - Lee usuarios desde env var ADMIN_USERS (JSON: [{u, p, role, name, color, access}])
+// - Firma/verifica JWT HS256 con JWT_SECRET (claims: sub, role, access)
 // - Gestiona cookies httpOnly
 
 const jwt = require('jsonwebtoken');
@@ -31,6 +31,18 @@ function getSecret() {
     return secret;
 }
 
+// Normaliza un registro de ADMIN_USERS a un perfil publico (sin password)
+function toProfile(user) {
+    if (!user) return null;
+    return {
+        username: user.u,
+        role: user.role || 'admin',
+        name: user.name || user.u,
+        color: user.color || '#3869AB',
+        access: Array.isArray(user.access) ? user.access : ['*'],
+    };
+}
+
 async function verifyCredentials(username, password) {
     if (typeof username !== 'string' || typeof password !== 'string') return null;
     const users = getUsers();
@@ -38,17 +50,37 @@ async function verifyCredentials(username, password) {
     if (!user) return null;
     const ok = await bcrypt.compare(password, user.p || '');
     if (!ok) return null;
-    return {
-        username: user.u,
-        role: user.role || 'admin',
-    };
+    return toProfile(user);
 }
 
-function signSession(payload) {
-    return jwt.sign(payload, getSecret(), {
-        algorithm: 'HS256',
-        expiresIn: TOKEN_TTL_SECONDS,
-    });
+// Lookup de perfil por username (sin password). Devuelve null si no existe.
+function loadProfile(username) {
+    if (!username) return null;
+    const users = getUsers();
+    const user = users.find((u) => (u.u || '').toLowerCase() === String(username).toLowerCase());
+    return toProfile(user);
+}
+
+// Lista publica del equipo (sin password, sin access). Para mostrar avatares y asignar a otros.
+function listTeam() {
+    return getUsers().map((u) => ({
+        username: u.u,
+        name: u.name || u.u,
+        role: u.role || 'admin',
+        color: u.color || '#3869AB',
+    }));
+}
+
+function signSession(profile) {
+    // profile = { username, role, access, ... }
+    if (!profile || !profile.username) {
+        throw new Error('[auth] signSession called with invalid profile');
+    }
+    return jwt.sign(
+        { sub: profile.username, role: profile.role, access: profile.access || ['*'] },
+        getSecret(),
+        { algorithm: 'HS256', expiresIn: TOKEN_TTL_SECONDS }
+    );
 }
 
 function verifySession(token) {
@@ -104,13 +136,40 @@ function requireSession(req, res) {
     return session;
 }
 
+// Devuelve true si la sesion tiene acceso a la integracion dada.
+// Admins con access ["*"] tienen acceso a todo.
+function hasAccessTo(session, integrationId) {
+    if (!session) return false;
+    const access = Array.isArray(session.access) ? session.access : [];
+    return access.includes('*') || access.includes(integrationId);
+}
+
+// Guard combinado: requiere sesion valida + acceso a la integracion.
+// Responde 401/403 si falla. Devuelve la sesion si OK, null si bloqueado.
+function requireIntegrationAccess(req, res, integrationId) {
+    const session = readSessionFromRequest(req);
+    if (!session) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return null;
+    }
+    if (!hasAccessTo(session, integrationId)) {
+        res.status(403).json({ error: 'Forbidden: no access to integration ' + integrationId });
+        return null;
+    }
+    return session;
+}
+
 module.exports = {
     COOKIE_NAME,
     TOKEN_TTL_SECONDS,
     verifyCredentials,
+    loadProfile,
+    listTeam,
     signSession,
     verifySession,
     buildSessionCookie,
     readSessionFromRequest,
     requireSession,
+    hasAccessTo,
+    requireIntegrationAccess,
 };

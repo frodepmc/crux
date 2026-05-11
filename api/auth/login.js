@@ -45,9 +45,9 @@ module.exports = async function handler(req, res) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        const token = signSession({ sub: user.username, role: user.role });
+        const token = signSession(user);  // user es el perfil completo desde verifyCredentials
         res.setHeader('Set-Cookie', buildSessionCookie(token));
-        return res.status(200).json({ ok: true, user });
+        return res.status(200).json({ ok: true, user: { username: user.username, role: user.role } });
     } catch (err) {
         console.error('[auth/login] error:', err);
         return res.status(500).json({ error: err.message || 'Internal error' });
