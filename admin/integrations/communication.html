@@ -12,7 +12,7 @@
       // Hide body until session is verified (prevents flash of content).
       var styleEl = document.createElement('style');
       styleEl.id = 'crux-admin-guard-style';
-      styleEl.textContent = 'body{visibility:hidden}html{background:#101010}#crux-guard-veil{position:fixed;inset:0;z-index:999999;background:#101010;color:#3869AB;display:flex;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.25em;text-transform:uppercase;visibility:visible}';
+      styleEl.textContent = 'body{visibility:hidden}html{background:#0E1A2B}#crux-guard-veil{position:fixed;inset:0;z-index:999999;background:#0E1A2B;color:#3869AB;display:flex;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.25em;text-transform:uppercase;visibility:visible}';
       document.head.appendChild(styleEl);
 
       // Veil mounted after DOM ready
@@ -55,7 +55,7 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
     html, body { color-scheme: dark; }
-    body { background: #101010; color: #E8E4E0; font-family: 'Instrument Sans', -apple-system, sans-serif; min-height: 100vh; }
+    body { background: #0E1A2B; color: #E8E4E0; font-family: 'Instrument Sans', -apple-system, sans-serif; min-height: 100vh; }
     input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.65); cursor: pointer; opacity: 0.7; transition: opacity 0.15s; }
     input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
     ::selection { background: rgba(56,105,171,0.25); color: #FAFAF8; }
@@ -258,7 +258,7 @@
 
     /* ─── Tokens ─── */
     const C = {
-      bg: "#101010", surface: "#181818", surface2: "#1e1e1e",
+      bg: "#0E1A2B", surface: "#181818", surface2: "#1e1e1e",
       border: "#262626", borderLight: "#2a2a2a",
       accent: "#3869AB", accentMuted: "#3869AB88",
       accentGlow: "rgba(56,105,171,0.08)", accentGlow2: "rgba(56,105,171,0.15)",
@@ -915,10 +915,6 @@
         <header style={{ borderBottom: `1px solid ${C.border}`, padding: "18px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <img src={CRUX_LOGO} alt="CRUX" style={{ width: 38, height: 38, objectFit: "contain", filter: "brightness(0) invert(1)", flexShrink: 0 }} />
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: C.white, letterSpacing: -0.3 }}>CRUX  /  Comunicación SaaS</div>
-              <div style={{ fontSize: 11, color: C.textDim, letterSpacing: 0.3, marginTop: 2 }}>Dashboard PM ↔ Developers/Técnicos</div>
-            </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: 28 }}>
               <ToolBtn icon={HeaderIcons.Team} active={route === "equipo"} onClick={onIrEquipo}>Equipo</ToolBtn>
               <ToolBtn icon={HeaderIcons.Gantt} active={route === "planificacion"} onClick={onIrPlanificacion} title="Vista Gantt de proyectos e hitos">Planificación</ToolBtn>
