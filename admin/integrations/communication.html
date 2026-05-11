@@ -914,7 +914,9 @@
       return (
         <header style={{ borderBottom: `1px solid ${C.border}`, padding: "18px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <img src={CRUX_LOGO} alt="CRUX" style={{ width: 38, height: 38, objectFit: "contain", filter: "brightness(0) invert(1)", flexShrink: 0 }} />
+            <a href="/admin/hub" title="Volver al hub interno" style={{ display: "inline-flex", textDecoration: "none", outline: "none", flexShrink: 0 }}>
+              <img src={CRUX_LOGO} alt="CRUX · Hub interno" style={{ width: 38, height: 38, objectFit: "contain", filter: "brightness(0) invert(1)", display: "block" }} />
+            </a>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: 28 }}>
               <ToolBtn icon={HeaderIcons.Team} active={route === "equipo"} onClick={onIrEquipo}>Equipo</ToolBtn>
               <ToolBtn icon={HeaderIcons.Gantt} active={route === "planificacion"} onClick={onIrPlanificacion} title="Vista Gantt de proyectos e hitos">Planificación</ToolBtn>
