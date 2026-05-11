@@ -270,7 +270,6 @@
     const font = "'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif";
     const mono = "'JetBrains Mono', 'SF Mono', monospace";
 
-    const STORAGE_KEY = "crux.comunicacion.v1";
     const USUARIO_KEY = "crux.usuarioActualId";
 
     /* Icono CRUX (diamante 4-pétalos). Color original azul; lo renderizamos blanco con CSS filter. */
@@ -381,26 +380,81 @@
       };
     };
 
-    function makeStore(storageKey) {
-      function load() {
-        try {
-          const raw = localStorage.getItem(storageKey);
-          if (raw) return JSON.parse(raw);
-        } catch (e) { console.warn("Store corrupto, regenerando seed", e); }
-        const seeded = SEED();
-        localStorage.setItem(storageKey, JSON.stringify(seeded));
-        return seeded;
-      }
-      let state = load();
+    function makeStore() {
+      let state = null;                   // null hasta hidratar desde KV
+      let saveTimer = null;
+      let saving = false;
+      let saveError = null;
       const listeners = new Set();
-      function persist() { localStorage.setItem(storageKey, JSON.stringify(state)); listeners.forEach(fn => fn()); }
+      const SAVE_DEBOUNCE_MS = 800;
+      const MAX_RETRIES = 3;
+
+      function notify() { listeners.forEach(fn => fn()); }
       function subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); }
+
+      async function hydrate() {
+        try {
+          const r = await fetch('/api/comm-state', { credentials: 'same-origin', cache: 'no-store' });
+          if (r.status === 404) {
+            state = SEED();
+            await persistNow();           // crea snapshot inicial en KV
+          } else if (r.ok) {
+            const { data } = await r.json();
+            state = data;
+          } else {
+            throw new Error('hydrate failed: ' + r.status);
+          }
+        } catch (e) {
+          console.error('[comm-store] hydrate error', e);
+          state = SEED();                 // fallback local; no se guarda en KV
+        }
+        notify();
+      }
+
+      function persist() {
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(persistNow, SAVE_DEBOUNCE_MS);
+        notify();                         // UI re-renderiza inmediato con el cambio in-memory
+      }
+
+      async function persistNow(attempt) {
+        attempt = attempt || 1;
+        saving = true;
+        if (attempt === 1) saveError = null;
+        notify();
+        try {
+          const r = await fetch('/api/comm-state', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ data: state }),
+          });
+          if (!r.ok) throw new Error('save failed: ' + r.status);
+          saving = false;
+          notify();
+        } catch (e) {
+          console.error('[comm-store] save attempt ' + attempt + ' failed', e);
+          if (attempt < MAX_RETRIES) {
+            // mantener saving=true durante el retry — la UI sigue mostrando Guardando
+            const backoff = Math.pow(2, attempt) * 500;   // 1s, 2s, 4s
+            setTimeout(() => persistNow(attempt + 1), backoff);
+          } else {
+            saveError = e.message || 'save failed';
+            saving = false;
+            notify();
+          }
+        }
+      }
 
       return {
         subscribe,
+        hydrate,
+        isReady: () => state !== null,
+        isSaving: () => saving,
+        saveError: () => saveError,
         getState: () => state,
-        reset: () => { state = SEED(); persist(); },
-        clear: () => { localStorage.removeItem(storageKey); state = load(); listeners.forEach(fn => fn()); },
+        reset: async () => { state = SEED(); await persistNow(); notify(); },
+        clear: async () => { state = SEED(); await persistNow(); notify(); },
 
         /* Clientes */
         getClientes: () => state.clientes.slice(),
@@ -521,7 +575,7 @@
     }
 
     /* Instancia global */
-    const store = makeStore(STORAGE_KEY);
+    const store = makeStore();
 
     /* ─── Componentes base ─── */
     function Card({ children, style = {}, ...rest }) {
@@ -2815,6 +2869,17 @@
             route={route.view}
             archivadosCount={s.getClientes().filter(c => c.archivado).length}
           />
+          {store.isSaving() && (
+            <div style={{ position: "fixed", top: 12, right: 16, zIndex: 1000, padding: "4px 10px", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 4, color: C.textSec, fontFamily: mono, fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase" }}>
+              Guardando…
+            </div>
+          )}
+          {store.saveError() && (
+            <div style={{ position: "fixed", top: 12, right: 16, zIndex: 1000, padding: "6px 12px", background: C.redBg, border: `1px solid ${C.red}`, borderRadius: 4, color: C.red, fontFamily: mono, fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer" }}
+              onClick={() => store.reset().catch(()=>{})}>
+              Error guardando — click para reintentar
+            </div>
+          )}
           <Breadcrumb trail={trail} onNav={(t) => setRoute(t.to)} />
           <main className="crux-main" style={{ padding: "28px 32px", maxWidth: 1280, margin: "0 auto" }}>
             {route.view === "home" && (
@@ -2885,133 +2950,20 @@
       );
     }
 
-    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-
-    /* ─── Test runner (?test=1) ─── */
-    if (typeof window !== "undefined" && window.location.search === "?test=1") {
-      const TEST_KEY = "_test_crux_comm";
-      const t = makeStore(TEST_KEY);
-      t.clear(); t.reset();
-      const results = [];
-      const assert = (cond, msg) => results.push({ ok: !!cond, msg });
-
-      /* Seed básico */
-      assert(t.getClientes().length === 2, "Seed: 2 clientes");
-      assert(t.getEquipo().length === 4, "Seed: 4 miembros equipo");
-
-      /* CRUD cliente */
-      const cli = t.addCliente({ nombre: "Test Cli" });
-      assert(t.getClientes().length === 3, "addCliente añade uno");
-      t.updateCliente(cli.id, { nombre: "Test Cli 2" });
-      assert(t.getCliente(cli.id).nombre === "Test Cli 2", "updateCliente cambia nombre");
-      t.deleteCliente(cli.id);
-      assert(t.getClientes().length === 2, "deleteCliente quita uno");
-
-      /* CRUD proyecto */
-      const cli2 = t.getClientes()[0];
-      const proy = t.addProyecto(cli2.id, { nombre: "Test Proy" });
-      assert(t.getProyectos(cli2.id).length === 2, "addProyecto añade al cliente correcto");
-      t.deleteProyecto(proy.id);
-      assert(t.getProyectos(cli2.id).length === 1, "deleteProyecto quita el correcto");
-
-      /* CRUD iteración + estado */
-      const proy0 = t.getProyectos(cli2.id)[0];
-      const itCount = t.getIteraciones(proy0.id).length;
-      const it = t.addIteracion(proy0.id, { descripcion: "Test", autorId: "u_pedro", tipo: "diseño" });
-      assert(t.getIteraciones(proy0.id).length === itCount + 1, "addIteracion añade activa");
-      t.updateIteracion(it.id, { estado: "hecha" });
-      assert(t.getIteracion(it.id).fechaArchivado, "updateIteracion(hecha) setea fechaArchivado");
-      assert(t.getIteraciones(proy0.id).length === itCount, "Hechas se ocultan por defecto");
-      assert(t.getIteraciones(proy0.id, { incluirArchivadas: true }).length === itCount + 1, "incluirArchivadas las muestra");
-      t.updateIteracion(it.id, { estado: "pendiente" });
-      assert(!t.getIteracion(it.id).fechaArchivado, "Volver a pendiente borra fechaArchivado");
-
-      /* Comentarios */
-      const iterCom = t.getIteraciones(proy0.id, { incluirArchivadas: true })[0];
-      const ccount = iterCom.comentarios.length;
-      t.addComentario(iterCom.id, { autorId: "u_calum", texto: "test" });
-      assert(t.getIteracion(iterCom.id).comentarios.length === ccount + 1, "addComentario añade al hilo");
-
-      /* Cascada delete cliente -> proyectos -> iteraciones */
-      const cliC = t.addCliente({ nombre: "Cascade" });
-      const proyC = t.addProyecto(cliC.id, { nombre: "P" });
-      t.addIteracion(proyC.id, { descripcion: "X" });
-      const totalIts = t.getState().iteraciones.length;
-      t.deleteCliente(cliC.id);
-      assert(!t.getCliente(cliC.id), "Cliente eliminado");
-      assert(t.getState().proyectos.find(p => p.id === proyC.id) === undefined, "Proyectos del cliente eliminados");
-      assert(t.getState().iteraciones.length === totalIts - 1, "Iteraciones del proyecto eliminadas");
-
-      /* Hitos: getHito, addHitoEnProyecto */
-      const proyH = t.getProyectos(t.getClientes()[0].id)[0];
-      const hitosIniciales = (proyH.hitos || []).length;
-      const nuevoHito = t.addHitoEnProyecto(proyH.id, { nombre: "Hito test", fecha: "2026-12-31" });
-      assert(t.getProyecto(proyH.id).hitos.length === hitosIniciales + 1, "addHitoEnProyecto añade hito al proyecto correcto");
-      assert(t.getHito(proyH.id, nuevoHito.id)?.nombre === "Hito test", "getHito recupera por id");
-      assert(t.getHito(proyH.id, "fake_id") === undefined, "getHito devuelve undefined para id inexistente");
-      assert(t.getHito(proyH.id, null) === null, "getHito(null) devuelve null");
-
-      /* setHitoIteracion: válido + cross-proyecto rechazo */
-      const itHito = t.addIteracion(proyH.id, { descripcion: "asignar hito" });
-      t.setHitoIteracion(itHito.id, nuevoHito.id);
-      assert(t.getIteracion(itHito.id).hitoId === nuevoHito.id, "setHitoIteracion asigna hito válido");
-      const otroProy = t.addProyecto(t.getClientes()[1].id, { nombre: "Otro proy" });
-      const hitoOtro = t.addHitoEnProyecto(otroProy.id, { nombre: "Otro hito", fecha: "2027-01-01" });
-      const prevHitoId = t.getIteracion(itHito.id).hitoId;
-      const warns = [];
-      const origWarn = console.warn;
-      console.warn = (...args) => warns.push(args);
-      t.setHitoIteracion(itHito.id, hitoOtro.id);
-      console.warn = origWarn;
-      assert(t.getIteracion(itHito.id).hitoId === prevHitoId, "setHitoIteracion no aplica si el hito es de otro proyecto");
-      assert(warns.length === 1, "setHitoIteracion warnea cuando rechaza");
-      t.setHitoIteracion(itHito.id, null);
-      assert(t.getIteracion(itHito.id).hitoId === null, "setHitoIteracion(null) desasigna");
-
-      /* getIteracionesPorHito */
-      t.setHitoIteracion(itHito.id, nuevoHito.id);
-      assert(t.getIteracionesPorHito(proyH.id, nuevoHito.id).length === 1, "getIteracionesPorHito devuelve la asignada");
-      assert(t.getIteracionesPorHito(proyH.id, null).length >= 1, "getIteracionesPorHito(null) devuelve huérfanas");
-
-      /* deleteHito: iteraciones pasan a hitoId=null, no se borran */
-      const itsAntes = t.getState().iteraciones.length;
-      t.deleteHito(proyH.id, nuevoHito.id);
-      assert(t.getHito(proyH.id, nuevoHito.id) === undefined, "deleteHito elimina del proyecto");
-      assert(t.getState().iteraciones.length === itsAntes, "deleteHito no borra iteraciones");
-      assert(t.getIteracion(itHito.id).hitoId === null, "deleteHito desasigna iteraciones");
-
-      /* Cleanup proyecto extra */
-      t.deleteProyecto(otroProy.id);
-      t.deleteIteracion(itHito.id);
-
-      /* Equipo */
-      const m = t.addMiembro({ nombre: "Nuevo Miembro" });
-      assert(m.iniciales === "NM", "addMiembro autogenera iniciales");
-      t.deleteMiembro(m.id);
-
-      /* Persistencia */
-      const t2 = makeStore(TEST_KEY);
-      assert(t2.getClientes().length === t.getClientes().length, "Otro store con mismo key lee mismo estado");
-
-      /* Limpieza final */
-      localStorage.removeItem(TEST_KEY);
-
-      /* Render resultados */
-      const root = document.getElementById("root");
-      const passed = results.filter(r => r.ok).length;
-      const total = results.length;
-      const allPass = passed === total;
-      root.innerHTML = `
-        <div style="padding:32px;font-family:${mono};color:${C.text};max-width:900px;margin:0 auto">
-          <h1 style="font-family:${font};font-size:22px;color:${allPass ? C.green : C.red};margin-bottom:16px">
-            ${allPass ? "✓" : "✗"} Tests · ${passed} / ${total} ${allPass ? "PASS" : "FAIL"}
-          </h1>
-          <pre style="background:${C.surface};border:1px solid ${C.border};border-radius:8px;padding:16px;font-size:12px;line-height:1.7;overflow:auto">
-${results.map(r => `${r.ok ? "  ✓" : "  ✗"}  ${r.msg}`).join("\n")}
-          </pre>
-        </div>`;
-      console.log(`Tests: ${passed}/${total}`, results);
+    /* Veil de carga de datos (mostrar mientras hidratamos desde KV) */
+    function LoadingVeil() {
+      return (
+        <div style={{ position: "fixed", inset: 0, background: C.bg, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: mono, fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", color: C.accent }}>
+          Cargando datos…
+        </div>
+      );
     }
+
+    const __root = ReactDOM.createRoot(document.getElementById("root"));
+    __root.render(<LoadingVeil />);
+    store.hydrate().then(() => {
+      __root.render(<App />);
+    });
   </script>
 </body>
 </html>
