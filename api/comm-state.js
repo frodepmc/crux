@@ -9,18 +9,16 @@
 //   ADMIN_USERS   (JSON [{u,p,role}])
 
 const { kv } = require('@vercel/kv');
-const { readSessionFromRequest } = require('./_lib/auth');
+const { requireIntegrationAccess } = require('./_lib/auth');
 
 const STATE_KEY = 'crux:dashboard:comm:state';
 
 module.exports = async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(204).end();
 
-    // Guard: solo admin con sesion valida
-    const session = readSessionFromRequest(req);
-    if (!session) {
-        return res.status(401).json({ error: 'Unauthorized' });
-    }
+    // Guard: sesion valida + acceso a la integracion 'communication'
+    const session = requireIntegrationAccess(req, res, 'communication');
+    if (!session) return;  // 401 o 403 ya respondido
 
     try {
         if (req.method === 'GET') {
