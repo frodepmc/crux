@@ -10,6 +10,16 @@
         "meta": ["React inline", "KV backed", "PDF export"]
     },
     {
+        "id": "communication",
+        "name": "Dashboard comunicación",
+        "description": "Iteraciones, hitos, equipo y comentarios. Snapshot en Vercel KV con autoguardado.",
+        "path": "/admin/integrations/communication",
+        "status": "live",
+        "roles": ["admin", "comms"],
+        "icon": "layers",
+        "meta": ["React inline", "KV backed", "Hitos & iteraciones"]
+    },
+    {
         "id": "leads",
         "name": "CRM de leads",
         "description": "Pipeline de contactos desde la web, WhatsApp e Instagram. Con seguimiento y etiquetas por fase.",
