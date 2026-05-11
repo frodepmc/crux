@@ -25,6 +25,7 @@
     }
   ],
   "redirects": [
-    { "source": "/admin/integrations/financial.html", "destination": "/admin/integrations/financial", "permanent": false }
+    { "source": "/admin/integrations/financial.html", "destination": "/admin/integrations/financial", "permanent": false },
+    { "source": "/admin/integrations/communication.html", "destination": "/admin/integrations/communication", "permanent": false }
   ]
 }
