@@ -27,20 +27,40 @@
       // Dev-only bypass: en localhost + ?__preview, saltar verificación
       var isLocal = /^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(window.location.hostname);
       var wantsPreview = new URLSearchParams(window.location.search).has('__preview');
-      var reveal = function () {
+      var reveal = function (profile) {
         var s = document.getElementById('crux-admin-guard-style');
         if (s) s.remove();
         var v = document.getElementById('crux-guard-veil');
         if (v) v.remove();
+        // Expone el perfil para que la app React lo consuma sin un segundo fetch
+        window.__cruxProfile = profile || null;
       };
-      if (isLocal && wantsPreview) { reveal(); return; }
+      if (isLocal && wantsPreview) {
+        reveal({
+          username: 'preview@localhost',
+          name: 'Preview Local',
+          role: 'admin',
+          color: '#3869AB',
+          access: ['*'],
+          isAdmin: true,
+        });
+        return;
+      }
 
-      fetch('/api/auth/verify', { method: 'GET', credentials: 'same-origin', cache: 'no-store' })
+      fetch('/api/auth/me', { method: 'GET', credentials: 'same-origin', cache: 'no-store' })
         .then(function (r) {
           if (!r.ok) throw new Error('unauth');
           return r.json();
         })
-        .then(reveal)
+        .then(function (profile) {
+          var access = Array.isArray(profile.access) ? profile.access : [];
+          var hasAccess = access.includes('*') || access.includes('communication');
+          if (!hasAccess) {
+            window.location.replace('/admin/hub');
+            return;
+          }
+          reveal(profile);
+        })
         .catch(function () {
           window.location.replace('/admin');
         });
