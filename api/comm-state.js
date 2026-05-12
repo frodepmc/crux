@@ -6,7 +6,7 @@
 //   KV_REST_API_URL
 //   KV_REST_API_TOKEN
 //   JWT_SECRET
-//   ADMIN_USERS   (JSON [{u,p,role}])
+//   ADMIN_USERS   (JSON [{u, p, role, name, color, access}])
 
 const { kv } = require('@vercel/kv');
 const { requireIntegrationAccess } = require('./_lib/auth');

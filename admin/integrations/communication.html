@@ -309,7 +309,7 @@
       __teamPromise = fetch('/api/auth/team', { credentials: 'same-origin', cache: 'no-store' })
         .then(r => r.ok ? r.json() : { team: [] })
         .then(json => { __teamCache = json.team || []; return __teamCache; })
-        .catch(() => []);
+        .catch(() => { __teamPromise = null; return []; });
       return __teamPromise;
     }
 
@@ -411,7 +411,6 @@
     }
 
     const SEED = () => {
-      const u_pedro = "u_pedro", u_calum = "u_calum", u_carlos = "u_carlos", u_tecnico = "u_tecnico";
       const cli1 = genId("cli"), cli2 = genId("cli");
       const proy1 = genId("proy");
       return {
@@ -427,7 +426,7 @@
             stack: { frontend: "Next.js 14", backend: "pan SaaS", hosting: "Vercel", dominioDNS: "Namecheap" },
             briefing: "Web institucional + landing de captación para servicio a domicilio. SEO local fuerte (Barcelona, Eixample). Foco en confianza y rapidez.",
             salud: "saludable", bloqueoActual: "",
-            equipoIds: [u_pedro, u_calum, u_carlos, u_tecnico],
+            equipoIds: [],
             hitos: [
               { id: genId("hito"), nombre: "Revisión QA", fecha: "2026-05-09", descripcion: "Validar el flujo completo de contacto, navegación y formularios antes de mostrar al cliente. Checklist en /docs/qa-rambla.md.", cumplido: false },
               { id: genId("hito"), nombre: "Validación cliente", fecha: "2026-05-21", descripcion: "Reunión con María García para revisar la web casi-final y recoger últimos ajustes. Avisar 5 días antes para reservar agenda.", cumplido: false },
@@ -436,15 +435,15 @@
           },
         ],
         iteraciones: [
-          { id: genId("it"), proyectoId: proy1, descripcion: "Cambia el logo de cabecera por el nuevo en SVG (lo dejé en /assets/logo-v2.svg). Que mantenga la altura de 32px en escritorio y 24px en móvil.", fechaCreacion: nowISO(), autorId: u_pedro, tipo: "diseño", estado: "pendiente", asignadoId: null, enlace: "", comentarios: [] },
-          { id: genId("it"), proyectoId: proy1, descripcion: "Endpoint /api/contacto está devolviendo 500 cuando el campo \"teléfono\" llega vacío. El cliente ha avisado dos veces ya. Hay que validar mejor o dejarlo opcional.", fechaCreacion: "2026-05-02T17:08:00.000Z", autorId: u_pedro, tipo: "backend", estado: "en_proceso", asignadoId: u_calum, enlace: "", comentarios: [] },
-          { id: genId("it"), proyectoId: proy1, descripcion: "Calum, en /servicios el bloque \"Horarios\" no respeta el padding del resto. Está pegado a los lados en móvil. Aplica el mismo wrapper que /nosotros.", fechaCreacion: "2026-04-28T10:22:00.000Z", autorId: u_carlos, tipo: "frontend", estado: "pendiente", asignadoId: null, enlace: "",
+          { id: genId("it"), proyectoId: proy1, descripcion: "Cambia el logo de cabecera por el nuevo en SVG (lo dejé en /assets/logo-v2.svg). Que mantenga la altura de 32px en escritorio y 24px en móvil.", fechaCreacion: nowISO(), autorId: null, tipo: "diseño", estado: "pendiente", asignadoId: null, enlace: "", comentarios: [] },
+          { id: genId("it"), proyectoId: proy1, descripcion: "Endpoint /api/contacto está devolviendo 500 cuando el campo \"teléfono\" llega vacío. El cliente ha avisado dos veces ya. Hay que validar mejor o dejarlo opcional.", fechaCreacion: "2026-05-02T17:08:00.000Z", autorId: null, tipo: "backend", estado: "en_proceso", asignadoId: null, enlace: "", comentarios: [] },
+          { id: genId("it"), proyectoId: proy1, descripcion: "Calum, en /servicios el bloque \"Horarios\" no respeta el padding del resto. Está pegado a los lados en móvil. Aplica el mismo wrapper que /nosotros.", fechaCreacion: "2026-04-28T10:22:00.000Z", autorId: null, tipo: "frontend", estado: "pendiente", asignadoId: null, enlace: "",
             comentarios: [
-              { id: genId("c"), autorId: u_calum, texto: "Visto. ¿Refactor el wrapper a un componente reutilizable o lo aplico solo en /servicios?", fecha: "2026-04-28T11:05:00.000Z" },
-              { id: genId("c"), autorId: u_carlos, texto: "Solo /servicios por ahora, refactor lo metemos en el próximo sprint.", fecha: "2026-04-28T11:10:00.000Z" },
+              { id: genId("c"), autorId: null, texto: "Visto. ¿Refactor el wrapper a un componente reutilizable o lo aplico solo en /servicios?", fecha: "2026-04-28T11:05:00.000Z" },
+              { id: genId("c"), autorId: null, texto: "Solo /servicios por ahora, refactor lo metemos en el próximo sprint.", fecha: "2026-04-28T11:10:00.000Z" },
             ] },
-          { id: genId("it"), proyectoId: proy1, descripcion: "El cliente quiere cambiar \"farmacia online\" por \"farmacia con servicio a domicilio\" en la home y en el meta description.", fechaCreacion: "2026-04-27T16:30:00.000Z", autorId: u_pedro, tipo: "copy", estado: "pendiente", asignadoId: null, enlace: "", comentarios: [] },
-          { id: genId("it"), proyectoId: proy1, descripcion: "Faltan los structured data de LocalBusiness en la home. Sin eso no aparecerá en Google Maps con horarios.", fechaCreacion: "2026-04-24T09:15:00.000Z", autorId: u_carlos, tipo: "seo", estado: "pendiente", asignadoId: null, enlace: "", comentarios: [] },
+          { id: genId("it"), proyectoId: proy1, descripcion: "El cliente quiere cambiar \"farmacia online\" por \"farmacia con servicio a domicilio\" en la home y en el meta description.", fechaCreacion: "2026-04-27T16:30:00.000Z", autorId: null, tipo: "copy", estado: "pendiente", asignadoId: null, enlace: "", comentarios: [] },
+          { id: genId("it"), proyectoId: proy1, descripcion: "Faltan los structured data de LocalBusiness en la home. Sin eso no aparecerá en Google Maps con horarios.", fechaCreacion: "2026-04-24T09:15:00.000Z", autorId: null, tipo: "seo", estado: "pendiente", asignadoId: null, enlace: "", comentarios: [] },
         ],
       };
     };
