@@ -283,6 +283,46 @@
     /** @jsxRuntime classic */
     const { useState, useEffect, useCallback, useRef, useMemo } = React;
 
+    /* ─── Identidad del usuario logueado ─── */
+    // Lee el perfil que el guard del <head> dejó en window.__cruxProfile.
+    // Si no está disponible (no debería pasar en producción), hace fetch al endpoint.
+    function useCurrentUser() {
+      const [profile, setProfile] = useState(() => window.__cruxProfile || null);
+      useEffect(() => {
+        if (profile) return;
+        let cancelled = false;
+        fetch('/api/auth/me', { credentials: 'same-origin', cache: 'no-store' })
+          .then(r => r.ok ? r.json() : null)
+          .then(p => { if (!cancelled && p) setProfile(p); })
+          .catch(() => {});
+        return () => { cancelled = true; };
+      }, []);
+      return profile;
+    }
+
+    /* ─── Lista pública del equipo ─── */
+    let __teamCache = null;
+    let __teamPromise = null;
+    function fetchTeam() {
+      if (__teamCache) return Promise.resolve(__teamCache);
+      if (__teamPromise) return __teamPromise;
+      __teamPromise = fetch('/api/auth/team', { credentials: 'same-origin', cache: 'no-store' })
+        .then(r => r.ok ? r.json() : { team: [] })
+        .then(json => { __teamCache = json.team || []; return __teamCache; })
+        .catch(() => []);
+      return __teamPromise;
+    }
+
+    function useTeam() {
+      const [team, setTeam] = useState(__teamCache || []);
+      useEffect(() => {
+        let cancelled = false;
+        fetchTeam().then(t => { if (!cancelled) setTeam(t); });
+        return () => { cancelled = true; };
+      }, []);
+      return team;
+    }
+
     /* ─── Tokens ─── */
     const C = {
       bg: "#0E1A2B", surface: "#181818", surface2: "#1e1e1e",
