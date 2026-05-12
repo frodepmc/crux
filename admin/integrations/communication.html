@@ -323,6 +323,18 @@
       return team;
     }
 
+    /* ─── Mapeo del shape /api/auth/team a la forma que esperan los componentes ─── */
+    function teamToMembers(team) {
+      return team.map(m => ({
+        id: m.username,
+        nombre: m.name,
+        iniciales: m.name ? m.name.trim().split(/\s+/).map(s => s[0] || '').join('').slice(0,2).toUpperCase() : '??',
+        rol: m.role === 'admin' ? 'admin' : 'member',
+        color: m.color,
+        gmail: m.username,
+      }));
+    }
+
     /* ─── Tokens ─── */
     const C = {
       bg: "#0E1A2B", surface: "#181818", surface2: "#1e1e1e",
@@ -620,9 +632,16 @@
         /* Equipo */
         getEquipo: () => state.equipo.slice(),
         getMiembro: (id) => state.equipo.find(m => m.id === id),
-        addMiembro: (data) => { const m = { id: genId("u"), nombre: "", iniciales: "", rol: "Otro", color: C.textSec, gmail: "", ...data }; if (!m.iniciales) m.iniciales = getInitials(m.nombre); state.equipo.push(m); persist(); return m; },
-        updateMiembro: (id, patch) => { state.equipo = state.equipo.map(m => m.id === id ? { ...m, ...patch, iniciales: patch.nombre ? getInitials(patch.nombre) : m.iniciales } : m); persist(); return state.equipo.find(m => m.id === id); },
-        deleteMiembro: (id) => { state.equipo = state.equipo.filter(m => m.id !== id); persist(); },
+        addMiembro(data) {
+          console.warn('[comm] addMiembro no-op: gestión de equipo se hace en Vercel (ADMIN_USERS) en V1');
+          // no-op — Task 11 elimina la UI que llama a este método
+        },
+        updateMiembro(id, data) {
+          console.warn('[comm] updateMiembro no-op: gestión de equipo se hace en Vercel (ADMIN_USERS) en V1');
+        },
+        deleteMiembro(id) {
+          console.warn('[comm] deleteMiembro no-op: gestión de equipo se hace en Vercel (ADMIN_USERS) en V1');
+        },
 
         /* Backup */
         export: () => JSON.stringify(state, null, 2),
@@ -1400,7 +1419,8 @@
     }
 
     function SidePanel({ store, proyecto, onVerFichaCompleta, onVerHitos }) {
-      const equipo = store.getEquipo();
+      const team = useTeam();
+      const equipo = teamToMembers(team);
       const miembros = proyecto.equipoIds.map(id => equipo.find(m => m.id === id)).filter(Boolean);
       const proxHito = proyecto.hitos.slice().sort((a, b) => a.fecha.localeCompare(b.fecha))[0];
       const dias = proxHito ? diasHasta(proxHito.fecha) : null;
@@ -1515,7 +1535,8 @@
         return () => document.removeEventListener("keydown", onKey);
       }, []);
 
-      const equipo = store.getEquipo();
+      const team = useTeam();
+      const equipo = teamToMembers(team);
       const all = store.getIteraciones(proyectoId, { incluirArchivadas: true });
       const proyecto = store.getProyecto(proyectoId);
       const hitosProyecto = (proyecto?.hitos || []).slice().sort((a, b) => (a.fecha || "").localeCompare(b.fecha || ""));
@@ -2166,7 +2187,8 @@
     }
 
     function VistaEquipo({ store, onVolver }) {
-      const equipo = store.getEquipo();
+      const team = useTeam();
+      const equipo = teamToMembers(team);
       const [editando, setEditando] = useState(null);
       const [nuevo, setNuevo] = useState(false);
 
@@ -2871,7 +2893,8 @@
       const [modalEditarCli, setModalEditarCli] = useState(false);
       const [modalNuevoProy, setModalNuevoProy] = useState(false);
       const [modalFichaCompleta, setModalFichaCompleta] = useState(false);
-      const equipo = s.getEquipo();
+      const team = useTeam();
+      const equipo = teamToMembers(team);
       const me = useCurrentUser();
       const usuarioActual = me ? {
         id: me.username,
