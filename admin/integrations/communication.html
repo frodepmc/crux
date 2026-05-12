@@ -357,14 +357,6 @@
       return nombre.trim().split(/\s+/).map(s => s[0] || "").join("").slice(0, 2).toUpperCase();
     }
 
-    /* Equipo seed (provisional, se moverá a store en Task 3) */
-    const EQUIPO_SEED = [
-      { id: "u_pedro", nombre: "Pedro Castrillo", iniciales: "PC", rol: "PM", color: C.accent, gmail: "pedro.castrillo@gmail.com" },
-      { id: "u_calum", nombre: "Calum", iniciales: "CL", rol: "Dev", color: C.amber, gmail: "calum@gmail.com" },
-      { id: "u_carlos", nombre: "Carlos Canet", iniciales: "CC", rol: "Dev/PM", color: C.green, gmail: "carlos.canet@gmail.com" },
-      { id: "u_tecnico", nombre: "Técnico SaaS", iniciales: "TS", rol: "Técnico SaaS", color: C.red, gmail: "soporte@gmail.com" },
-    ];
-
     function genId(prefix = "id") {
       return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
     }
@@ -423,7 +415,6 @@
       const cli1 = genId("cli"), cli2 = genId("cli");
       const proy1 = genId("proy");
       return {
-        equipo: EQUIPO_SEED.map(m => ({ ...m, iniciales: m.iniciales || getInitials(m.nombre) })),
         clientes: [
           { id: cli1, nombre: "Farmacia La Rambla", notas: "Cliente recurrente, contacto: María García", fechaAlta: "2026-03-15" },
           { id: cli2, nombre: "Cliente Demo", notas: "Cliente de ejemplo — bórralo cuando añadas el tuyo.", fechaAlta: todayISO() },
@@ -627,20 +618,6 @@
         deleteComentario: (iteracionId, comentarioId) => {
           state.iteraciones = state.iteraciones.map(it => it.id === iteracionId ? { ...it, comentarios: it.comentarios.filter(c => c.id !== comentarioId) } : it);
           persist();
-        },
-
-        /* Equipo */
-        getEquipo: () => state.equipo.slice(),
-        getMiembro: (id) => state.equipo.find(m => m.id === id),
-        addMiembro(data) {
-          console.warn('[comm] addMiembro no-op: gestión de equipo se hace en Vercel (ADMIN_USERS) en V1');
-          // no-op — Task 11 elimina la UI que llama a este método
-        },
-        updateMiembro(id, data) {
-          console.warn('[comm] updateMiembro no-op: gestión de equipo se hace en Vercel (ADMIN_USERS) en V1');
-        },
-        deleteMiembro(id) {
-          console.warn('[comm] deleteMiembro no-op: gestión de equipo se hace en Vercel (ADMIN_USERS) en V1');
         },
 
         /* Backup */
@@ -988,7 +965,7 @@
       );
     }
 
-    function Header({ usuarioActual, equipo, onIrEquipo, onIrPlanificacion, onIrArchivados, onResetear, route, archivadosCount }) {
+    function Header({ usuarioActual, onIrEquipo, onIrPlanificacion, onIrArchivados, onResetear, route, archivadosCount }) {
       const [open, setOpen] = useState(false);
       const ref = useRef(null);
       useEffect(() => {
@@ -2192,28 +2169,24 @@
       );
     }
 
-    function VistaEquipo({ store, onVolver }) {
-      const team = useTeam();
-      const equipo = teamToMembers(team);
-      const [editando, setEditando] = useState(null);
-      const [nuevo, setNuevo] = useState(false);
-
+    function VistaEquipo({ equipo, onVolver }) {
       return (
         <div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 24 }}>
             <div>
               <h1 style={{ fontSize: 24, fontWeight: 700, color: C.white, letterSpacing: -0.5 }}>Equipo</h1>
-              <p style={{ fontSize: 12, color: C.textDim, marginTop: 4 }}>{equipo.length} miembros · usados como autores en iteraciones y comentarios</p>
+              <p style={{ fontSize: 12, color: C.textDim, marginTop: 4 }}>
+                {equipo.length} miembros · gestión en Vercel (env var <code style={{ fontFamily: mono, color: C.textSec }}>ADMIN_USERS</code>) hasta V2
+              </p>
             </div>
             <div style={{ display: "flex", gap: 8 }}>
               <Btn onClick={onVolver}>← Volver</Btn>
-              <Btn kind="primary" onClick={() => setNuevo(true)}>+ Nuevo miembro</Btn>
             </div>
           </div>
 
           <Card>
             {equipo.map((m, i) => (
-              <div key={m.id} style={{ display: "grid", gridTemplateColumns: "auto 1.6fr 0.9fr 1.8fr 0.9fr auto", gap: 14, alignItems: "center", padding: "10px 0", borderBottom: i < equipo.length - 1 ? `1px solid ${C.border}` : "none" }}>
+              <div key={m.id} style={{ display: "grid", gridTemplateColumns: "auto 1.6fr 0.9fr 1.8fr 0.9fr", gap: 14, alignItems: "center", padding: "10px 0", borderBottom: i < equipo.length - 1 ? `1px solid ${C.border}` : "none" }}>
                 <Avatar nombre={m.nombre} color={m.color} size={32} />
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 13, fontWeight: 600, color: C.white }}>{m.nombre}</div>
@@ -2222,78 +2195,16 @@
                 <div style={{ fontSize: 12, color: C.textSec }}>{m.rol}</div>
                 <div style={{ fontSize: 12, color: C.textSec, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {m.gmail ? (
-                    <a href={`mailto:${m.gmail}`} title={m.gmail} style={{ color: C.textSec, textDecoration: "none", borderBottom: `1px dashed ${C.border}` }} onMouseEnter={(e) => { e.currentTarget.style.color = C.accent; e.currentTarget.style.borderBottomColor = C.accent; }} onMouseLeave={(e) => { e.currentTarget.style.color = C.textSec; e.currentTarget.style.borderBottomColor = C.border; }}>{m.gmail}</a>
+                    <a href={`mailto:${m.gmail}`} title={m.gmail} style={{ color: C.textSec, textDecoration: "none", borderBottom: `1px dashed ${C.border}` }}>{m.gmail}</a>
                   ) : (
                     <span style={{ color: C.textDim, fontFamily: mono, fontSize: 11 }}>—</span>
                   )}
                 </div>
                 <div style={{ fontSize: 11, color: C.textDim, fontFamily: mono }}>{m.color}</div>
-                <Btn onClick={() => setEditando(m)}>Editar</Btn>
               </div>
             ))}
           </Card>
-
-          <MiembroModal open={!!editando || nuevo} onClose={() => { setEditando(null); setNuevo(false); }} miembro={editando} onGuardar={(d) => editando ? store.updateMiembro(editando.id, d) : store.addMiembro(d)} onEliminar={editando ? () => store.deleteMiembro(editando.id) : null} />
         </div>
-      );
-    }
-
-    function MiembroModal({ open, onClose, miembro, onGuardar, onEliminar }) {
-      const [nombre, setNombre] = useState("");
-      const [rol, setRol] = useState("Otro");
-      const [gmail, setGmail] = useState("");
-      const [color, setColor] = useState(C.accent);
-      const [errorGmail, setErrorGmail] = useState("");
-      useEffect(() => {
-        if (open) {
-          setNombre(miembro?.nombre || "");
-          setRol(miembro?.rol || "Otro");
-          setGmail(miembro?.gmail || "");
-          setColor(miembro?.color || C.accent);
-          setErrorGmail("");
-        }
-      }, [open, miembro]);
-      const submit = () => {
-        if (!nombre.trim()) return;
-        const g = gmail.trim();
-        if (g && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(g)) { setErrorGmail("Email inválido"); return; }
-        onGuardar({ nombre: nombre.trim(), rol, color, gmail: g });
-        onClose();
-      };
-      const eliminar = () => {
-        askConfirm({
-          title: `Eliminar miembro "${miembro.nombre}"`,
-          body: "Las iteraciones que lo tengan como autor mantendrán su id huérfano.",
-          confirmText: "Eliminar",
-          danger: true,
-        }).then(ok => { if (ok) { onEliminar(); onClose(); } });
-      };
-
-      const colors = [C.accent, C.green, C.amber, C.red, "#9B7BC2", "#5BC0BE", "#E8A87C", C.textSec];
-
-      return (
-        <Modal open={open} onClose={onClose} title={miembro ? "Editar miembro" : "Nuevo miembro"} footer={<>{miembro && <Btn kind="danger" onClick={eliminar}>Eliminar</Btn>}<div style={{ flex: 1 }} /><Btn onClick={onClose}>Cancelar</Btn><Btn kind="primary" onClick={submit}>Guardar</Btn></>}>
-          <FormField label="Nombre"><TextInput value={nombre} onChange={(e) => setNombre(e.target.value)} autoFocus /></FormField>
-          <FormField label="Rol">
-            <Select value={rol} onChange={setRol} options={[
-              { value: "PM", label: "PM" },
-              { value: "Dev", label: "Dev" },
-              { value: "Dev/PM", label: "Dev/PM" },
-              { value: "Técnico SaaS", label: "Técnico SaaS" },
-              { value: "Otro", label: "Otro" },
-            ]} buttonStyle={{ padding: "8px 10px", fontSize: 13 }} />
-          </FormField>
-          <FormField label="Gmail" hint="Email de contacto. Se usa como mailto: en la lista del equipo." error={errorGmail}>
-            <TextInput type="email" value={gmail} onChange={(e) => { setGmail(e.target.value); if (errorGmail) setErrorGmail(""); }} placeholder="nombre@gmail.com" autoComplete="email" />
-          </FormField>
-          <FormField label="Color del avatar">
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {colors.map(c => (
-                <button key={c} onClick={() => setColor(c)} style={{ width: 28, height: 28, borderRadius: "50%", background: c, border: color === c ? `2px solid ${C.white}` : `2px solid transparent`, cursor: "pointer" }} />
-              ))}
-            </div>
-          </FormField>
-        </Modal>
       );
     }
 
@@ -2956,7 +2867,6 @@
         <div style={{ background: C.bg, minHeight: "100vh", color: C.text }}>
           <Header
             usuarioActual={usuarioActual}
-            equipo={equipo}
             onIrEquipo={goEquipo}
             onIrPlanificacion={goPlanificacion}
             onIrArchivados={goArchivados}
@@ -3009,7 +2919,7 @@
               />
             )}
             {route.view === "equipo" && (
-              <VistaEquipo store={s} onVolver={goHome} />
+              <VistaEquipo equipo={equipo} onVolver={goHome} />
             )}
             {route.view === "planificacion" && (
               <VistaGantt store={s} onAbrirProyecto={goProyecto} />
