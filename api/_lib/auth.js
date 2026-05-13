@@ -146,17 +146,26 @@ function hasAccessTo(session, integrationId) {
 
 // Guard combinado: requiere sesion valida + acceso a la integracion.
 // Responde 401/403 si falla. Devuelve la sesion si OK, null si bloqueado.
+//
+// El access se relee desde ADMIN_USERS en cada request — no se confia en los claims
+// del JWT, que quedaron congelados en el momento del login. Asi, anadir o revocar
+// permisos en el env var surte efecto inmediato sin obligar al usuario a re-loguearse.
 function requireIntegrationAccess(req, res, integrationId) {
     const session = readSessionFromRequest(req);
     if (!session) {
         res.status(401).json({ error: 'Unauthorized' });
         return null;
     }
-    if (!hasAccessTo(session, integrationId)) {
+    const profile = loadProfile(session.sub);
+    if (!profile) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return null;
+    }
+    if (!hasAccessTo(profile, integrationId)) {
         res.status(403).json({ error: 'Forbidden: no access to integration ' + integrationId });
         return null;
     }
-    return session;
+    return { ...session, access: profile.access, role: profile.role };
 }
 
 module.exports = {
