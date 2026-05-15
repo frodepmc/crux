@@ -2636,125 +2636,6 @@ textarea:focus-visible {
 }
 
 /* ═══════════════════════════════════════
-   ABOUT / MANIFESTO
-   ═══════════════════════════════════════ */
-.about {
-    border-top: 1px solid var(--border);
-    position: relative;
-    isolation: isolate;
-}
-
-.about::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--bg);
-    opacity: 0.85;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.about > :not(.section-media) {
-    position: relative;
-    z-index: 1;
-}
-
-.about__manifesto {
-    margin-bottom: clamp(5rem, 10vh, 8rem);
-}
-
-.about__quote {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-weight: 400;
-    font-size: clamp(1.6rem, 3.5vw, 3rem);
-    line-height: 1.4;
-    max-width: 850px;
-    position: relative;
-    padding-left: clamp(1.5rem, 3vw, 2.5rem);
-}
-
-.about__quote::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0.3em;
-    bottom: 0.3em;
-    width: 2px;
-    background: linear-gradient(to bottom, var(--accent), transparent);
-}
-
-.about__quote-mark {
-    color: var(--accent);
-    font-size: 1.3em;
-}
-
-.about__grid {
-    display: block;
-}
-
-.about__body {
-    max-width: 520px;
-}
-
-.about__text {
-    color: var(--text-muted);
-    line-height: 1.9;
-    font-weight: 300;
-    margin-bottom: 3rem;
-}
-
-.about__details {
-    display: flex;
-    gap: 3.5rem;
-    flex-wrap: wrap;
-}
-
-.about__detail-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.about__detail-value {
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: 1.05rem;
-    letter-spacing: 0.02em;
-    color: var(--accent);
-}
-
-.about__cta {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.6rem;
-    margin-top: clamp(1.5rem, 3vw, 2.5rem);
-    font-family: var(--font-brand);
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--accent);
-    text-decoration: none;
-    transition: gap 0.4s var(--ease-out), color 0.3s ease;
-}
-
-.about__cta:hover {
-    gap: 1rem;
-    color: var(--accent-hover);
-}
-
-.about__cta-arrow {
-    font-family: var(--font-display);
-    font-size: 1.1em;
-    transition: transform 0.4s var(--ease-out);
-}
-
-.about__cta:hover .about__cta-arrow {
-    transform: translateX(4px);
-}
-
-/* ═══════════════════════════════════════
    DIAGNOSTIC
    ═══════════════════════════════════════ */
 .diagnostic {
@@ -2870,7 +2751,6 @@ textarea:focus-visible {
     font-weight: 600;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    border-radius: 999px;
     transition: background 0.3s ease, translate 0.3s var(--ease-out), box-shadow 0.3s ease;
     box-shadow: 0 4px 14px rgba(56, 105, 171, 0.25);
 }
@@ -3684,11 +3564,6 @@ html.no-js .nav__menu-btn {
         flex-direction: column;
     }
 
-    .about.section-padding {
-        padding-top: clamp(4.5rem, 9vh, 6rem);
-        padding-bottom: clamp(2.75rem, 5vh, 4rem);
-    }
-
     .contact.section-padding {
         padding-top: clamp(3rem, 6vh, 4.5rem);
         padding-bottom: clamp(4rem, 8vh, 5.5rem);
@@ -3941,18 +3816,6 @@ html.no-js .nav__menu-btn {
         height: 48px;
     }
 
-    .about__details {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 1rem;
-        align-items: start;
-    }
-
-    .about__detail-item {
-        width: auto;
-        min-width: 0;
-    }
-
     .projects__lead {
         max-width: none;
     }
@@ -4042,29 +3905,6 @@ html.no-js .nav__menu-btn {
     .process__phase-title { font-size: 1.7rem; }
     .process__phase-desc { font-size: 0.92rem; }
 
-    /* Quote — larger text */
-    .about__quote {
-        font-size: 3rem;
-        max-width: 950px;
-    }
-
-    /* About — wider body */
-    .about__body {
-        max-width: 620px;
-    }
-
-    .about__text {
-        font-size: 1.05rem;
-    }
-
-    .about__details {
-        gap: 4.5rem;
-    }
-
-    .about__detail-value {
-        font-size: 1.15rem;
-    }
-
     /* Contact — better proportions */
     .contact__heading {
         font-size: 5.2rem;
@@ -4102,15 +3942,6 @@ html.no-js .nav__menu-btn {
     }
     .process__watermark { font-size: 5.5rem; }
     .process__phase-title { font-size: 1.8rem; }
-
-    .about__quote {
-        max-width: 1050px;
-        font-size: 3.2rem;
-    }
-
-    .about__body {
-        max-width: 700px;
-    }
 }
 
 /* ═══════════════════════════════════════
