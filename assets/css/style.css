@@ -2566,33 +2566,6 @@ textarea:focus-visible {
     font-weight: 300;
 }
 
-.process__tags {
-    display: flex;
-    gap: 0.35rem;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-.process__tag {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 4px;
-    padding: 0.3rem 0.65rem;
-    font-family: var(--font-brand);
-    font-size: 0.56rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: rgba(255,255,255,0.45);
-    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-}
-
-.process__phase:hover .process__tag {
-    background: rgba(120, 183, 238, 0.08);
-    border-color: rgba(120, 183, 238, 0.2);
-    color: rgba(255,255,255,0.7);
-}
-
 /* ─── CTA ─── */
 .process__cta {
     display: flex;
