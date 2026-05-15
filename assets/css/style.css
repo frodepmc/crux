@@ -203,13 +203,6 @@ html.cursor-ready button {
     transform: translateY(0);
 }
 
-.line-accent {
-    width: 40px;
-    height: 1px;
-    background: var(--accent);
-    display: block;
-}
-
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
@@ -480,17 +473,6 @@ textarea:focus-visible {
     z-index: 2;
     padding-top: clamp(7.5rem, 10vh, 9rem);
     padding-bottom: clamp(4rem, 8vh, 6rem);
-}
-
-.hero__label {
-    margin-bottom: 2.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.hero__label::before {
-    display: none;
 }
 
 .hero__heading {
@@ -2330,14 +2312,6 @@ textarea:focus-visible {
     justify-content: center;
 }
 
-.work__header .label::before {
-    background: var(--accent-deep);
-}
-
-.work__header .line-accent {
-    background: var(--accent-deep);
-}
-
 .work__title {
     font-family: var(--font-display);
     font-weight: 400;
@@ -2752,13 +2726,7 @@ textarea:focus-visible {
 }
 
 .about__grid {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: clamp(2rem, 6vw, 8rem);
-}
-
-.about__label-col {
-    padding-top: 0.3rem;
+    display: block;
 }
 
 .about__body {
@@ -3550,11 +3518,6 @@ html.no-js .nav__menu-btn {
         padding-top: 0.6rem;
     }
 
-    .hero__label {
-        justify-content: center;
-        margin-bottom: 1.5rem;
-    }
-
     .hero__heading {
         margin-bottom: 1.5rem;
     }
@@ -3633,11 +3596,6 @@ html.no-js .nav__menu-btn {
     .contact.section-padding {
         padding-top: clamp(3rem, 6vh, 4.5rem);
         padding-bottom: clamp(4rem, 8vh, 5.5rem);
-    }
-
-    .about__grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
     }
 
     .services__blocks {
@@ -3945,10 +3903,6 @@ html.no-js .nav__menu-btn {
     }
 
 
-    .hero__label {
-        margin-bottom: 3rem;
-    }
-
     .hero__descriptor {
         max-width: 440px;
         font-size: 1rem;
@@ -4090,10 +4044,6 @@ html.no-js .nav__menu-btn {
 
 .svc-hero__inner {
     display: block;
-}
-
-.svc-hero__label {
-    margin-bottom: 1.5rem;
 }
 
 .svc-hero__heading {
