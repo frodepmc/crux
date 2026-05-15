@@ -839,34 +839,44 @@ textarea:focus-visible {
 .panel-paths {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 0.5rem;
     margin-bottom: 1.2rem;
 }
 .panel-path {
     display: flex;
     align-items: center;
     gap: 0.9rem;
-    padding: 1rem 1.1rem;
+    padding: 0.95rem 1.1rem;
     text-decoration: none;
     color: var(--text);
-    background: rgba(255, 255, 255, 0.55);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--border-strong);
+    background: #fff;
     border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     position: relative;
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-                background 0.3s ease,
-                border-color 0.3s ease,
+    transition: rotate 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                translate 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                scale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
                 box-shadow 0.4s ease;
 }
+/* Idle float — alternating, subtle, like pack-mini */
+.panel-path:nth-child(1) { rotate: -1deg; animation: panelPathFloat 3.4s ease-in-out infinite; }
+.panel-path:nth-child(3) { rotate: 1deg;  animation: panelPathFloat 3s ease-in-out 0.5s infinite; }
+@keyframes panelPathFloat {
+    0%, 100% { translate: 0 0; }
+    50%      { translate: 0 -3px; }
+}
+.panel-paths:hover .panel-path {
+    animation-play-state: paused;
+    rotate: 0deg;
+}
 .panel-path:hover {
-    transform: translateY(-3px) translateX(2px);
-    border-left-color: var(--accent);
-    background: rgba(255, 255, 255, 0.8);
-    box-shadow: 0 8px 28px rgba(56, 105, 171, 0.1);
+    translate: 0 -6px;
+    scale: 1.02;
+    box-shadow: 0 14px 36px rgba(56, 105, 171, 0.18);
+    z-index: 2;
 }
 .panel-path:active {
-    transform: scale(0.98);
+    scale: 0.98;
     transition-duration: 0.1s;
 }
 .panel-path__num {
@@ -874,21 +884,21 @@ textarea:focus-visible {
     font-size: 0.6rem;
     font-weight: 600;
     letter-spacing: 0.14em;
-    color: #fff;
-    background: var(--accent);
-    width: 26px;
-    height: 26px;
+    color: var(--accent);
+    background: rgba(56, 105, 171, 0.08);
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    opacity: 0.7;
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: background 0.3s ease, color 0.3s ease, scale 0.3s ease;
 }
 .panel-path:hover .panel-path__num {
-    opacity: 1;
-    transform: scale(1.1);
+    background: var(--accent);
+    color: #fff;
+    scale: 1.08;
 }
 .panel-path__body {
     flex: 1;
@@ -914,15 +924,15 @@ textarea:focus-visible {
     font-family: var(--font-display);
     font-size: 1.2rem;
     font-weight: 300;
-    color: var(--accent);
-    opacity: 0;
-    transform: translateX(-8px);
-    transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    color: var(--text-muted);
+    opacity: 0.5;
+    transition: opacity 0.3s ease, color 0.3s ease, translate 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     flex-shrink: 0;
 }
 .panel-path:hover .panel-path__arrow {
     opacity: 1;
-    transform: translateX(4px);
+    color: var(--accent);
+    translate: 4px 0;
 }
 
 /* Divider between paths — diamond motif */
@@ -930,7 +940,6 @@ textarea:focus-visible {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem 0;
 }
 .panel-paths__line {
     flex: 1;
