@@ -979,24 +979,27 @@ select:focus-visible {
     }
 }
 
-/* Card flotante — triple-layer shadow + accent line gradient + inner top highlight */
+/* Card flotante real — 5-layer shadow + gradient bg + inset rim light */
 .adm-int {
     position: relative;
     display: flex;
     flex-direction: column;
     padding: clamp(2rem, 2.8vw, 2.6rem);
     border: none;
-    border-radius: 12px;
-    background: #FFFFFF;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #FFFFFF 0%, #FAFBFD 100%);
     color: var(--text);
     text-decoration: none;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03),
-                0 4px 12px rgba(0, 0, 0, 0.04),
-                0 8px 28px rgba(56, 105, 171, 0.06);
+    box-shadow:
+        0 0 0 1px rgba(56, 105, 171, 0.04),
+        0 2px 4px rgba(0, 0, 0, 0.03),
+        0 10px 28px rgba(0, 0, 0, 0.04),
+        0 28px 56px rgba(56, 105, 171, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.85);
     transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1),
                 box-shadow 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
     overflow: hidden;
-    min-height: 17rem;
+    min-height: 15rem;
     will-change: transform;
 }
 
@@ -1030,10 +1033,13 @@ select:focus-visible {
 }
 
 .adm-int:hover {
-    transform: translateY(-10px) scale(1.015);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04),
-                0 16px 40px rgba(0, 0, 0, 0.05),
-                0 32px 72px rgba(56, 105, 171, 0.18);
+    transform: translateY(-16px) scale(1.025);
+    box-shadow:
+        0 0 0 1px rgba(56, 105, 171, 0.10),
+        0 4px 8px rgba(0, 0, 0, 0.04),
+        0 20px 40px rgba(0, 0, 0, 0.05),
+        0 48px 96px rgba(56, 105, 171, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 
 .adm-int:hover::before {

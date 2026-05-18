@@ -323,10 +323,6 @@
 
         const html = liveOnly.map((item, i) => {
             const num = String(i + 1).padStart(2, '0');
-            const metaBits = (item.meta || [])
-                .filter((m) => m !== 'React inline')
-                .map((m) => `<span>${escapeHtml(m)}</span>`)
-                .join('');
 
             return `
                 <a href="${escapeAttr(item.path)}" class="adm-int">
@@ -335,7 +331,6 @@
                         <span class="adm-int__badge adm-int__badge--live">Live</span>
                     </div>
                     <h3 class="adm-int__title">${escapeHtml(item.name)}</h3>
-                    <div class="adm-int__meta">${metaBits}</div>
                     <div class="adm-int__cta">Entrar <span aria-hidden="true">\u2192</span></div>
                 </a>
             `;
