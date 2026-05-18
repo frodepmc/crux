@@ -1143,7 +1143,7 @@
       var totalConIVA = calcTotalConIVA(m.importe, ivaActual);
       var esGasto = m.tipo === "coste_dir" || m.tipo === "opex";
       var ivaDeducible = esIvaDeducible(m);
-      return React.createElement("div", { className: "crux-row", style: { display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 120px 130px 130px 36px", gap: 0, padding: "8px 18px", borderBottom: idx < total - 1 ? "1px solid " + C.border : "none", alignItems: "center" } },
+      return React.createElement("div", { className: "crux-row", style: { display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 120px 130px 130px 90px 36px", gap: 0, padding: "8px 18px", borderBottom: idx < total - 1 ? "1px solid " + C.border : "none", alignItems: "center" } },
         /* Fecha */
         React.createElement("input", {
           type: "date", value: m.fecha || "",
@@ -1440,7 +1440,7 @@
             <div style={{ overflowX: "auto" }}>
               <div style={{ minWidth: 1180 }}>
                 {/* Header */}
-                <div style={{ display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 120px 130px 130px 36px", gap: 0, padding: "12px 18px", borderBottom: "1px solid " + C.border, background: C.surfaceHover, fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 120px 130px 130px 90px 36px", gap: 0, padding: "12px 18px", borderBottom: "1px solid " + C.border, background: C.surfaceHover, fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 }}>
                   <span>Fecha</span>
                   <span>Tipo</span>
                   <span>Categoría</span>
@@ -1448,6 +1448,7 @@
                   <span>Cliente</span>
                   <span style={{ textAlign: "right" }}>Importe (base)</span>
                   <span style={{ textAlign: "center" }} title="Tipo de IVA + flag deducible (gastos)">IVA · Ded.</span>
+                  <span style={{ textAlign: "center" }} title="Retención IRPF (0 % = no aplica)">Ret.</span>
                   <span></span>
                 </div>
                 {/* Rows */}
@@ -1477,7 +1478,7 @@
                     if (filtroTipo !== "todos" && m.tipo !== filtroTipo) return s;
                     return s + calcIVA(m.importe, m.iva == null ? IVA_DEFAULT : m.iva);
                   }, 0);
-                  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 120px 130px 130px 36px", gap: 0, padding: "12px 18px", borderTop: "2px solid " + C.border, background: C.surfaceHover, alignItems: "center" } },
+                  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 120px 130px 130px 90px 36px", gap: 0, padding: "12px 18px", borderTop: "2px solid " + C.border, background: C.surfaceHover, alignItems: "center" } },
                     React.createElement("span", { style: { gridColumn: "1 / 6", fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 } },
                       "Total " + (vistaAnual ? "año " + selAnyo : MESES_NOMBRE[selMes] + " " + selAnyo) + " · " + (filtroTipo === "todos" ? "todos los tipos" : TIPO_LABEL[filtroTipo])
                     ),
