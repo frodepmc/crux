@@ -896,27 +896,33 @@ select:focus-visible {
 .adm-hub__sidemeta {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    align-items: flex-start;
-    padding: 1.1rem 1.2rem;
-    border: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.45);
+    gap: 0;
+    align-self: end;
+    padding: 0;
+    border: none;
+    background: transparent;
     font-family: var(--font-mono);
-    font-size: 0.62rem;
-    letter-spacing: 0.15em;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
     color: var(--text-muted);
+    min-width: 18rem;
 }
 
 .adm-hub__sidemeta-row {
     display: flex;
     justify-content: space-between;
-    gap: 1rem;
-    width: 100%;
+    gap: 1.5rem;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.adm-hub__sidemeta-row:last-child {
+    border-bottom: none;
 }
 
 .adm-hub__sidemeta-row b {
     color: var(--text);
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.08em;
 }
 
