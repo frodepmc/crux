@@ -1348,7 +1348,7 @@
         var p = parseFechaISO(today);
         var fecha = (p && p.year === selAnyo && p.month === selMes && !vistaAnual) ? today : (selAnyo + "-" + String(selMes + 1).padStart(2, "0") + "-15");
         if (vistaAnual) fecha = today;
-        var nuevo = { id: nuevoMovId(), fecha: fecha, tipo: tipo, categoria: (CATEGORIAS[tipo] && CATEGORIAS[tipo][0]) || "", concepto: "", importe: 0, cliente: "", iva: IVA_DEFAULT };
+        var nuevo = { id: nuevoMovId(), fecha: fecha, tipo: tipo, categoria: (CATEGORIAS[tipo] && CATEGORIAS[tipo][0]) || "", concepto: "", importe: 0, cliente: "", iva: IVA_DEFAULT, retencion: RETENCION_DEFAULT };
         if (tipo !== "ingreso") nuevo.ivaDeducible = true; /* gastos: deducible por defecto (asumimos factura formal) */
         setMovimientos(function(ms) { return [nuevo].concat(ms); });
       };
