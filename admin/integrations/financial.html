@@ -987,6 +987,29 @@
       return { repercutido: rep, soportado: sop, soportadoNoDeducible: sopNoDeducible, aLiquidar: rep - sop };
     }
 
+    /* Liquidación de retenciones IRPF por trimestre y año:
+       practicadas = sum(retención de costes_dir + opex con retencion > 0)
+                     — lo que CRUX retiene al pagar profesionales/alquileres.
+                     Se ingresa en Hacienda trimestralmente (mod. 111 / 115).
+       soportadas  = sum(retención de ingresos con retencion > 0)
+                     — lo que el cliente retiene a CRUX. Se recupera en la
+                     declaración anual del IS, NO compensa trimestralmente.
+       aIngresar   = practicadas (lo que realmente se paga al cierre de Q). */
+    function retencionTrimestre(movs, year, trimestre) {
+      var meses = mesesDeTrimestre(trimestre);
+      var practicadas = 0, soportadas = 0;
+      movs.forEach(function(m) {
+        var p = parseFechaISO(m.fecha);
+        if (!p || p.year !== year || meses.indexOf(p.month) === -1) return;
+        var tipoRet = m.retencion == null ? 0 : Number(m.retencion);
+        if (tipoRet <= 0) return;
+        var retMov = calcRetencion(m.importe, tipoRet);
+        if (m.tipo === "ingreso") soportadas += retMov;
+        else if (m.tipo === "coste_dir" || m.tipo === "opex") practicadas += retMov;
+      });
+      return { practicadas: practicadas, soportadas: soportadas, aIngresar: practicadas };
+    }
+
     /* Helpers: parsear fecha ISO + utilidades de derivación */
     function parseFechaISO(f) {
       if (!f || typeof f !== "string") return null;
