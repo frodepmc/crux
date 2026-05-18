@@ -949,6 +949,17 @@
     const IVA_DEFAULT = 21;
     function calcIVA(importe, tipo) { return Number(importe || 0) * Number(tipo || 0) / 100; }
     function calcTotalConIVA(importe, tipo) { return Number(importe || 0) + calcIVA(importe, tipo); }
+
+    /* Retenciones IRPF — tipos vigentes en España:
+       0 % (no aplica), 7 % (profesionales primeros 2 años), 15 % (profesionales),
+       19 % (alquileres, capital). Default 0 porque la mayoría de movimientos no
+       llevan retención. Se aplica tanto a ingresos (cliente nos retiene → soportada)
+       como a gastos a profesionales/alquileres (CRUX retiene → practicada).
+       Si el tipo es 0, no se computa en la liquidación. */
+    const TIPOS_RETENCION = [0, 7, 15, 19];
+    const RETENCION_DEFAULT = 0;
+    function calcRetencion(importe, tipo) { return Number(importe || 0) * Number(tipo || 0) / 100; }
+
     /* Trimestre (0-3) de un mes (0-11): T1=Ene-Mar, T2=Abr-Jun, T3=Jul-Sep, T4=Oct-Dic */
     function trimestreDeMes(mes) { return Math.floor(mes / 3); }
     function mesesDeTrimestre(t) { return [t * 3, t * 3 + 1, t * 3 + 2]; }
