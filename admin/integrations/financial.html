@@ -949,6 +949,17 @@
     const IVA_DEFAULT = 21;
     function calcIVA(importe, tipo) { return Number(importe || 0) * Number(tipo || 0) / 100; }
     function calcTotalConIVA(importe, tipo) { return Number(importe || 0) + calcIVA(importe, tipo); }
+
+    /* Retenciones IRPF — tipos vigentes en España:
+       0 % (no aplica), 7 % (profesionales primeros 2 años), 15 % (profesionales),
+       19 % (alquileres, capital). Default 0 porque la mayoría de movimientos no
+       llevan retención. Se aplica tanto a ingresos (cliente nos retiene → soportada)
+       como a gastos a profesionales/alquileres (CRUX retiene → practicada).
+       Si el tipo es 0, no se computa en la liquidación. */
+    const TIPOS_RETENCION = [0, 7, 15, 19];
+    const RETENCION_DEFAULT = 0;
+    function calcRetencion(importe, tipo) { return Number(importe || 0) * Number(tipo || 0) / 100; }
+
     /* Trimestre (0-3) de un mes (0-11): T1=Ene-Mar, T2=Abr-Jun, T3=Jul-Sep, T4=Oct-Dic */
     function trimestreDeMes(mes) { return Math.floor(mes / 3); }
     function mesesDeTrimestre(t) { return [t * 3, t * 3 + 1, t * 3 + 2]; }
@@ -974,6 +985,29 @@
         }
       });
       return { repercutido: rep, soportado: sop, soportadoNoDeducible: sopNoDeducible, aLiquidar: rep - sop };
+    }
+
+    /* Liquidación de retenciones IRPF por trimestre y año:
+       practicadas = sum(retención de costes_dir + opex con retencion > 0)
+                     — lo que CRUX retiene al pagar profesionales/alquileres.
+                     Se ingresa en Hacienda trimestralmente (mod. 111 / 115).
+       soportadas  = sum(retención de ingresos con retencion > 0)
+                     — lo que el cliente retiene a CRUX. Se recupera en la
+                     declaración anual del IS, NO compensa trimestralmente.
+       aIngresar   = practicadas (lo que realmente se paga al cierre de Q). */
+    function retencionTrimestre(movs, year, trimestre) {
+      var meses = mesesDeTrimestre(trimestre);
+      var practicadas = 0, soportadas = 0;
+      movs.forEach(function(m) {
+        var p = parseFechaISO(m.fecha);
+        if (!p || p.year !== year || meses.indexOf(p.month) === -1) return;
+        var tipoRet = m.retencion == null ? 0 : Number(m.retencion);
+        if (tipoRet <= 0) return;
+        var retMov = calcRetencion(m.importe, tipoRet);
+        if (m.tipo === "ingreso") soportadas += retMov;
+        else if (m.tipo === "coste_dir" || m.tipo === "opex") practicadas += retMov;
+      });
+      return { practicadas: practicadas, soportadas: soportadas, aIngresar: practicadas };
     }
 
     /* Helpers: parsear fecha ISO + utilidades de derivación */
@@ -1109,7 +1143,7 @@
       var totalConIVA = calcTotalConIVA(m.importe, ivaActual);
       var esGasto = m.tipo === "coste_dir" || m.tipo === "opex";
       var ivaDeducible = esIvaDeducible(m);
-      return React.createElement("div", { className: "crux-row", style: { display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 120px 130px 130px 36px", gap: 0, padding: "8px 18px", borderBottom: idx < total - 1 ? "1px solid " + C.border : "none", alignItems: "center" } },
+      return React.createElement("div", { className: "crux-row", style: { display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 120px 130px 130px 90px 36px", gap: 0, padding: "8px 18px", borderBottom: idx < total - 1 ? "1px solid " + C.border : "none", alignItems: "center" } },
         /* Fecha */
         React.createElement("input", {
           type: "date", value: m.fecha || "",
@@ -1227,6 +1261,31 @@
             ivaDeducible ? "DED" : "N/D"
           ) : React.createElement("span", { style: { fontSize: 9, color: C.textDim, fontWeight: 600, letterSpacing: 0.3, opacity: 0.5, paddingRight: 4 }, title: "El IVA repercutido siempre cuenta en la liquidación" }, "REP")
         ),
+        /* Retención — selector de tipo IRPF (0/7/15/19 %). Atenuado si tipo = 0. */
+        (function() {
+          var retencionActual = m.retencion == null ? 0 : Number(m.retencion);
+          var retOpts = TIPOS_RETENCION.map(function(v) { return { value: String(v), label: v + " %" }; });
+          return React.createElement("div", { style: { padding: "0 4px", display: "flex", justifyContent: "center", alignItems: "center" } },
+            React.createElement(SelectField, {
+              value: String(retencionActual),
+              onChange: function(v) { updateMov(m.id, "retencion", Number(v)); },
+              options: retOpts,
+              size: "xs",
+              ariaLabel: "Tipo de retención IRPF",
+              chevronColor: C.textDim,
+              style: {
+                background: "transparent",
+                borderColor: "transparent",
+                color: retencionActual > 0 ? C.textSec : C.textDim,
+                opacity: retencionActual > 0 ? 1 : 0.5,
+                fontWeight: 600,
+                fontSize: 10,
+                fontFamily: mono,
+                width: "100%",
+              }
+            })
+          );
+        })(),
         /* Delete — doble clic para confirmar (sin modal nativo) */
         React.createElement("button", {
           onClick: function() { if (armado) { removeMov(m.id); } else { setArmado(true); } },
@@ -1314,7 +1373,7 @@
         var p = parseFechaISO(today);
         var fecha = (p && p.year === selAnyo && p.month === selMes && !vistaAnual) ? today : (selAnyo + "-" + String(selMes + 1).padStart(2, "0") + "-15");
         if (vistaAnual) fecha = today;
-        var nuevo = { id: nuevoMovId(), fecha: fecha, tipo: tipo, categoria: (CATEGORIAS[tipo] && CATEGORIAS[tipo][0]) || "", concepto: "", importe: 0, cliente: "", iva: IVA_DEFAULT };
+        var nuevo = { id: nuevoMovId(), fecha: fecha, tipo: tipo, categoria: (CATEGORIAS[tipo] && CATEGORIAS[tipo][0]) || "", concepto: "", importe: 0, cliente: "", iva: IVA_DEFAULT, retencion: RETENCION_DEFAULT };
         if (tipo !== "ingreso") nuevo.ivaDeducible = true; /* gastos: deducible por defecto (asumimos factura formal) */
         setMovimientos(function(ms) { return [nuevo].concat(ms); });
       };
@@ -1404,9 +1463,9 @@
           {/* Tabla de movimientos */}
           <Card style={{ padding: 0, overflow: "hidden" }}>
             <div style={{ overflowX: "auto" }}>
-              <div style={{ minWidth: 1180 }}>
+              <div style={{ minWidth: 1270 }}>
                 {/* Header */}
-                <div style={{ display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 120px 130px 130px 36px", gap: 0, padding: "12px 18px", borderBottom: "1px solid " + C.border, background: C.surfaceHover, fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 120px 130px 130px 90px 36px", gap: 0, padding: "12px 18px", borderBottom: "1px solid " + C.border, background: C.surfaceHover, fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 }}>
                   <span>Fecha</span>
                   <span>Tipo</span>
                   <span>Categoría</span>
@@ -1414,6 +1473,7 @@
                   <span>Cliente</span>
                   <span style={{ textAlign: "right" }}>Importe (base)</span>
                   <span style={{ textAlign: "center" }} title="Tipo de IVA + flag deducible (gastos)">IVA · Ded.</span>
+                  <span style={{ textAlign: "center" }} title="Retención IRPF (0 % = no aplica)">Ret.</span>
                   <span></span>
                 </div>
                 {/* Rows */}
@@ -1443,7 +1503,11 @@
                     if (filtroTipo !== "todos" && m.tipo !== filtroTipo) return s;
                     return s + calcIVA(m.importe, m.iva == null ? IVA_DEFAULT : m.iva);
                   }, 0);
-                  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 120px 130px 130px 36px", gap: 0, padding: "12px 18px", borderTop: "2px solid " + C.border, background: C.surfaceHover, alignItems: "center" } },
+                  var totalRet = filtrados.reduce(function(s, m) {
+                    if (filtroTipo !== "todos" && m.tipo !== filtroTipo) return s;
+                    return s + calcRetencion(m.importe, m.retencion == null ? 0 : m.retencion);
+                  }, 0);
+                  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 120px 130px 130px 90px 36px", gap: 0, padding: "12px 18px", borderTop: "2px solid " + C.border, background: C.surfaceHover, alignItems: "center" } },
                     React.createElement("span", { style: { gridColumn: "1 / 6", fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 } },
                       "Total " + (vistaAnual ? "año " + selAnyo : MESES_NOMBRE[selMes] + " " + selAnyo) + " · " + (filtroTipo === "todos" ? "todos los tipos" : TIPO_LABEL[filtroTipo])
                     ),
@@ -1453,6 +1517,9 @@
                     ),
                     React.createElement("div", { style: { textAlign: "center" } },
                       totalIVA > 0 ? React.createElement("span", { title: "IVA del periodo (todos los tipos seleccionados)", style: { fontSize: 11, fontFamily: mono, color: C.textDim, fontWeight: 600 } }, "+" + fmt(Math.round(totalIVA))) : React.createElement("span", { style: { fontSize: 10, color: C.textDim } }, "—")
+                    ),
+                    React.createElement("div", { style: { textAlign: "center" } },
+                      totalRet > 0 ? React.createElement("span", { title: "Retención IRPF del periodo (todos los tipos seleccionados)", style: { fontSize: 11, fontFamily: mono, color: C.textDim, fontWeight: 600 } }, "−" + fmt(Math.round(totalRet))) : React.createElement("span", { style: { fontSize: 10, color: C.textDim } }, "—")
                     ),
                     React.createElement("span", null)
                   );
@@ -2435,6 +2502,55 @@
                 React.createElement("div", { style: { display: "flex", gap: 16, alignItems: "baseline" } },
                   React.createElement("span", { style: { fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.4, fontWeight: 700 } }, "Saldo anual:"),
                   React.createElement("span", { style: { fontSize: 14, fontFamily: mono, fontWeight: 700, color: totalAnual.liq > 0 ? C.amber : totalAnual.liq < 0 ? C.green : C.textDim } }, (totalAnual.liq > 0 ? "+" : "") + fmt(Math.round(totalAnual.liq)) + " €")
+                )
+              ) : null
+            );
+          })()}
+
+          {/* ── Retenciones IRPF trimestrales del año en curso ── */}
+          {(function(){
+            var trims = [0, 1, 2, 3].map(function(t) { return Object.assign({ q: t }, retencionTrimestre(movimientos, hoyAnyo, t)); });
+            var trimActual = trimestreDeMes(hoyMes);
+            var totalAnual = trims.reduce(function(a, t) { return { prac: a.prac + t.practicadas, sop: a.sop + t.soportadas, ing: a.ing + t.aIngresar }; }, { prac: 0, sop: 0, ing: 0 });
+            var hayDatos = totalAnual.prac > 0 || totalAnual.sop > 0;
+            return React.createElement(Card, { style: { marginBottom: 16 } },
+              React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 } },
+                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10 } },
+                  React.createElement(CardLabel, null, "Retenciones IRPF Trimestral " + hoyAnyo),
+                  React.createElement("span", { style: { fontSize: 8, color: C.accent, background: C.accentGlow, padding: "2px 6px", borderRadius: 3, fontWeight: 700, letterSpacing: 0.4 } }, "DERIVADO")
+                ),
+                React.createElement("span", { style: { fontSize: 11, color: C.textDim, fontStyle: "italic" } }, "Practicadas (mod. 111) y soportadas (declaración anual)")
+              ),
+              !hayDatos ? React.createElement("div", { style: { padding: "20px 0", textAlign: "center", fontSize: 11, color: C.textDim } }, "Sin movimientos con retención este año.") :
+              React.createElement("div", { className: "crux-grid-4", style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10 } },
+                trims.map(function(t) {
+                  var esActual = t.q === trimActual;
+                  var color = t.aIngresar > 0 ? C.amber : C.textDim;
+                  return React.createElement("div", { key: t.q, style: { background: esActual ? C.accentGlow : "rgba(255,255,255,0.02)", borderRadius: 8, padding: "14px 14px", borderLeft: "3px solid " + (esActual ? C.accent : C.border) } },
+                    React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 } },
+                      React.createElement("span", { style: { fontSize: 11, fontWeight: 700, color: esActual ? C.accent2 : C.textSec, letterSpacing: 0.4 } }, "Q" + (t.q + 1)),
+                      esActual ? React.createElement("span", { style: { fontSize: 8, color: C.accent, background: "rgba(56,105,171,0.18)", padding: "1px 6px", borderRadius: 3, fontWeight: 700, letterSpacing: 0.4 } }, "ACTUAL") : null
+                    ),
+                    React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "3px 0" } },
+                      React.createElement("span", { style: { fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.3 } }, "Practicadas"),
+                      React.createElement("span", { style: { fontSize: 11, fontFamily: mono, color: C.text } }, fmt(Math.round(t.practicadas)) + " €")
+                    ),
+                    t.soportadas > 0 ? React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "0 0 3px" }, title: "Retención que clientes nos practican al pagar — se recupera en la declaración anual del IS, no compensa trimestralmente" },
+                      React.createElement("span", { style: { fontSize: 8, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.3, fontStyle: "italic" } }, "Soportadas"),
+                      React.createElement("span", { style: { fontSize: 10, fontFamily: mono, color: C.textDim, fontStyle: "italic" } }, fmt(Math.round(t.soportadas)) + " €")
+                    ) : null,
+                    React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "8px 0 0", marginTop: 6, borderTop: "1px solid " + C.border } },
+                      React.createElement("span", { style: { fontSize: 9, fontWeight: 700, color: C.textSec, textTransform: "uppercase", letterSpacing: 0.3 } }, "A ingresar"),
+                      React.createElement("span", { style: { fontSize: 14, fontFamily: mono, fontWeight: 700, color: color } }, (t.aIngresar > 0 ? "+" : "") + fmt(Math.round(t.aIngresar)) + " €")
+                    )
+                  );
+                })
+              ),
+              hayDatos ? React.createElement("div", { style: { paddingTop: 12, borderTop: "1px solid " + C.border, marginTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center" } },
+                React.createElement("span", { style: { fontSize: 10, color: C.textDim, fontStyle: "italic" } }, "Modelo 111 — retenciones IRPF a profesionales/alquileres. Las soportadas se recuperan en la declaración anual."),
+                React.createElement("div", { style: { display: "flex", gap: 16, alignItems: "baseline" } },
+                  React.createElement("span", { style: { fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.4, fontWeight: 700 } }, "Saldo anual practicadas:"),
+                  React.createElement("span", { style: { fontSize: 14, fontFamily: mono, fontWeight: 700, color: totalAnual.prac > 0 ? C.amber : C.textDim } }, (totalAnual.prac > 0 ? "+" : "") + fmt(Math.round(totalAnual.prac)) + " €")
                 )
               ) : null
             );
