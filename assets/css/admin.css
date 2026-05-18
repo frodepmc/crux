@@ -996,7 +996,7 @@ select:focus-visible {
     transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1),
                 box-shadow 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
     overflow: hidden;
-    min-height: 26rem;
+    min-height: 17rem;
     will-change: transform;
 }
 
@@ -1117,12 +1117,13 @@ select:focus-visible {
 
 .adm-int__title {
     font-family: var(--font-display-hero);
-    font-weight: 600;
-    font-size: clamp(1.3rem, 1.7vw, 1.55rem);
+    font-weight: 700;
+    font-size: clamp(1.5rem, 2vw, 1.9rem);
     line-height: 1.15;
-    letter-spacing: -0.015em;
-    margin-bottom: 0.7rem;
+    letter-spacing: -0.02em;
+    margin: 0.5rem 0 1.4rem;
     color: var(--text);
+    flex: 1;
 }
 
 .adm-int__desc {
