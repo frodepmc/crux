@@ -35,10 +35,54 @@
     --gutter: clamp(1.5rem, 4vw, 4rem);
 }
 
-/* Hub-only overrides: fondo blanco puro + tipografía display Manrope */
+/* Hub-only overrides: ambient blue-tinted bg + starfield + display Manrope */
 body.adm-hub {
     --font-display-hero: 'Manrope', 'Inter', 'Helvetica Neue', sans-serif;
-    background: #FFFFFF;
+    --hub-bg-base: #F6F9FD;
+    --hub-bg-mid: #FAFBFD;
+    --hub-bg-top: #FCFDFE;
+    background-color: var(--hub-bg-mid);
+    background-image:
+        /* glow azul cielo arriba */
+        radial-gradient(ellipse 90% 55% at 50% -10%, rgba(120, 183, 238, 0.10) 0%, rgba(120, 183, 238, 0) 70%),
+        /* glow accent derecha */
+        radial-gradient(ellipse 50% 40% at 90% 20%, rgba(56, 105, 171, 0.06) 0%, rgba(56, 105, 171, 0) 60%),
+        /* base gradient vertical */
+        linear-gradient(180deg, var(--hub-bg-base) 0%, var(--hub-bg-mid) 45%, var(--hub-bg-top) 100%);
+    background-attachment: fixed;
+    background-size: cover;
+    background-repeat: no-repeat;
+    isolation: isolate;
+}
+
+/* Starfield — patrón de puntos azul muy diluido, ambient "Observatorio" */
+body.adm-hub::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(56, 105, 171, 0.07) 1px, transparent 0);
+    background-size: 28px 28px;
+    background-position: 0 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.45;
+}
+
+/* Sutil "fog" más cerca del top — sensación de profundidad */
+body.adm-hub::after {
+    content: '';
+    position: fixed;
+    inset: 0 0 auto 0;
+    height: 180px;
+    background: linear-gradient(180deg, rgba(244, 247, 251, 0.6) 0%, rgba(244, 247, 251, 0) 100%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Asegurar que el contenido va por encima del background */
+body.adm-hub > * {
+    position: relative;
+    z-index: 1;
 }
 
 html {
@@ -767,6 +811,14 @@ select:focus-visible {
     text-transform: uppercase;
 }
 
+/* Hub: topbar glass azul ligero */
+body.adm-hub .adm-topbar {
+    background: rgba(252, 253, 254, 0.72);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-bottom: 1px solid rgba(56, 105, 171, 0.08);
+}
+
 .adm-topbar__left,
 .adm-topbar__right {
     display: inline-flex;
@@ -855,6 +907,20 @@ select:focus-visible {
     margin: 0 auto;
     width: 100%;
     position: relative;
+}
+
+/* Hub hero: orbe de luz cielo detrás del título */
+body.adm-hub .adm-hub__hero::before {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: -3%;
+    width: 45%;
+    height: 90%;
+    background: radial-gradient(ellipse, rgba(120, 183, 238, 0.16) 0%, rgba(120, 183, 238, 0) 65%);
+    pointer-events: none;
+    z-index: -1;
+    filter: blur(50px);
 }
 
 .adm-hub__hero-grid {
@@ -987,15 +1053,15 @@ select:focus-visible {
     padding: clamp(2rem, 2.8vw, 2.6rem);
     border: none;
     border-radius: 14px;
-    background: linear-gradient(180deg, #FFFFFF 0%, #FAFBFD 100%);
+    background: linear-gradient(180deg, #FFFFFF 0%, #FCFDFE 100%);
     color: var(--text);
     text-decoration: none;
     box-shadow:
-        0 0 0 1px rgba(56, 105, 171, 0.04),
+        0 0 0 1px rgba(56, 105, 171, 0.05),
         0 2px 4px rgba(0, 0, 0, 0.03),
-        0 10px 28px rgba(0, 0, 0, 0.04),
-        0 28px 56px rgba(56, 105, 171, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.85);
+        0 12px 32px rgba(30, 58, 95, 0.06),
+        0 32px 64px rgba(56, 105, 171, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
     transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1),
                 box-shadow 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
     overflow: hidden;
@@ -1236,6 +1302,12 @@ select:focus-visible {
     color: var(--text-muted);
     text-transform: uppercase;
     background: rgba(255, 255, 255, 0.3);
+}
+
+/* Hub: footer transparente + border azul muy diluido */
+body.adm-hub .adm-footer {
+    background: transparent;
+    border-top: 1px solid rgba(56, 105, 171, 0.08);
 }
 
 .adm-footer b {
