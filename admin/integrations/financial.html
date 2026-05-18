@@ -1494,7 +1494,7 @@
                     removeMov: removeMov,
                   });
                 })}
-                {/* Footer con totales (base + IVA) */}
+                {/* Footer: Base · IVA · Ret · Líquido — celda líquida (base + IVA − ret) destacada */}
                 {filtrados.length > 0 && (function(){
                   var totalBase = (filtroTipo === "todos" || filtroTipo === "ingreso" ? totPeriodo.ingreso : 0)
                                 + (filtroTipo === "coste_dir" ? totPeriodo.coste_dir : 0)
@@ -1507,21 +1507,33 @@
                     if (filtroTipo !== "todos" && m.tipo !== filtroTipo) return s;
                     return s + calcRetencion(m.importe, m.retencion == null ? 0 : m.retencion);
                   }, 0);
-                  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 120px 130px 130px 90px 36px", gap: 0, padding: "12px 18px", borderTop: "2px solid " + C.border, background: C.surfaceHover, alignItems: "center" } },
-                    React.createElement("span", { style: { gridColumn: "1 / 6", fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 } },
-                      "Total " + (vistaAnual ? "año " + selAnyo : MESES_NOMBRE[selMes] + " " + selAnyo) + " · " + (filtroTipo === "todos" ? "todos los tipos" : TIPO_LABEL[filtroTipo])
+                  var totalLiquido = totalBase + totalIVA - totalRet;
+                  var periodoLabel = vistaAnual ? "año " + selAnyo : MESES_NOMBRE[selMes] + " " + selAnyo;
+                  var tipoLabel = filtroTipo === "todos" ? "todos los tipos" : TIPO_LABEL[filtroTipo];
+                  var miniLabel = function(text) {
+                    return React.createElement("span", { style: { fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.4, fontWeight: 700 } }, text);
+                  };
+                  var amountCell = function(label, value, opts) {
+                    opts = opts || {};
+                    return React.createElement("div", { style: { display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3 } },
+                      opts.labelColor ? React.createElement("span", { style: { fontSize: 9, color: opts.labelColor, textTransform: "uppercase", letterSpacing: 0.4, fontWeight: 700 } }, label) : miniLabel(label),
+                      React.createElement("span", { style: { fontSize: opts.big ? 15 : 13, fontFamily: mono, fontWeight: opts.big ? 700 : 600, color: opts.valueColor || (opts.dim ? C.textDim : C.text) } }, value)
+                    );
+                  };
+                  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 90px 100px 90px 110px", gap: 16, padding: "14px 18px", borderTop: "2px solid " + C.border, background: C.surfaceHover, alignItems: "end" } },
+                    /* Etiqueta de periodo — dos líneas */
+                    React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 2 } },
+                      React.createElement("span", { style: { fontSize: 12, fontWeight: 600, color: C.text, textTransform: "capitalize" } }, "Total " + periodoLabel),
+                      React.createElement("span", { style: { fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 } }, tipoLabel)
                     ),
-                    React.createElement("div", { style: { textAlign: "right" } },
-                      React.createElement("div", { style: { fontSize: 14, fontFamily: mono, fontWeight: 700, color: C.white } }, fmt(Math.round(totalBase)) + " €"),
-                      totalIVA > 0 ? React.createElement("div", { style: { fontSize: 9, fontFamily: mono, color: C.textDim, marginTop: 2 } }, fmt(Math.round(totalBase + totalIVA)) + " € c/IVA") : null
-                    ),
-                    React.createElement("div", { style: { textAlign: "center" } },
-                      totalIVA > 0 ? React.createElement("span", { title: "IVA del periodo (todos los tipos seleccionados)", style: { fontSize: 11, fontFamily: mono, color: C.textDim, fontWeight: 600 } }, "+" + fmt(Math.round(totalIVA))) : React.createElement("span", { style: { fontSize: 10, color: C.textDim } }, "—")
-                    ),
-                    React.createElement("div", { style: { textAlign: "center" } },
-                      totalRet > 0 ? React.createElement("span", { title: "Retención IRPF del periodo (todos los tipos seleccionados)", style: { fontSize: 11, fontFamily: mono, color: C.textDim, fontWeight: 600 } }, "−" + fmt(Math.round(totalRet))) : React.createElement("span", { style: { fontSize: 10, color: C.textDim } }, "—")
-                    ),
-                    React.createElement("span", null)
+                    /* BASE */
+                    amountCell("Base", fmt(Math.round(totalBase)) + " €"),
+                    /* IVA */
+                    amountCell("IVA", totalIVA > 0 ? "+" + fmt(Math.round(totalIVA)) + " €" : "—", { dim: totalIVA <= 0 }),
+                    /* RET */
+                    amountCell("Ret.", totalRet > 0 ? "−" + fmt(Math.round(totalRet)) + " €" : "—", { dim: totalRet <= 0 }),
+                    /* LÍQUIDO — destacado */
+                    amountCell("Líquido", fmt(Math.round(totalLiquido)) + " €", { big: true, labelColor: C.textSec, valueColor: C.white })
                   );
                 })()}
               </div>
