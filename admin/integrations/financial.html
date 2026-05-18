@@ -1503,6 +1503,10 @@
                     if (filtroTipo !== "todos" && m.tipo !== filtroTipo) return s;
                     return s + calcIVA(m.importe, m.iva == null ? IVA_DEFAULT : m.iva);
                   }, 0);
+                  var totalRet = filtrados.reduce(function(s, m) {
+                    if (filtroTipo !== "todos" && m.tipo !== filtroTipo) return s;
+                    return s + calcRetencion(m.importe, m.retencion == null ? 0 : m.retencion);
+                  }, 0);
                   return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "120px 110px 150px 1fr 120px 130px 130px 90px 36px", gap: 0, padding: "12px 18px", borderTop: "2px solid " + C.border, background: C.surfaceHover, alignItems: "center" } },
                     React.createElement("span", { style: { gridColumn: "1 / 6", fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700 } },
                       "Total " + (vistaAnual ? "año " + selAnyo : MESES_NOMBRE[selMes] + " " + selAnyo) + " · " + (filtroTipo === "todos" ? "todos los tipos" : TIPO_LABEL[filtroTipo])
@@ -1513,6 +1517,9 @@
                     ),
                     React.createElement("div", { style: { textAlign: "center" } },
                       totalIVA > 0 ? React.createElement("span", { title: "IVA del periodo (todos los tipos seleccionados)", style: { fontSize: 11, fontFamily: mono, color: C.textDim, fontWeight: 600 } }, "+" + fmt(Math.round(totalIVA))) : React.createElement("span", { style: { fontSize: 10, color: C.textDim } }, "—")
+                    ),
+                    React.createElement("div", { style: { textAlign: "center" } },
+                      totalRet > 0 ? React.createElement("span", { title: "Retención IRPF del periodo (todos los tipos seleccionados)", style: { fontSize: 11, fontFamily: mono, color: C.textDim, fontWeight: 600 } }, "−" + fmt(Math.round(totalRet))) : React.createElement("span", { style: { fontSize: 10, color: C.textDim } }, "—")
                     ),
                     React.createElement("span", null)
                   );
