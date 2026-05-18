@@ -2507,6 +2507,55 @@
             );
           })()}
 
+          {/* ── Retenciones IRPF trimestrales del año en curso ── */}
+          {(function(){
+            var trims = [0, 1, 2, 3].map(function(t) { return Object.assign({ q: t }, retencionTrimestre(movimientos, hoyAnyo, t)); });
+            var trimActual = trimestreDeMes(hoyMes);
+            var totalAnual = trims.reduce(function(a, t) { return { prac: a.prac + t.practicadas, sop: a.sop + t.soportadas, ing: a.ing + t.aIngresar }; }, { prac: 0, sop: 0, ing: 0 });
+            var hayDatos = totalAnual.prac > 0 || totalAnual.sop > 0;
+            return React.createElement(Card, { style: { marginBottom: 16 } },
+              React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 } },
+                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10 } },
+                  React.createElement(CardLabel, null, "Retenciones IRPF Trimestral " + hoyAnyo),
+                  React.createElement("span", { style: { fontSize: 8, color: C.accent, background: C.accentGlow, padding: "2px 6px", borderRadius: 3, fontWeight: 700, letterSpacing: 0.4 } }, "DERIVADO")
+                ),
+                React.createElement("span", { style: { fontSize: 11, color: C.textDim, fontStyle: "italic" } }, "Practicadas (mod. 111) y soportadas (declaración anual)")
+              ),
+              !hayDatos ? React.createElement("div", { style: { padding: "20px 0", textAlign: "center", fontSize: 11, color: C.textDim } }, "Sin movimientos con retención este año.") :
+              React.createElement("div", { className: "crux-grid-4", style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10 } },
+                trims.map(function(t) {
+                  var esActual = t.q === trimActual;
+                  var color = t.aIngresar > 0 ? C.amber : C.textDim;
+                  return React.createElement("div", { key: t.q, style: { background: esActual ? C.accentGlow : "rgba(255,255,255,0.02)", borderRadius: 8, padding: "14px 14px", borderLeft: "3px solid " + (esActual ? C.accent : C.border) } },
+                    React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 } },
+                      React.createElement("span", { style: { fontSize: 11, fontWeight: 700, color: esActual ? C.accent2 : C.textSec, letterSpacing: 0.4 } }, "Q" + (t.q + 1)),
+                      esActual ? React.createElement("span", { style: { fontSize: 8, color: C.accent, background: "rgba(56,105,171,0.18)", padding: "1px 6px", borderRadius: 3, fontWeight: 700, letterSpacing: 0.4 } }, "ACTUAL") : null
+                    ),
+                    React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "3px 0" } },
+                      React.createElement("span", { style: { fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.3 } }, "Practicadas"),
+                      React.createElement("span", { style: { fontSize: 11, fontFamily: mono, color: C.text } }, fmt(Math.round(t.practicadas)) + " €")
+                    ),
+                    t.soportadas > 0 ? React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "0 0 3px" }, title: "Retención que clientes nos practican al pagar — se recupera en la declaración anual del IS, no compensa trimestralmente" },
+                      React.createElement("span", { style: { fontSize: 8, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.3, fontStyle: "italic" } }, "Soportadas"),
+                      React.createElement("span", { style: { fontSize: 10, fontFamily: mono, color: C.textDim, fontStyle: "italic" } }, fmt(Math.round(t.soportadas)) + " €")
+                    ) : null,
+                    React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "8px 0 0", marginTop: 6, borderTop: "1px solid " + C.border } },
+                      React.createElement("span", { style: { fontSize: 9, fontWeight: 700, color: C.textSec, textTransform: "uppercase", letterSpacing: 0.3 } }, "A ingresar"),
+                      React.createElement("span", { style: { fontSize: 14, fontFamily: mono, fontWeight: 700, color: color } }, (t.aIngresar > 0 ? "+" : "") + fmt(Math.round(t.aIngresar)) + " €")
+                    )
+                  );
+                })
+              ),
+              hayDatos ? React.createElement("div", { style: { paddingTop: 12, borderTop: "1px solid " + C.border, marginTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center" } },
+                React.createElement("span", { style: { fontSize: 10, color: C.textDim, fontStyle: "italic" } }, "Modelo 111 — retenciones IRPF a profesionales/alquileres. Las soportadas se recuperan en la declaración anual."),
+                React.createElement("div", { style: { display: "flex", gap: 16, alignItems: "baseline" } },
+                  React.createElement("span", { style: { fontSize: 9, color: C.textDim, textTransform: "uppercase", letterSpacing: 0.4, fontWeight: 700 } }, "Saldo anual practicadas:"),
+                  React.createElement("span", { style: { fontSize: 14, fontFamily: mono, fontWeight: 700, color: totalAnual.prac > 0 ? C.amber : C.textDim } }, (totalAnual.prac > 0 ? "+" : "") + fmt(Math.round(totalAnual.prac)) + " €")
+                )
+              ) : null
+            );
+          })()}
+
           {/* ── Cuentas por Cobrar (estático, a día de hoy) ── */}
           <Card style={{ marginBottom: 16 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
