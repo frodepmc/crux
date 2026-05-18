@@ -1261,6 +1261,31 @@
             ivaDeducible ? "DED" : "N/D"
           ) : React.createElement("span", { style: { fontSize: 9, color: C.textDim, fontWeight: 600, letterSpacing: 0.3, opacity: 0.5, paddingRight: 4 }, title: "El IVA repercutido siempre cuenta en la liquidación" }, "REP")
         ),
+        /* Retención — selector de tipo IRPF (0/7/15/19 %). Atenuado si tipo = 0. */
+        (function() {
+          var retencionActual = m.retencion == null ? 0 : Number(m.retencion);
+          var retOpts = TIPOS_RETENCION.map(function(v) { return { value: String(v), label: v + " %" }; });
+          return React.createElement("div", { style: { padding: "0 4px", display: "flex", justifyContent: "center", alignItems: "center" } },
+            React.createElement(SelectField, {
+              value: String(retencionActual),
+              onChange: function(v) { updateMov(m.id, "retencion", Number(v)); },
+              options: retOpts,
+              size: "xs",
+              ariaLabel: "Tipo de retención IRPF",
+              chevronColor: C.textDim,
+              style: {
+                background: "transparent",
+                borderColor: "transparent",
+                color: retencionActual > 0 ? C.textSec : C.textDim,
+                opacity: retencionActual > 0 ? 1 : 0.5,
+                fontWeight: 600,
+                fontSize: 10,
+                fontFamily: mono,
+                width: "100%",
+              }
+            })
+          );
+        })(),
         /* Delete — doble clic para confirmar (sin modal nativo) */
         React.createElement("button", {
           onClick: function() { if (armado) { removeMov(m.id); } else { setArmado(true); } },
