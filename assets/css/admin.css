@@ -35,6 +35,12 @@
     --gutter: clamp(1.5rem, 4vw, 4rem);
 }
 
+/* Hub-only overrides: fondo blanco puro + tipografía display Manrope */
+body.adm-hub {
+    --font-display-hero: 'Manrope', 'Inter', 'Helvetica Neue', sans-serif;
+    background: #FFFFFF;
+}
+
 html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
