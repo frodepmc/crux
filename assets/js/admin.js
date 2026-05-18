@@ -279,7 +279,7 @@
             console.error('[hub] registry error:', err);
             const grid = document.getElementById('adm-integrations');
             if (grid) {
-                grid.innerHTML = `<div class="adm-int is-soon"><div class="adm-int__head"><span class="adm-int__num">ERR</span><span class="adm-int__badge">No cargado</span></div><h3 class="adm-int__title">Registro no disponible</h3><p class="adm-int__desc">No se pudo cargar <code>/admin/integrations.json</code>. Revisa consola.</p></div>`;
+                grid.innerHTML = `<div class="adm-int"><div class="adm-int__head"><span class="adm-int__num">ERR</span><span class="adm-int__badge">No cargado</span></div><h3 class="adm-int__title">Registro no disponible</h3><p class="adm-int__desc">No se pudo cargar <code>/admin/integrations.json</code>. Revisa consola.</p></div>`;
             }
         }
     }
