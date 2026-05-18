@@ -965,26 +965,37 @@ select:focus-visible {
 /* Integrations grid */
 .adm-integrations {
     padding: 0 var(--gutter) clamp(4rem, 9vh, 8rem);
-    max-width: 1500px;
+    max-width: 1100px;
     margin: 0 auto;
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: clamp(1rem, 1.8vw, 1.8rem);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(1.2rem, 2vw, 2rem);
+}
+
+@media (max-width: 720px) {
+    .adm-integrations {
+        grid-template-columns: 1fr;
+    }
 }
 
 .adm-int {
     position: relative;
     display: flex;
     flex-direction: column;
-    padding: clamp(1.6rem, 2.4vw, 2.2rem);
+    padding: clamp(1.8rem, 2.6vw, 2.4rem);
     border: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.55);
+    border-radius: 6px;
+    background: #FFFFFF;
     color: var(--text);
     text-decoration: none;
-    transition: transform 0.45s var(--ease-out), border-color 0.3s ease, box-shadow 0.4s ease, background 0.3s ease;
+    box-shadow: 0 8px 24px rgba(56, 105, 171, 0.06);
+    transition: transform 0.5s var(--ease-out),
+                border-color 0.3s ease,
+                box-shadow 0.5s var(--ease-out);
     overflow: hidden;
-    min-height: 22rem;
+    min-height: 24rem;
+    will-change: transform;
 }
 
 .adm-int::before {
@@ -993,39 +1004,20 @@ select:focus-visible {
     top: 0;
     left: 0;
     width: 90px;
-    height: 1px;
+    height: 2px;
     background: var(--accent);
     transition: width 0.5s var(--ease-out);
 }
 
 .adm-int:hover {
-    transform: translateY(-4px);
-    border-color: rgba(56, 105, 171, 0.35);
-    background: rgba(255, 255, 255, 0.78);
-    box-shadow: 0 28px 60px rgba(30, 58, 95, 0.08);
+    transform: translateY(-8px);
+    border-color: rgba(56, 105, 171, 0.28);
+    box-shadow: 0 24px 60px rgba(56, 105, 171, 0.12),
+                0 4px 12px rgba(56, 105, 171, 0.08);
 }
 
 .adm-int:hover::before {
-    width: 140px;
-}
-
-/* Disabled / "soon" state */
-.adm-int.is-soon {
-    cursor: not-allowed;
-    background: rgba(255, 255, 255, 0.28);
-    color: var(--text-muted);
-}
-
-.adm-int.is-soon::before {
-    background: var(--text-muted);
-    opacity: 0.4;
-}
-
-.adm-int.is-soon:hover {
-    transform: none;
-    border-color: var(--border);
-    box-shadow: none;
-    background: rgba(255, 255, 255, 0.32);
+    width: 160px;
 }
 
 .adm-int__head {
@@ -1077,12 +1069,6 @@ select:focus-visible {
     animation: pulseDot 2.4s ease-in-out infinite;
 }
 
-.adm-int__badge--soon {
-    color: var(--accent);
-    border-color: rgba(56, 105, 171, 0.3);
-    background: rgba(56, 105, 171, 0.05);
-}
-
 .adm-int__glyph {
     margin-bottom: 1.2rem;
     width: 58px;
@@ -1105,11 +1091,6 @@ select:focus-visible {
     stroke-width: 1.2;
 }
 
-.adm-int.is-soon .adm-int__glyph {
-    color: var(--text-muted);
-    background: rgba(0, 0, 0, 0.02);
-}
-
 .adm-int__title {
     font-family: var(--font-display);
     font-weight: 400;
@@ -1118,10 +1099,6 @@ select:focus-visible {
     letter-spacing: -0.02em;
     margin-bottom: 0.6rem;
     color: var(--text);
-}
-
-.adm-int.is-soon .adm-int__title {
-    color: var(--text-muted);
 }
 
 .adm-int__desc {
@@ -1174,10 +1151,6 @@ select:focus-visible {
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--accent);
-}
-
-.adm-int.is-soon .adm-int__cta {
-    color: var(--text-muted);
 }
 
 .adm-int__cta-arrow {
