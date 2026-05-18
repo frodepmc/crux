@@ -323,8 +323,10 @@
 
         const html = liveOnly.map((item, i) => {
             const num = String(i + 1).padStart(2, '0');
-            const glyph = GLYPHS[item.icon] || GLYPHS.layers;
-            const metaBits = (item.meta || []).map((m) => `<span>${escapeHtml(m)}</span>`).join('');
+            const metaBits = (item.meta || [])
+                .filter((m) => m !== 'React inline')
+                .map((m) => `<span>${escapeHtml(m)}</span>`)
+                .join('');
 
             return `
                 <a href="${escapeAttr(item.path)}" class="adm-int">
@@ -332,9 +334,7 @@
                         <span class="adm-int__num">${num}</span>
                         <span class="adm-int__badge adm-int__badge--live">Live</span>
                     </div>
-                    <div class="adm-int__glyph" aria-hidden="true">${glyph}</div>
                     <h3 class="adm-int__title">${escapeHtml(item.name)}</h3>
-                    <p class="adm-int__desc">${escapeHtml(item.description || '')}</p>
                     <div class="adm-int__meta">${metaBits}</div>
                     <div class="adm-int__cta">Entrar <span aria-hidden="true">\u2192</span></div>
                 </a>
