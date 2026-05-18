@@ -297,9 +297,11 @@
 
     function renderIntegrations(list, profile) {
         const grid = document.getElementById('adm-integrations');
+        const chapter = document.getElementById('adm-int-chapter');
         if (!grid) return;
         if (!Array.isArray(list) || list.length === 0) {
             grid.innerHTML = '<p class="adm-stage__sub">No hay integraciones registradas todavia.</p>';
+            if (chapter) chapter.textContent = 'Sin integraciones';
             return;
         }
 
@@ -307,39 +309,35 @@
         const hasAll = access.includes('*');
 
         const visible = list.filter((item) => hasAll || access.includes(item.id));
+        const liveOnly = visible.filter((item) => item.status === 'live');
 
-        if (visible.length === 0) {
-            grid.innerHTML = '<p class="adm-stage__sub">Tu cuenta no tiene integraciones asignadas. Habla con un admin.</p>';
+        if (liveOnly.length === 0) {
+            grid.innerHTML = '<p class="adm-stage__sub">Tu cuenta no tiene integraciones activas. Habla con un admin.</p>';
+            if (chapter) chapter.textContent = 'Sin integraciones activas';
             return;
         }
 
-        const html = visible.map((item, i) => {
+        if (chapter) {
+            chapter.textContent = 'Activas · ' + String(liveOnly.length).padStart(2, '0');
+        }
+
+        const html = liveOnly.map((item, i) => {
             const num = String(i + 1).padStart(2, '0');
             const glyph = GLYPHS[item.icon] || GLYPHS.layers;
-            const isLive = item.status === 'live';
-            const tag = isLive ? 'Entrar' : 'Proximamente';
-            const badgeClass = item.status === 'live'
-                ? 'adm-int__badge--live'
-                : (item.status === 'soon' ? 'adm-int__badge--soon' : '');
-            const badgeText = item.status === 'live' ? 'Live' : (item.status === 'soon' ? 'Soon' : 'Cerrado');
             const metaBits = (item.meta || []).map((m) => `<span>${escapeHtml(m)}</span>`).join('');
-            const wrapTag = isLive ? 'a' : 'div';
-            const wrapAttrs = isLive
-                ? `href="${escapeAttr(item.path)}" class="adm-int"`
-                : `class="adm-int is-soon" aria-disabled="true"`;
 
             return `
-                <${wrapTag} ${wrapAttrs}>
+                <a href="${escapeAttr(item.path)}" class="adm-int">
                     <div class="adm-int__head">
-                        <span class="adm-int__num mono">· ${num} ·</span>
-                        <span class="adm-int__badge ${badgeClass}">${badgeText}</span>
+                        <span class="adm-int__num">${num}</span>
+                        <span class="adm-int__badge adm-int__badge--live">Live</span>
                     </div>
                     <div class="adm-int__glyph" aria-hidden="true">${glyph}</div>
                     <h3 class="adm-int__title">${escapeHtml(item.name)}</h3>
                     <p class="adm-int__desc">${escapeHtml(item.description || '')}</p>
                     <div class="adm-int__meta">${metaBits}</div>
-                    <div class="adm-int__cta">${tag} <span aria-hidden="true">\u2192</span></div>
-                </${wrapTag}>
+                    <div class="adm-int__cta">Entrar <span aria-hidden="true">\u2192</span></div>
+                </a>
             `;
         }).join('');
 
