@@ -50,7 +50,28 @@
     opacity: 0.4;
 }
 .b-table tbody tr[data-drop-target="true"] {
-    border-top: 2px solid var(--accent);
+    position: relative;
+}
+.b-table tbody tr[data-drop-target="true"]::before,
+.b-table tbody tr[data-drop-target="true"]::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent);
+    pointer-events: none;
+    box-shadow: 0 0 0 1px var(--accent-soft);
+}
+.b-table tbody tr[data-drop-target="true"][data-drop-position="top"]::before {
+    top: -1px;
+}
+.b-table tbody tr[data-drop-target="true"][data-drop-position="bottom"]::after {
+    bottom: -1px;
+}
+.b-table tbody tr[data-drop-target="true"][data-drop-position="none"]::before,
+.b-table tbody tr[data-drop-target="true"][data-drop-position="none"]::after {
+    display: none;
 }
 
 .b-row-handle {
@@ -152,4 +173,27 @@
     padding: 1px 8px;
     border-radius: 12px;
     border: 1px solid var(--line-2);
+}
+
+/* ── Group drop zone (only visible while dragging) ──────────────────── */
+.b-group-drop-zone td {
+    padding: 6px var(--sp-4) !important;
+    background: var(--bg-card);
+    border-top: 1px dashed var(--line-3);
+}
+.b-group-drop-zone:hover td {
+    background: var(--accent-soft);
+    border-top-color: var(--accent);
+}
+.b-group-drop-zone span {
+    display: block;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--text-4);
+    letter-spacing: var(--letter-mono);
+    text-transform: uppercase;
+}
+.b-group-drop-zone:hover span {
+    color: var(--accent);
 }

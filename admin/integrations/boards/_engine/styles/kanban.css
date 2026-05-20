@@ -96,6 +96,31 @@
 .b-kanban-card[data-dragging="true"] {
     opacity: 0.4;
 }
+.b-kanban-card[data-drop-target="true"] {
+    position: relative;
+}
+.b-kanban-card[data-drop-target="true"]::before,
+.b-kanban-card[data-drop-target="true"]::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 2px;
+    pointer-events: none;
+    box-shadow: 0 0 0 2px var(--accent-soft);
+}
+.b-kanban-card[data-drop-target="true"][data-drop-position="top"]::before {
+    top: -5px;
+}
+.b-kanban-card[data-drop-target="true"][data-drop-position="bottom"]::after {
+    bottom: -5px;
+}
+.b-kanban-card[data-drop-target="true"][data-drop-position="none"]::before,
+.b-kanban-card[data-drop-target="true"][data-drop-position="none"]::after {
+    display: none;
+}
 
 .b-kanban-card-title {
     font-weight: var(--fw-semibold);

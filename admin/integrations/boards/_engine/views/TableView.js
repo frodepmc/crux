@@ -13,6 +13,7 @@ export function TableView({ store }) {
     const { meta, itemIndex, itemsById, team } = state;
     const [draggingId, setDraggingId] = useState(null);
     const [dropTargetId, setDropTargetId] = useState(null);
+    const [dropPosition, setDropPosition] = useState(null);
     const [collapsedGroups, setCollapsedGroups] = useState(new Set());
     function toggleGroup(gid) {
         setCollapsedGroups((prev) => {
@@ -82,11 +83,16 @@ export function TableView({ store }) {
     }
     function onDragOver(e, overItem) {
         e.preventDefault();
-        if (overItem.id !== draggingId) setDropTargetId(overItem.id);
+        if (overItem.id === draggingId) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        setDropTargetId(overItem.id);
+        setDropPosition(e.clientY < midY ? 'top' : 'bottom');
     }
     function onDragEnd() {
         setDraggingId(null);
         setDropTargetId(null);
+        setDropPosition(null);
     }
     async function onDrop(e, targetItem) {
         e.preventDefault();
@@ -94,8 +100,22 @@ export function TableView({ store }) {
         const targetEntry = itemIndex.find((x) => x.id === targetItem.id);
         if (!targetEntry) return onDragEnd();
         const sameGroup = itemIndex.filter((x) => x.groupId === targetEntry.groupId);
-        const targetIdx = sameGroup.findIndex((x) => x.id === targetItem.id);
+        let targetIdx = sameGroup.findIndex((x) => x.id === targetItem.id);
+        // If dropping on bottom half, insert AFTER target
+        if (dropPosition === 'bottom') targetIdx += 1;
+        // Si el dragging item está en el mismo grupo Y aparece antes del target,
+        // su retirada del array hace que el index baje. Ajustar.
+        const sourceIdx = sameGroup.findIndex((x) => x.id === draggingId);
+        if (sourceIdx !== -1 && sourceIdx < targetIdx) targetIdx -= 1;
         await store.reorderItem(draggingId, targetEntry.groupId, targetIdx);
+        onDragEnd();
+    }
+    async function onDropToGroup(e, groupId) {
+        e.preventDefault();
+        if (!draggingId) return onDragEnd();
+        // Inserta al final del grupo
+        const sameGroup = itemIndex.filter((x) => x.groupId === groupId && x.id !== draggingId);
+        await store.reorderItem(draggingId, groupId, sameGroup.length);
         onDragEnd();
     }
 
@@ -137,7 +157,6 @@ export function TableView({ store }) {
                 <tbody>
                     ${showGroups ? groups.map((g) => {
                         const gItems = itemsByGroupId[g.id] || [];
-                        if (gItems.length === 0) return null;
                         const collapsed = collapsedGroups.has(g.id);
                         return html`
                             <${GroupHeader}
@@ -157,12 +176,22 @@ export function TableView({ store }) {
                                     dragDisabled=${sortActive}
                                     isDragging=${item.id === draggingId}
                                     isDropTarget=${item.id === dropTargetId}
+                                    dropPosition=${item.id === dropTargetId ? dropPosition : null}
                                     onDragStart=${() => !sortActive && onDragStart(item)}
                                     onDragOver=${(e) => !sortActive && onDragOver(e, item)}
                                     onDragEnd=${onDragEnd}
                                     onDrop=${(e) => !sortActive && onDrop(e, item)}
                                     onClick=${() => store.openDrawer(item.id)} />
                             `) : null}
+                            ${draggingId && !collapsed ? html`
+                                <tr key=${'gdz-' + g.id} class="b-group-drop-zone"
+                                    onDragOver=${(e) => { e.preventDefault(); }}
+                                    onDrop=${(e) => onDropToGroup(e, g.id)}>
+                                    <td colspan=${columns.length + 2}>
+                                        <span>Soltar al final de ${g.name}</span>
+                                    </td>
+                                </tr>
+                            ` : null}
                         `;
                     }) : itemsInOrder.map(({ item }) => html`
                         <${TableRow}
@@ -174,6 +203,7 @@ export function TableView({ store }) {
                             dragDisabled=${sortActive}
                             isDragging=${item.id === draggingId}
                             isDropTarget=${item.id === dropTargetId}
+                            dropPosition=${item.id === dropTargetId ? dropPosition : null}
                             onDragStart=${() => !sortActive && onDragStart(item)}
                             onDragOver=${(e) => !sortActive && onDragOver(e, item)}
                             onDragEnd=${onDragEnd}
@@ -186,7 +216,7 @@ export function TableView({ store }) {
     `;
 }
 
-function TableRow({ item, columns, team, store, dragDisabled, isDragging, isDropTarget,
+function TableRow({ item, columns, team, store, dragDisabled, isDragging, isDropTarget, dropPosition,
                    onDragStart, onDragOver, onDragEnd, onDrop, onClick }) {
     const handleRef = useRef(null);
     const [draggable, setDraggable] = useState(false);
@@ -195,6 +225,7 @@ function TableRow({ item, columns, team, store, dragDisabled, isDragging, isDrop
         <tr data-item-id=${item.id}
             data-dragging=${isDragging ? 'true' : 'false'}
             data-drop-target=${isDropTarget ? 'true' : 'false'}
+            data-drop-position=${isDropTarget && dropPosition ? dropPosition : 'none'}
             draggable=${dragDisabled ? false : draggable}
             onDragStart=${onDragStart}
             onDragOver=${onDragOver}

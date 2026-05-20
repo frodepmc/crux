@@ -37,6 +37,8 @@ export function KanbanView({ store }) {
     const { meta, itemIndex, itemsById, team } = state;
     const [draggingId, setDraggingId] = useState(null);
     const [dropTargetKey, setDropTargetKey] = useState(null);
+    const [cardDropTargetId, setCardDropTargetId] = useState(null);
+    const [cardDropPosition, setCardDropPosition] = useState(null);
 
     if (!meta) return html`<div class="b-empty">Cargando…</div>`;
 
@@ -83,33 +85,88 @@ export function KanbanView({ store }) {
                         draggingId=${draggingId}
                         setDraggingId=${setDraggingId}
                         dropTargetKey=${dropTargetKey}
-                        setDropTargetKey=${setDropTargetKey} />
+                        setDropTargetKey=${setDropTargetKey}
+                        cardDropTargetId=${cardDropTargetId}
+                        setCardDropTargetId=${setCardDropTargetId}
+                        cardDropPosition=${cardDropPosition}
+                        setCardDropPosition=${setCardDropPosition}
+                        itemIndex=${itemIndex} />
                 `)}
             </div>
         </div>
     `;
 }
 
-function KanbanColumn({ col, meta, team, store, kanbanColumn, draggingId, setDraggingId, dropTargetKey, setDropTargetKey }) {
+function KanbanColumn({ col, meta, team, store, kanbanColumn, draggingId, setDraggingId, dropTargetKey, setDropTargetKey, cardDropTargetId, setCardDropTargetId, cardDropPosition, setCardDropPosition, itemIndex }) {
     const otherColumns = (meta.columns || [])
         .filter((c) => c.id !== kanbanColumn.id)
         .slice()
         .sort((a, b) => (a.order || 0) - (b.order || 0))
         .slice(0, 3);
 
-    function onDragOver(e) {
+    function onColDragOver(e) {
         e.preventDefault();
         if (draggingId && col.key !== NO_VALUE) setDropTargetKey(col.key);
     }
-    async function onDrop(e) {
+    async function onColDrop(e) {
         e.preventDefault();
         if (!draggingId || col.key === NO_VALUE) { setDropTargetKey(null); setDraggingId(null); return; }
         const item = store.getState().itemsById[draggingId];
         if (!item) return;
         const currentValue = item.cells?.[kanbanColumn.id];
+        // Drop on empty area of column → change status if needed, push to end
         if (currentValue !== col.key) {
             await store.updateCell(draggingId, kanbanColumn.id, col.key);
         }
+        setDropTargetKey(null);
+        setCardDropTargetId(null);
+        setCardDropPosition(null);
+        setDraggingId(null);
+    }
+
+    function onCardDragOver(e, hoverItem) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (hoverItem.id === draggingId) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        setCardDropTargetId(hoverItem.id);
+        setCardDropPosition(e.clientY < midY ? 'top' : 'bottom');
+        setDropTargetKey(col.key);
+    }
+
+    async function onCardDrop(e, hoverItem) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!draggingId || hoverItem.id === draggingId) {
+            setCardDropTargetId(null);
+            setCardDropPosition(null);
+            setDropTargetKey(null);
+            setDraggingId(null);
+            return;
+        }
+        const item = store.getState().itemsById[draggingId];
+        if (!item) return;
+        const currentStatus = item.cells?.[kanbanColumn.id];
+
+        // 1. Si el status cambia, primero actualizar status
+        if (currentStatus !== col.key) {
+            await store.updateCell(draggingId, kanbanColumn.id, col.key);
+        }
+
+        // 2. Reorder dentro del item-index global
+        const targetEntry = itemIndex.find((x) => x.id === hoverItem.id);
+        if (targetEntry) {
+            const sameGroup = itemIndex.filter((x) => x.groupId === targetEntry.groupId);
+            let targetIdx = sameGroup.findIndex((x) => x.id === hoverItem.id);
+            if (cardDropPosition === 'bottom') targetIdx += 1;
+            const sourceIdx = sameGroup.findIndex((x) => x.id === draggingId);
+            if (sourceIdx !== -1 && sourceIdx < targetIdx) targetIdx -= 1;
+            await store.reorderItem(draggingId, targetEntry.groupId, targetIdx);
+        }
+
+        setCardDropTargetId(null);
+        setCardDropPosition(null);
         setDropTargetKey(null);
         setDraggingId(null);
     }
@@ -117,8 +174,8 @@ function KanbanColumn({ col, meta, team, store, kanbanColumn, draggingId, setDra
     return html`
         <div class="b-kanban-col"
              data-drop-active=${col.key === dropTargetKey ? 'true' : 'false'}
-             onDragOver=${onDragOver}
-             onDrop=${onDrop}>
+             onDragOver=${onColDragOver}
+             onDrop=${onColDrop}>
             <div class="b-kanban-col-header">
                 <span class="b-kanban-col-chip" style=${{ background: col.color }} />
                 <span class="b-kanban-col-label">${col.label}</span>
@@ -135,8 +192,12 @@ function KanbanColumn({ col, meta, team, store, kanbanColumn, draggingId, setDra
                             team=${team}
                             store=${store}
                             isDragging=${item.id === draggingId}
+                            isDropTarget=${item.id === cardDropTargetId}
+                            dropPosition=${item.id === cardDropTargetId ? cardDropPosition : null}
                             onDragStart=${() => setDraggingId(item.id)}
-                            onDragEnd=${() => { setDraggingId(null); setDropTargetKey(null); }} />
+                            onDragOver=${(e) => onCardDragOver(e, item)}
+                            onDrop=${(e) => onCardDrop(e, item)}
+                            onDragEnd=${() => { setDraggingId(null); setDropTargetKey(null); setCardDropTargetId(null); setCardDropPosition(null); }} />
                     `)}
             </div>
             ${col.key !== NO_VALUE ? html`
@@ -161,14 +222,18 @@ function KanbanColumn({ col, meta, team, store, kanbanColumn, draggingId, setDra
     `;
 }
 
-function KanbanCard({ item, otherColumns, team, store, isDragging, onDragStart, onDragEnd }) {
+function KanbanCard({ item, otherColumns, team, store, isDragging, isDropTarget, dropPosition, onDragStart, onDragOver, onDragEnd, onDrop }) {
     const state = store.getState();
     return html`
         <div class="b-kanban-card"
              draggable="true"
              data-dragging=${isDragging ? 'true' : 'false'}
+             data-drop-target=${isDropTarget ? 'true' : 'false'}
+             data-drop-position=${isDropTarget && dropPosition ? dropPosition : 'none'}
              onDragStart=${onDragStart}
+             onDragOver=${onDragOver}
              onDragEnd=${onDragEnd}
+             onDrop=${onDrop}
              onClick=${() => store.openDrawer(item.id)}>
             <div class="b-kanban-card-title">${item.name}</div>
             <div class="b-kanban-card-meta">
