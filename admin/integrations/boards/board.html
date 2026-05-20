@@ -81,6 +81,9 @@
     await import('/admin/integrations/boards/_engine/columns/link.js');
     await import('/admin/integrations/boards/_engine/columns/email.js');
     await import('/admin/integrations/boards/_engine/columns/phone.js');
+    await import('/admin/integrations/boards/_engine/columns/checkbox.js');
+    await import('/admin/integrations/boards/_engine/columns/daterange.js');
+    await import('/admin/integrations/boards/_engine/columns/dependency.js');
 
     const { createStore } = await import('/admin/integrations/boards/_engine/store.js');
     const { App } = await import('/admin/integrations/boards/_engine/ui/App.js');
