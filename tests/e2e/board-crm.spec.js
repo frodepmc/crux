@@ -169,3 +169,53 @@ test('timeline view: bars and arrows render', async ({ page }) => {
     const hasEmpty = await page.locator('.b-tl-wrap .b-empty, .b-tl-empty').count();
     expect(hasBars + hasEmpty).toBeGreaterThan(0);
 });
+
+test('mobile viewport: table renders as vertical cards', async ({ page, browserName }, testInfo) => {
+    // Only run on mobile project (iPhone 13 device)
+    test.skip(!(testInfo.project.name || '').includes('mobile'), 'desktop-only project');
+
+    await page.goto('/admin');
+    await page.fill('input[name="username"]', USERNAME);
+    await page.fill('input[name="password"]', PASSWORD);
+    await page.click('button[type="submit"]');
+    await page.waitForURL(/\/admin\/hub/);
+    await page.goto(`/admin/integrations/boards/board.html?id=${BOARD_ID}`);
+
+    // Switch to Tabla
+    await page.locator('.b-view-btn', { hasText: 'Tabla' }).click();
+    // En móvil <768px, las filas se muestran como cards verticales (thead oculto)
+    const thead = page.locator('.b-table thead');
+    await expect(thead).toBeHidden();
+    // Items siguen siendo clicables
+    await expect(page.locator('.b-table tbody tr').first()).toBeVisible();
+});
+
+test('theme toggle: switches data-theme and persists', async ({ page }) => {
+    await page.goto('/admin');
+    await page.fill('input[name="username"]', USERNAME);
+    await page.fill('input[name="password"]', PASSWORD);
+    await page.click('button[type="submit"]');
+    await page.waitForURL(/\/admin\/hub/);
+    await page.goto(`/admin/integrations/boards/board.html?id=${BOARD_ID}`);
+
+    // Wait for hydrate
+    await expect(page.locator('.b-header-title')).toBeVisible();
+
+    // Get initial theme (default: dark)
+    const initial = await page.evaluate(() => document.documentElement.getAttribute('data-theme') || 'dark');
+
+    // Click toggle
+    await page.locator('.b-theme-toggle').click();
+    await page.waitForTimeout(200);
+    const next = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+    expect(next).not.toBe(initial);
+
+    // Wait for debounced persist
+    await page.waitForTimeout(700);
+
+    // Reload — theme should be restored
+    await page.reload();
+    await expect(page.locator('.b-header-title')).toBeVisible();
+    const restored = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+    expect(restored).toBe(next);
+});
