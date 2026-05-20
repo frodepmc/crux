@@ -132,6 +132,7 @@ function KanbanColumn({ col, meta, team, store, kanbanColumn, draggingId, setDra
 }
 
 function KanbanCard({ item, otherColumns, team, store, isDragging, onDragStart, onDragEnd }) {
+    const state = store.getState();
     return html`
         <div class="b-kanban-card"
              draggable="true"
@@ -149,7 +150,7 @@ function KanbanCard({ item, otherColumns, team, store, isDragging, onDragStart, 
                     return html`
                         <div key=${col.id} class="b-kanban-card-row">
                             <span class="b-kanban-card-label">${col.name}</span>
-                            ${ct.render(value, { column: col, team })}
+                            ${ct.render(value, { column: col, team, itemsById: state.itemsById })}
                         </div>
                     `;
                 })}

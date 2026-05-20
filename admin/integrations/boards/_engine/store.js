@@ -16,6 +16,7 @@ const initialState = {
     error: null,
     drawer: { open: false, itemId: null },
     toasts: [],              // [{ id, tone, text }]
+    commentsByItemId: {},    // { itemId: [{id, authorId, text, createdAt}] }
     pendingWrites: 0,
 };
 
@@ -152,6 +153,45 @@ export function createStore(boardId) {
         }
     }
 
+    // ── Comments ──────────────────────────────────────────────────────
+    async function loadComments(itemId) {
+        if (state.commentsByItemId[itemId] !== undefined) return state.commentsByItemId[itemId];
+        try {
+            const resp = await api.listComments(boardId, itemId);
+            setState({ commentsByItemId: { ...state.commentsByItemId, [itemId]: resp.comments || [] } });
+            return resp.comments || [];
+        } catch (err) {
+            pushToast('err', 'No se pudieron cargar comentarios: ' + (err.message || 'red'));
+            return [];
+        }
+    }
+
+    async function addComment(itemId, text) {
+        if (!text || !text.trim()) return null;
+        try {
+            const resp = await api.addComment(boardId, itemId, text);
+            const current = state.commentsByItemId[itemId] || [];
+            setState({ commentsByItemId: { ...state.commentsByItemId, [itemId]: [...current, resp.comment] } });
+            return resp.comment;
+        } catch (err) {
+            pushToast('err', 'No se pudo añadir comentario: ' + (err.message || 'red'));
+            return null;
+        }
+    }
+
+    async function removeComment(itemId, commentId) {
+        const current = state.commentsByItemId[itemId] || [];
+        const optimistic = current.filter((c) => c.id !== commentId);
+        setState({ commentsByItemId: { ...state.commentsByItemId, [itemId]: optimistic } });
+        try {
+            await api.deleteComment(boardId, itemId, commentId);
+        } catch (err) {
+            // Rollback
+            setState({ commentsByItemId: { ...state.commentsByItemId, [itemId]: current } });
+            pushToast('err', 'No se pudo borrar comentario: ' + (err.message || 'red'));
+        }
+    }
+
     // ── Drawer ────────────────────────────────────────────────────────
     function openDrawer(itemId) { setState({ drawer: { open: true, itemId } }); }
     function closeDrawer()      { setState({ drawer: { open: false, itemId: null } }); }
@@ -159,6 +199,7 @@ export function createStore(boardId) {
     return {
         getState, subscribe,
         hydrate, updateCell, reorderItem, createItem, deleteItemById,
+        loadComments, addComment, removeComment,
         openDrawer, closeDrawer,
         pushToast,
     };

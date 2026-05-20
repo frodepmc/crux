@@ -61,6 +61,7 @@ export function TableView({ store }) {
                             item=${item}
                             columns=${columns}
                             team=${team}
+                            store=${store}
                             isDragging=${item.id === draggingId}
                             isDropTarget=${item.id === dropTargetId}
                             onDragStart=${() => onDragStart(item)}
@@ -75,7 +76,7 @@ export function TableView({ store }) {
     `;
 }
 
-function TableRow({ item, columns, team, isDragging, isDropTarget,
+function TableRow({ item, columns, team, store, isDragging, isDropTarget,
                    onDragStart, onDragOver, onDragEnd, onDrop, onClick }) {
     const handleRef = useRef(null);
     const [draggable, setDraggable] = useState(false);
@@ -98,11 +99,59 @@ function TableRow({ item, columns, team, isDragging, isDropTarget,
                 <span ref=${handleRef} class="b-row-handle" aria-hidden="true">⋮⋮</span>
             </td>
             <td class="b-cell-name" data-label="Nombre">${item.name}</td>
-            ${columns.map((col) => {
-                const colType = getColumnType(col.type);
-                const value = item.cells?.[col.id];
-                return html`<td key=${col.id} data-label=${col.name}>${colType.render(value, { column: col, team })}</td>`;
-            })}
+            ${columns.map((col) => html`
+                <${InlineCell}
+                    key=${col.id}
+                    item=${item}
+                    column=${col}
+                    team=${team}
+                    store=${store} />
+            `)}
         </tr>
+    `;
+}
+
+function InlineCell({ item, column, team, store }) {
+    const [editing, setEditing] = useState(false);
+    const colType = getColumnType(column.type);
+    const value = item.cells?.[column.id];
+    const state = store.getState();
+
+    function onClickCell(e) {
+        // Status / tags / person / date / etc. — el click activa el editor;
+        // longtext y dependency siguen viviendo en el drawer (mejor UX para esos).
+        if (column.type === 'longtext' || column.type === 'dependency') return;
+        e.stopPropagation();
+        setEditing(true);
+    }
+
+    function onChange(v) {
+        store.updateCell(item.id, column.id, v);
+    }
+
+    function commit() {
+        setEditing(false);
+    }
+
+    if (editing) {
+        return html`
+            <td data-label=${column.name}
+                onBlur=${(e) => {
+                    // Cerrar editor si el blur sale del <td>
+                    if (!e.currentTarget.contains(e.relatedTarget)) commit();
+                }}
+                onKeyDown=${(e) => { if (e.key === 'Escape') commit(); }}
+                onClick=${(e) => e.stopPropagation()}>
+                ${colType.renderEditor(value, { column, team, itemsById: state.itemsById, item }, onChange)}
+            </td>
+        `;
+    }
+
+    return html`
+        <td data-label=${column.name}
+            onClick=${onClickCell}
+            style=${{ cursor: (column.type === 'longtext' || column.type === 'dependency') ? 'pointer' : 'cell' }}>
+            ${colType.render(value, { column, team, itemsById: state.itemsById })}
+        </td>
     `;
 }
