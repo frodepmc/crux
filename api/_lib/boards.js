@@ -113,6 +113,21 @@ async function patchUserPrefs(userId, patch) {
     return next;
 }
 
+async function deleteBoardCascade(boardId) {
+    if (!boardId) throw new Error('boardId required');
+    // 1. Listar todas las keys con prefijo de este board
+    const pattern = PREFIX + boardId + ':*';
+    const keys = await kv.keys(pattern);
+    if (keys.length > 0) await kv.del(...keys);
+
+    // 2. Quitar del index global
+    const ix = await getBoardsIndex();
+    const next = ix.filter((b) => b.id !== boardId);
+    await setBoardsIndex(next);
+
+    return { deletedKeys: keys.length };
+}
+
 module.exports = {
     PREFIX,
     K_INDEX,
@@ -134,4 +149,5 @@ module.exports = {
     deleteItem,
     getUserPrefs,
     patchUserPrefs,
+    deleteBoardCascade,
 };

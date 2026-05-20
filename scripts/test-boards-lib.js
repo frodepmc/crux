@@ -206,6 +206,22 @@ const boards = require(path.join(__dirname, '..', 'api', '_lib', 'boards.js'));
         check('patchUserPrefs preserves lastBoard after second patch', p2.lastBoard === 'b_crm');
     }
 
+    reset();
+
+    // Test: cascade borra meta + index + items + comments
+    {
+        await boards.setBoardsIndex([{ id: 'b_crm', name: 'CRM', visibility: 'team' }]);
+        await boards.setBoardMeta('b_crm', { columns: [], groups: [], views: {} });
+        await boards.setItemIndex('b_crm', [{ id: 'i_x', groupId: 'g', position: 0 }]);
+        await boards.setItem('b_crm', 'i_x', { id: 'i_x', name: 'X', cells: {}, version: 1 });
+
+        await boards.deleteBoardCascade('b_crm');
+
+        check('cascade removes meta', await boards.getBoardMeta('b_crm') === null);
+        check('cascade removes item-index', (await boards.getItemIndex('b_crm')).length === 0);
+        check('cascade removes items', await boards.getItem('b_crm', 'i_x') === null);
+    }
+
     // ─── (Tasks 4-9 añaden más tests aquí, antes del console.log) ──────────
 
     console.log(failures === 0 ? '\nAll tests passed ✓' : '\n' + failures + ' test(s) FAILED');
