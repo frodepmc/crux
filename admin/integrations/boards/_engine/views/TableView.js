@@ -6,6 +6,7 @@ import { useState, useRef } from 'react';
 import { useStore } from '../hooks.js';
 import { getColumnType } from '../columns/registry.js';
 import { applyFilters, applySort } from '../filters.js';
+import { Icon } from '../ui/Icon.js';
 
 export function TableView({ store }) {
     const state = useStore(store);
@@ -41,8 +42,8 @@ export function TableView({ store }) {
         }
     }
     function sortIndicator(columnId) {
-        if (prefs.sortBy !== columnId) return '';
-        return prefs.sortDir === 'asc' ? ' ↑' : ' ↓';
+        if (prefs.sortBy !== columnId) return null;
+        return html`<${Icon} name=${prefs.sortDir === 'asc' ? 'arrow-up' : 'arrow-down'} size=${12} strokeWidth=${2.4} style=${{ marginLeft: '4px' }} />`;
     }
 
     if (itemsInOrder.length === 0) {
@@ -82,13 +83,13 @@ export function TableView({ store }) {
                         <th style=${{ width: '24px' }}></th>
                         <th onClick=${() => toggleSort('__name__')}
                             style=${{ cursor: 'pointer' }}>
-                            Nombre${sortIndicator('__name__')}
+                            Nombre${' '}${sortIndicator('__name__')}
                         </th>
                         ${columns.map((c) => html`
                             <th key=${c.id}
                                 onClick=${() => toggleSort(c.id)}
                                 style=${{ cursor: 'pointer' }}>
-                                ${c.name}${sortIndicator(c.id)}
+                                ${c.name}${' '}${sortIndicator(c.id)}
                             </th>
                         `)}
                     </tr>
@@ -140,7 +141,9 @@ function TableRow({ item, columns, team, store, dragDisabled, isDragging, isDrop
                       class="b-row-handle"
                       data-disabled=${dragDisabled ? 'true' : 'false'}
                       title=${dragDisabled ? 'Quita el sort para reordenar' : 'Arrastra para reordenar'}
-                      aria-hidden="true">⋮⋮</span>
+                      aria-hidden="true">
+                    <${Icon} name="grip-vertical" size=${14} strokeWidth=${2.2} />
+                </span>
             </td>
             <td class="b-cell-name" data-label="Nombre">${item.name}</td>
             ${columns.map((col) => html`

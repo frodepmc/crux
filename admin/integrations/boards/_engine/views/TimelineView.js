@@ -5,6 +5,7 @@ import { html } from 'htm/react';
 import { useState, useRef } from 'react';
 import { useStore } from '../hooks.js';
 import { applyFilters } from '../filters.js';
+import { Icon } from '../ui/Icon.js';
 
 const LABEL_PX = 220;
 const ROW_PX = 52;
@@ -146,14 +147,21 @@ export function TimelineView({ store }) {
                     <span>·</span>
                     <span><strong>${arrows.length}</strong> dependencia${arrows.length === 1 ? '' : 's'}</span>
                     ${conflictCount > 0 ? html`
-                        <span class="b-tl-conflict">⚠ ${conflictCount} en conflicto</span>
+                        <span class="b-tl-conflict">
+                            <${Icon} name="alert-triangle" size=${13} strokeWidth=${2.2} />
+                            ${conflictCount} en conflicto
+                        </span>
                     ` : null}
                 </div>
                 <div class="b-tl-zoom">
                     <span>Zoom</span>
-                    <button class="b-tl-nav" onClick=${() => setDayPx(Math.max(12, dayPx - 8))} aria-label="Zoom out">−</button>
+                    <button class="b-tl-nav" onClick=${() => setDayPx(Math.max(12, dayPx - 8))} aria-label="Zoom out">
+                        <${Icon} name="minus" size=${13} strokeWidth=${2.4} />
+                    </button>
                     <span class="b-tl-zoom-value">${dayPx}px/día</span>
-                    <button class="b-tl-nav" onClick=${() => setDayPx(Math.min(64, dayPx + 8))} aria-label="Zoom in">+</button>
+                    <button class="b-tl-nav" onClick=${() => setDayPx(Math.min(64, dayPx + 8))} aria-label="Zoom in">
+                        <${Icon} name="plus" size=${13} strokeWidth=${2.4} />
+                    </button>
                 </div>
             </div>
 

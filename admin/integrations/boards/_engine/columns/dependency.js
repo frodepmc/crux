@@ -2,6 +2,7 @@
 // Dependency: array de itemIds del mismo board. Render como pills con nombres.
 import { html } from 'htm/react';
 import { register } from './registry.js';
+import { Icon } from '../ui/Icon.js';
 
 register({
     type: 'dependency',
@@ -22,7 +23,12 @@ register({
                             borderRadius: '10px',
                             fontSize: '10px',
                             fontWeight: 600,
-                        }}>→ ${label}</span>
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                        }}>
+                            <${Icon} name="arrow-right" size=${10} strokeWidth=${2.6} style=${{ marginRight: '4px' }} />
+                            ${label}
+                        </span>
                     `;
                 })}
             </div>
@@ -57,8 +63,11 @@ register({
                                 alignItems: 'center',
                                 gap: '4px',
                             }}>
-                                → ${label}
-                                <button onClick=${() => remove(id)} style=${{ color: 'inherit', padding: '0 2px', lineHeight: 1 }} aria-label="Quitar">×</button>
+                                <${Icon} name="arrow-right" size=${10} strokeWidth=${2.6} />
+                                ${label}
+                                <button onClick=${() => remove(id)} style=${{ color: 'inherit', padding: '0 2px', lineHeight: 1, display: 'inline-flex' }} aria-label="Quitar">
+                                    <${Icon} name="x" size=${10} strokeWidth=${2.6} />
+                                </button>
                             </span>
                         `;
                     })}

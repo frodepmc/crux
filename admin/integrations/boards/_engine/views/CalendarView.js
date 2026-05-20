@@ -7,6 +7,7 @@ import { html } from 'htm/react';
 import { useState } from 'react';
 import { useStore } from '../hooks.js';
 import { applyFilters } from '../filters.js';
+import { Icon } from '../ui/Icon.js';
 
 const DOW = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 const MONTHS = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -125,9 +126,13 @@ export function CalendarView({ store }) {
     return html`
         <div class="b-cal-wrap">
             <div class="b-cal-header">
-                <button class="b-cal-nav" onClick=${() => setCursor(addMonths(cursor, -1))} aria-label="Mes anterior">← Anterior</button>
+                <button class="b-cal-nav" onClick=${() => setCursor(addMonths(cursor, -1))} aria-label="Mes anterior">
+                    <${Icon} name="chevron-left" size=${14} strokeWidth=${2.2} />
+                </button>
                 <div class="b-cal-month">${MONTHS[cursor.getMonth()]} ${cursor.getFullYear()}</div>
-                <button class="b-cal-nav" onClick=${() => setCursor(addMonths(cursor, 1))} aria-label="Mes siguiente">Siguiente →</button>
+                <button class="b-cal-nav" onClick=${() => setCursor(addMonths(cursor, 1))} aria-label="Mes siguiente">
+                    <${Icon} name="chevron-right" size=${14} strokeWidth=${2.2} />
+                </button>
                 <button class="b-cal-nav" onClick=${() => setCursor(startOfMonth(new Date()))} style=${{ marginLeft: 'auto' }}>Hoy</button>
             </div>
 

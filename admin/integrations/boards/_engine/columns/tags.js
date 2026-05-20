@@ -3,6 +3,7 @@
 import { html } from 'htm/react';
 import { useState } from 'react';
 import { register } from './registry.js';
+import { Icon } from '../ui/Icon.js';
 
 function tagColor(tag, config) {
     const palette = config?.palette || ['#3869AB', '#5CB88A', '#D4A84A', '#D96B6B', '#9B5DE5'];
@@ -59,8 +60,10 @@ register({
                         }}>
                             ${t}
                             <button onClick=${() => remove(t)} style=${{
-                                color: 'inherit', padding: '0 2px', lineHeight: 1,
-                            }} aria-label="Quitar">×</button>
+                                color: 'inherit', padding: '0 2px', lineHeight: 1, display: 'inline-flex',
+                            }} aria-label="Quitar">
+                                <${Icon} name="x" size=${10} strokeWidth=${2.6} />
+                            </button>
                         </span>
                     `)}
                 </div>

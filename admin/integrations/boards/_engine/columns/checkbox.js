@@ -2,6 +2,7 @@
 // Boolean simple. Render como ✓/space.
 import { html } from 'htm/react';
 import { register } from './registry.js';
+import { Icon } from '../ui/Icon.js';
 
 register({
     type: 'checkbox',
@@ -17,7 +18,7 @@ register({
             color: '#fff',
             fontSize: '11px',
             fontWeight: 700,
-        }}>${value ? '✓' : ''}</span>
+        }}>${value ? html`<${Icon} name="check" size=${12} strokeWidth=${3} color="#fff" />` : ''}</span>
     `,
     renderEditor: (value, ctx, onChange) => html`
         <label style=${{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>

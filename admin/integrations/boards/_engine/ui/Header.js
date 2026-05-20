@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useStore } from '../hooks.js';
 import { defaultOpForType } from '../filters.js';
 import { getColumnType } from '../columns/registry.js';
+import { Icon } from './Icon.js';
 
 const VIEWS = [
     { id: 'table',    label: 'Tabla',    enabled: true },
@@ -50,7 +51,7 @@ export function Header({ store, currentView, setView }) {
                         onClick=${() => store.setTheme(theme === 'dark' ? 'light' : 'dark')}
                         title=${theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'}
                         aria-label="Cambiar tema">
-                    ${theme === 'dark' ? '☀' : '☾'}
+                    <${Icon} name=${theme === 'dark' ? 'sun' : 'moon'} size=${16} />
                 </button>
             </div>
 
@@ -70,7 +71,10 @@ export function Header({ store, currentView, setView }) {
                             });
                             if (item) store.openDrawer(item.id);
                         }}
-                        aria-label="Crear nuevo item">+ Nuevo</button>
+                        aria-label="Crear nuevo item">
+                    <${Icon} name="plus" size=${14} strokeWidth=${2.2} />
+                    Nuevo
+                </button>
 
                 <div class="b-filter-chips">
                     ${activeFilters.map((f) => html`
@@ -98,7 +102,9 @@ function FilterChip({ filter, meta, store }) {
             <span>${valueDisplay}</span>
             <button class="b-filter-chip-x"
                     onClick=${() => store.removeFilter(filter.columnId)}
-                    aria-label="Quitar filtro">×</button>
+                    aria-label="Quitar filtro">
+                <${Icon} name="x" size=${12} strokeWidth=${2.4} />
+            </button>
         </span>
     `;
 }
@@ -152,7 +158,10 @@ function AddFilterButton({ meta, store, activeFilters }) {
 
     return html`
         <span style=${{ position: 'relative' }} ref=${wrapRef}>
-            <button class="b-filter-add" onClick=${() => setOpen(!open)} aria-label="Añadir filtro">+ Filtro</button>
+            <button class="b-filter-add" onClick=${() => setOpen(!open)} aria-label="Añadir filtro">
+                <${Icon} name="filter" size=${12} strokeWidth=${2} />
+                Filtro
+            </button>
             ${open ? html`
                 <div class="b-filter-popover" role="dialog" aria-label="Añadir filtro">
                     ${!selectedCol ? html`
@@ -203,7 +212,9 @@ function FilterValuePicker({ col, store, onCommit, onBack }) {
 
     return html`
         <h4 style=${{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button onClick=${onBack} style=${{ color: 'var(--text-4)' }}>←</button>
+            <button onClick=${onBack} style=${{ color: 'var(--text-4)', display: 'inline-flex', alignItems: 'center' }}>
+                <${Icon} name="chevron-left" size=${14} />
+            </button>
             ${col.name}
         </h4>
 

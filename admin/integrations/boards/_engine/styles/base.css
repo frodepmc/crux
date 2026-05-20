@@ -176,6 +176,9 @@ a { color: var(--text-2); text-decoration: none; }
 }
 
 .b-filter-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     background: var(--bg-elevated);
     border: 1px dashed var(--line-2);
     border-radius: var(--r-1);
@@ -255,6 +258,9 @@ a { color: var(--text-2); text-decoration: none; }
 
 /* ── New item button ──────────────────────────────────────────────────── */
 .b-new-item-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     background: var(--accent);
     border: 1px solid var(--accent);
     border-radius: var(--r-1);

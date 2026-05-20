@@ -6,6 +6,7 @@ import { html } from 'htm/react';
 import { useEffect, useState } from 'react';
 import { useStore } from '../hooks.js';
 import { getColumnType } from '../columns/registry.js';
+import { Icon } from './Icon.js';
 
 export function ItemDrawer({ store }) {
     const state = useStore(store);
@@ -31,7 +32,7 @@ export function ItemDrawer({ store }) {
         <aside class="b-drawer" role="dialog" aria-label="Detalle item">
             <header style=${{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--sp-4)' }}>
                 <h2>${item.name}</h2>
-                <button onClick=${() => store.closeDrawer()} style=${{ color: 'var(--text-4)', padding: '4px 8px' }} aria-label="Cerrar">✕</button>
+                <button onClick=${() => store.closeDrawer()} style=${{ color: 'var(--text-4)', padding: '4px 8px' }} aria-label="Cerrar"><${Icon} name="x" size=${18} /></button>
             </header>
 
             <div style=${{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)' }}>
@@ -53,7 +54,10 @@ export function ItemDrawer({ store }) {
                 <div style=${{ marginTop: 'var(--sp-5)', borderTop: '1px solid var(--line-1)', paddingTop: 'var(--sp-3)' }}>
                     <button onClick=${() => {
                         if (confirm('¿Borrar este item?')) store.deleteItemById(item.id);
-                    }} style=${{ color: 'var(--err)', fontSize: '0.85rem' }}>Borrar item</button>
+                    }} style=${{ color: 'var(--err)', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <${Icon} name="trash" size=${14} />
+                        Borrar item
+                    </button>
                 </div>
             </div>
         </aside>
@@ -144,7 +148,9 @@ function CommentsSection({ store, item, comments }) {
                                 ${isMine ? html`
                                     <button onClick=${() => {
                                         if (confirm('¿Borrar comentario?')) store.removeComment(item.id, c.id);
-                                    }} style=${{ marginLeft: 'auto', color: 'var(--err)', fontSize: '0.7rem' }} aria-label="Borrar">borrar</button>
+                                    }} style=${{ marginLeft: 'auto', color: 'var(--err)', display: 'inline-flex', alignItems: 'center' }} aria-label="Borrar comentario">
+                                        <${Icon} name="trash" size=${12} />
+                                    </button>
                                 ` : null}
                             </div>
                             <div style=${{ color: 'var(--text-2)', fontSize: '0.85rem', whiteSpace: 'pre-wrap' }}>${c.text}</div>
@@ -168,7 +174,13 @@ function CommentsSection({ store, item, comments }) {
                         fontSize: '0.8rem',
                         fontWeight: 600,
                         opacity: (!draft.trim() || pending) ? 0.4 : 1,
-                    }}>${pending ? 'Enviando…' : 'Comentar'}</button>
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                    }}>
+                        <${Icon} name="send" size=${12} strokeWidth=${2.2} />
+                        ${pending ? 'Enviando…' : 'Comentar'}
+                    </button>
                 </div>
             </div>
         </div>
