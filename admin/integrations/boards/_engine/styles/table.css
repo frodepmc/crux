@@ -1,0 +1,102 @@
+/* admin/integrations/boards/_engine/styles/table.css */
+
+.b-table-wrap {
+    padding: var(--sp-4) var(--sp-5);
+}
+
+.b-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    background: var(--bg-elevated);
+    border-radius: var(--r-2);
+    overflow: hidden;
+    border: 1px solid var(--line-1);
+}
+.b-table thead tr {
+    background: var(--bg-card);
+    color: var(--text-5);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+}
+.b-table th {
+    padding: var(--sp-3) var(--sp-4);
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 1px solid var(--line-1);
+}
+.b-table td {
+    padding: var(--sp-3) var(--sp-4);
+    color: var(--text-3);
+    border-top: 1px solid var(--line-1);
+    vertical-align: middle;
+}
+.b-table tbody tr {
+    transition: background 120ms;
+}
+.b-table tbody tr:hover {
+    background: var(--bg-card-hover);
+    cursor: pointer;
+}
+.b-table tbody tr[data-dragging="true"] {
+    opacity: 0.4;
+}
+.b-table tbody tr[data-drop-target="true"] {
+    border-top: 2px solid var(--accent);
+}
+
+.b-row-handle {
+    cursor: grab;
+    color: var(--text-5);
+    opacity: 0;
+    transition: opacity 120ms;
+    user-select: none;
+    padding: 0 var(--sp-2);
+}
+.b-table tbody tr:hover .b-row-handle { opacity: 1; }
+.b-row-handle:active { cursor: grabbing; }
+
+.b-table td.b-cell-name {
+    font-weight: 600;
+    color: var(--text-1);
+}
+
+/* ── Empty state ─── */
+.b-empty {
+    text-align: center;
+    padding: var(--sp-6);
+    color: var(--text-5);
+    font-style: italic;
+}
+
+/* ── Responsive: card mode <768px (no DnD en móvil) ─── */
+@media (max-width: 768px) {
+    .b-table, .b-table thead, .b-table tbody, .b-table th, .b-table td, .b-table tr {
+        display: block;
+    }
+    .b-table thead { display: none; }
+    .b-table tr {
+        background: var(--bg-card);
+        border: 1px solid var(--line-1);
+        border-radius: var(--r-2);
+        margin-bottom: var(--sp-3);
+        padding: var(--sp-3);
+    }
+    .b-table td {
+        border: none;
+        padding: var(--sp-2) 0;
+    }
+    .b-table td::before {
+        content: attr(data-label);
+        display: block;
+        font-family: var(--font-mono);
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: var(--text-5);
+        margin-bottom: var(--sp-1);
+    }
+    .b-row-handle { display: none; }
+}
