@@ -40,6 +40,24 @@ export function createStore(boardId) {
         return state.prefs.filters?.[boardId] || { filters: [], search: '', sortBy: null, sortDir: 'asc' };
     }
 
+    function setTheme(theme) {
+        const next = (theme === 'light' || theme === 'dark') ? theme : 'dark';
+        setState({ prefs: { ...state.prefs, theme: next } });
+        // Apply to DOM
+        if (typeof document !== 'undefined') {
+            document.documentElement.setAttribute('data-theme', next);
+        }
+        // Persist (debounced via schedulePersist trick — but we want lastBoard too)
+        if (persistTimer) clearTimeout(persistTimer);
+        persistTimer = setTimeout(async () => {
+            try {
+                await api.patchUserPrefs({ theme: next, lastBoard: boardId });
+            } catch (err) {
+                console.warn('[boards] persist theme failed:', err.message);
+            }
+        }, 400);
+    }
+
     let persistTimer = null;
     function schedulePersist() {
         if (persistTimer) clearTimeout(persistTimer);
@@ -99,6 +117,10 @@ export function createStore(boardId) {
             ]);
             const summary = (list.boards || []).find((b) => b.id === boardId);
             if (!summary) throw new Error('Board not visible to user');
+            // M6: apply persisted theme on load
+            if (typeof document !== 'undefined' && prefs.prefs?.theme) {
+                document.documentElement.setAttribute('data-theme', prefs.prefs.theme);
+            }
             setState({
                 summary,
                 meta: meta.meta,
@@ -254,5 +276,6 @@ export function createStore(boardId) {
         openDrawer, closeDrawer,
         pushToast,
         getBoardPrefs, setSearch, setSort, clearSort, addFilter, removeFilter, clearFilters,
+        setTheme,
     };
 }

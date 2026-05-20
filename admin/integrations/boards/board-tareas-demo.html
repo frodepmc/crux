@@ -220,11 +220,17 @@
         setBoardPrefs({ filters: (current.filters || []).filter((f) => f.columnId !== columnId) });
       }
       function clearFilters() { setBoardPrefs({ filters: [] }); }
-      return { getState, subscribe, hydrate, updateCell, reorderItem, createItem, deleteItemById, loadComments, addComment, removeComment, openDrawer, closeDrawer, pushToast, getBoardPrefs, setSearch, setSort, clearSort, addFilter, removeFilter, clearFilters };
+      function setTheme(theme) {
+        const next = (theme === 'light' || theme === 'dark') ? theme : 'dark';
+        setState({ prefs: { ...state.prefs, theme: next } });
+        document.documentElement.setAttribute('data-theme', next);
+      }
+      return { getState, subscribe, hydrate, updateCell, reorderItem, createItem, deleteItemById, loadComments, addComment, removeComment, openDrawer, closeDrawer, pushToast, getBoardPrefs, setSearch, setSort, clearSort, addFilter, removeFilter, clearFilters, setTheme };
     }
 
     // Fake __cruxProfile so the comments delete button enables for demo author
     window.__cruxProfile = window.__cruxProfile || { username: 'pedro@cruxmallorca.es', name: 'Pedro', role: 'admin', color: '#3869AB', access: ['*'], isAdmin: true };
+    document.documentElement.setAttribute('data-theme', 'dark');
 
     const store = createDemoStore();
     createRoot(document.getElementById('root')).render(html`<${App} store=${store} />`);

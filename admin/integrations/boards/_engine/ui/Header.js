@@ -21,6 +21,7 @@ export function Header({ store, currentView, setView }) {
 
     const prefs = store.getBoardPrefs();
     const activeFilters = prefs.filters || [];
+    const theme = state.prefs?.theme || 'dark';
 
     return html`
         <header class="b-header" style=${{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: '8px' }}>
@@ -45,6 +46,12 @@ export function Header({ store, currentView, setView }) {
                         </button>
                     `)}
                 </div>
+                <button class="b-theme-toggle"
+                        onClick=${() => store.setTheme(theme === 'dark' ? 'light' : 'dark')}
+                        title=${theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'}
+                        aria-label="Cambiar tema">
+                    ${theme === 'dark' ? '☀' : '☾'}
+                </button>
             </div>
 
             <div class="b-header-search-row">

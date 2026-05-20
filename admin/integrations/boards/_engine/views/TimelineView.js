@@ -11,7 +11,6 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { useStore } from '../hooks.js';
 import { applyFilters } from '../filters.js';
 
-const DAY_PX = 28;  // ancho por día
 const LABEL_PX = 220;
 
 function ymdToDate(ymd) { if (!ymd) return null; const d = new Date(ymd + 'T00:00:00'); return Number.isNaN(d.getTime()) ? null : d; }
@@ -35,6 +34,7 @@ function findDependencyColumn(meta) {
 
 export function TimelineView({ store }) {
     const state = useStore(store);
+    const [dayPx, setDayPx] = useState(28);  // M6: zoom controlado por el usuario
     const { meta, itemIndex, itemsById } = state;
     const scrollerRef = useRef(null);
     const [scrollX, setScrollX] = useState(0);
@@ -75,7 +75,7 @@ export function TimelineView({ store }) {
     const startD = addDays(minDate, -3);
     const endD = addDays(maxDate, 3);
     const totalDays = diffDays(startD, endD) + 1;
-    const totalWidth = totalDays * DAY_PX + LABEL_PX;
+    const totalWidth = totalDays * dayPx + LABEL_PX;
 
     // Render ticks (uno por día; marcamos inicio de mes)
     const ticks = [];
@@ -112,15 +112,15 @@ export function TimelineView({ store }) {
     }
 
     function barLeft(r) {
-        return LABEL_PX + diffDays(startD, r.start) * DAY_PX;
+        return LABEL_PX + diffDays(startD, r.start) * dayPx;
     }
     function barWidth(r) {
-        return Math.max((diffDays(r.start, r.end) + 1) * DAY_PX, DAY_PX);
+        return Math.max((diffDays(r.start, r.end) + 1) * dayPx, dayPx);
     }
     function arrowPath(from, to) {
-        const x1 = LABEL_PX + (diffDays(startD, from.end) + 1) * DAY_PX;
+        const x1 = LABEL_PX + (diffDays(startD, from.end) + 1) * dayPx;
         const y1 = rowIndexById[from.item.id] * 44 + 22;  // mid-row
-        const x2 = LABEL_PX + diffDays(startD, to.start) * DAY_PX;
+        const x2 = LABEL_PX + diffDays(startD, to.start) * dayPx;
         const y2 = rowIndexById[to.item.id] * 44 + 22;
         const midX = (x1 + x2) / 2;
         return `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`;
@@ -129,13 +129,19 @@ export function TimelineView({ store }) {
     return html`
         <div class="b-tl-wrap">
             <div class="b-tl-header">
-                <div style=${{ fontSize: '0.85rem', color: 'var(--text-3)' }}>
+                <div style=${{ fontSize: '0.85rem', color: 'var(--text-3)', flex: 1 }}>
                     ${rangedItems.length} items con rango · ${arrows.length} dependencia${arrows.length === 1 ? '' : 's'}
                     ${arrows.filter((a) => a.conflict).length > 0 ? html`
                         <span style=${{ marginLeft: '12px', color: 'var(--warn)' }}>
                             ⚠ ${arrows.filter((a) => a.conflict).length} dependencia${arrows.filter((a) => a.conflict).length === 1 ? '' : 's'} en conflicto
                         </span>
                     ` : null}
+                </div>
+                <div style=${{ display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-5)' }}>
+                    <span style=${{ letterSpacing: '0.1em', textTransform: 'uppercase' }}>Zoom</span>
+                    <button class="b-tl-nav" onClick=${() => setDayPx(Math.max(12, dayPx - 8))} aria-label="Zoom out">−</button>
+                    <span style=${{ minWidth: '40px', textAlign: 'center', color: 'var(--text-3)' }}>${dayPx}px/día</span>
+                    <button class="b-tl-nav" onClick=${() => setDayPx(Math.min(64, dayPx + 8))} aria-label="Zoom in">+</button>
                 </div>
             </div>
 
@@ -146,7 +152,7 @@ export function TimelineView({ store }) {
                             <div key=${dateToYmd(t.d)}
                                  class="b-tl-axis-tick"
                                  data-month-start=${t.isMonthStart ? 'true' : 'false'}
-                                 style=${{ width: DAY_PX + 'px' }}>
+                                 style=${{ width: dayPx + 'px' }}>
                                 ${t.label}
                             </div>
                         `)}
