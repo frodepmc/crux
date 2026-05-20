@@ -54,19 +54,6 @@
     letter-spacing: 0;
 }
 
-.b-tl-nav {
-    background: var(--bg-elevated);
-    border: 1px solid var(--line-2);
-    border-radius: var(--r-1);
-    color: var(--text-2);
-    padding: 4px 10px;
-    font-size: var(--fs-sm);
-    font-family: var(--font-sans);
-    line-height: 1;
-    transition: border-color 120ms, color 120ms;
-}
-.b-tl-nav:hover { border-color: var(--accent); color: var(--text-1); }
-
 /* ── Scroller ────────────────────────────────────────────────────────── */
 .b-tl-scroller {
     flex: 1 1 auto;

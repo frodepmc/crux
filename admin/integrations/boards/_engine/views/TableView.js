@@ -63,7 +63,7 @@ export function TableView({ store }) {
                     <${Icon} name="search" size=${28} strokeWidth=${1.5} style=${{ marginBottom: '12px', opacity: 0.5 }} />
                     <div class="b-empty-title">Sin coincidencias</div>
                     <div class="b-empty-sub">Ningún item pasa los filtros actuales.</div>
-                    <button onClick=${() => { store.clearFilters(); store.setSearch(''); }} class="b-empty-action">
+                    <button class="b-btn b-btn-primary" onClick=${() => { store.clearFilters(); store.setSearch(''); }}>
                         Limpiar filtros y búsqueda
                     </button>
                 </div>

@@ -201,7 +201,7 @@ function KanbanColumn({ col, meta, team, store, kanbanColumn, draggingId, setDra
                     `)}
             </div>
             ${col.key !== NO_VALUE ? html`
-                <button class="b-kanban-add-card"
+                <button class="b-btn b-btn-dashed b-btn-sm b-kanban-add-card"
                         onClick=${async () => {
                             const t = store.getState().summary?.type;
                             const seedName = t === 'crm' ? 'Lead sin título' : t === 'tasks' ? 'Tarea sin título' : 'Item sin título';

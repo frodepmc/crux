@@ -170,23 +170,5 @@
 /* ── Add card button ─────────────────────────────────────────────────── */
 .b-kanban-add-card {
     margin: var(--sp-2);
-    padding: 8px 12px;
-    background: transparent;
-    border: 1px dashed var(--line-2);
-    border-radius: var(--r-1);
-    color: var(--text-4);
-    font-size: var(--fs-sm);
-    font-weight: var(--fw-medium);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    cursor: pointer;
-    transition: border-color 120ms, color 120ms, background 120ms;
     width: calc(100% - var(--sp-3) - var(--sp-3));
-}
-.b-kanban-add-card:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
 }

@@ -45,7 +45,7 @@ export function ItemDrawer({ store }) {
         <aside class="b-drawer" role="dialog" aria-label="Detalle item">
             <header class="b-drawer-header">
                 <h2>${item.name}</h2>
-                <button class="b-drawer-close" onClick=${() => store.closeDrawer()} aria-label="Cerrar">
+                <button class="b-btn b-btn-ghost b-btn-icon" onClick=${() => store.closeDrawer()} aria-label="Cerrar">
                     <${Icon} name="x" size=${18} />
                 </button>
             </header>
@@ -67,9 +67,7 @@ export function ItemDrawer({ store }) {
                 <${CommentsSection} store=${store} item=${item} comments=${comments || []} />
 
                 <div style=${{ marginTop: 'var(--sp-5)', borderTop: '1px solid var(--line-1)', paddingTop: 'var(--sp-3)' }}>
-                    <button onClick=${() => {
-                        if (confirm('¿Borrar este item?')) store.deleteItemById(item.id);
-                    }} style=${{ color: 'var(--err)', fontSize: 'var(--fs-md)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <button class="b-btn b-btn-danger b-btn-sm" onClick=${() => { if (confirm('¿Borrar este item?')) store.deleteItemById(item.id); }}>
                         <${Icon} name="trash" size=${14} />
                         Borrar item
                     </button>
@@ -174,9 +172,9 @@ function CommentsSection({ store, item, comments }) {
                                 <strong style=${{ color: 'var(--text-2)' }}>${c.authorId}</strong>
                                 <span style=${{ fontFamily: 'var(--font-mono)' }}>${fmtDate(c.createdAt)}</span>
                                 ${canDelete ? html`
-                                    <button onClick=${() => {
+                                    <button class="b-btn b-btn-ghost b-btn-icon b-btn-sm" onClick=${() => {
                                         if (confirm('¿Borrar comentario?')) store.removeComment(item.id, c.id);
-                                    }} style=${{ marginLeft: 'auto', color: 'var(--err)', display: 'inline-flex', alignItems: 'center' }} aria-label="Borrar comentario" title=${isMine ? 'Borrar mi comentario' : 'Borrar comentario (admin)'}>
+                                    }} style=${{ marginLeft: 'auto', color: 'var(--err)' }} aria-label="Borrar comentario" title=${isMine ? 'Borrar mi comentario' : 'Borrar comentario (admin)'}>
                                         <${Icon} name="trash" size=${12} />
                                     </button>
                                 ` : null}
@@ -194,19 +192,8 @@ function CommentsSection({ store, item, comments }) {
                           placeholder="Escribe un comentario…"
                           aria-label="Nuevo comentario" />
                 <div style=${{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <button onClick=${send} disabled=${!draft.trim() || pending} style=${{
-                        background: 'var(--accent)',
-                        color: '#fff',
-                        padding: 'var(--sp-2) var(--sp-3)',
-                        borderRadius: 'var(--r-1)',
-                        fontSize: 'var(--fs-sm)',
-                        fontWeight: 'var(--fw-semibold)',
-                        opacity: (!draft.trim() || pending) ? 0.4 : 1,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                    }}>
-                        <${Icon} name="send" size=${12} strokeWidth=${2.2} />
+                    <button class="b-btn b-btn-primary b-btn-sm" onClick=${send} disabled=${!draft.trim() || pending}>
+                        <${Icon} name="send" size=${12} strokeWidth=${2.4} />
                         ${pending ? 'Enviando…' : 'Comentar'}
                     </button>
                 </div>

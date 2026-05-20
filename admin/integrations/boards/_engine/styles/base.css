@@ -58,29 +58,6 @@ a { color: var(--text-2); text-decoration: none; }
     border-radius: var(--r-1);
     overflow: hidden;
 }
-.b-view-btn {
-    padding: 8px 14px;
-    font-size: var(--fs-sm);
-    font-weight: var(--fw-medium);
-    color: var(--text-3);
-    transition: background 160ms, color 160ms;
-    min-height: 36px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    position: relative;
-}
-.b-view-btn:disabled {
-    color: var(--text-5);
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-.b-view-btn:hover { background: var(--bg-card-hover); color: var(--text-2); }
-.b-view-btn[aria-current="true"] {
-    background: var(--accent-soft);
-    color: var(--accent);
-    font-weight: var(--fw-semibold);
-}
 .b-main {
     flex: 1 1 auto;
     overflow: auto;
@@ -124,24 +101,6 @@ a { color: var(--text-2); text-decoration: none; }
     align-items: flex-start;
     gap: var(--sp-3);
     background: var(--bg-elevated);
-}
-.b-drawer-close {
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: var(--r-1);
-    color: var(--text-4);
-    width: 32px;
-    height: 32px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: background 120ms, color 120ms, border-color 120ms;
-}
-.b-drawer-close:hover {
-    background: var(--bg-card-hover);
-    color: var(--text-1);
-    border-color: var(--line-2);
 }
 .b-drawer-body {
     flex: 1 1 auto;
@@ -260,23 +219,6 @@ a { color: var(--text-2); text-decoration: none; }
 }
 .b-filter-chip-x:hover { color: var(--err); background: rgba(217,107,107,0.12); }
 
-.b-filter-add {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: transparent;
-    border: 1px dashed var(--line-2);
-    border-radius: var(--r-1);
-    color: var(--text-4);
-    padding: 5px 12px;
-    font-size: var(--fs-sm);
-    font-family: var(--font-sans);
-    font-weight: var(--fw-medium);
-    min-height: 28px;
-    transition: border-color 120ms, color 120ms;
-}
-.b-filter-add:hover { border-color: var(--accent); color: var(--accent); }
-
 .b-filter-popover {
     position: absolute;
     top: 100%;
@@ -329,59 +271,6 @@ a { color: var(--text-2); text-decoration: none; }
 }
 .b-filter-popover .b-input:focus { outline: none; border-color: var(--accent); }
 
-.b-clear-all {
-    background: transparent;
-    color: var(--text-5);
-    font-size: var(--fs-xs);
-    font-family: var(--font-mono);
-    text-transform: uppercase;
-    letter-spacing: var(--letter-label);
-    padding: 4px 8px;
-}
-.b-clear-all:hover { color: var(--err); }
-
-/* ── New item button ──────────────────────────────────────────────────── */
-.b-new-item-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--accent);
-    border: 1px solid var(--accent);
-    border-radius: var(--r-1);
-    color: #fff;
-    padding: 9px 16px;
-    font-size: var(--fs-sm);
-    font-weight: var(--fw-semibold);
-    letter-spacing: 0.01em;
-    cursor: pointer;
-    flex-shrink: 0;
-    min-height: 36px;
-    transition: filter 120ms, box-shadow 120ms;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.12);
-}
-.b-new-item-btn:hover { filter: brightness(1.08); box-shadow: 0 2px 6px rgba(0,0,0,0.18); }
-
-/* ── M6: Theme toggle ─────────────────────────────────────────────────── */
-.b-theme-toggle {
-    background: var(--bg-elevated);
-    border: 1px solid var(--line-2);
-    border-radius: var(--r-1);
-    color: var(--text-3);
-    width: 36px;
-    height: 36px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: border-color 120ms, color 120ms, background 120ms;
-}
-.b-theme-toggle:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-}
-
 /* ── Empty state ─────────────────────────────────────────────────────── */
 .b-empty {
     display: flex;
@@ -416,19 +305,6 @@ a { color: var(--text-2); text-decoration: none; }
     max-width: 360px;
     line-height: var(--lh-normal);
 }
-.b-empty-action {
-    margin-top: var(--sp-4);
-    background: var(--accent);
-    color: #fff;
-    padding: 8px 16px;
-    border-radius: var(--r-1);
-    font-size: var(--fs-sm);
-    font-weight: var(--fw-semibold);
-    cursor: pointer;
-    transition: filter 120ms;
-}
-.b-empty-action:hover { filter: brightness(1.08); }
-
 /* ── Spinner ─────────────────────────────────────────────────────────── */
 .b-spinner {
     width: 28px;
@@ -497,4 +373,255 @@ input[type="checkbox"] {
     width: 16px;
     height: 16px;
     cursor: pointer;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   BUTTON SYSTEM (b-btn)
+   ════════════════════════════════════════════════════════════════════
+
+   Sizes:
+     .b-btn-sm    → 28px height, 6px 10px padding, fs-xs
+     (default)    → 36px height, 8px 14px padding, fs-sm
+     .b-btn-lg    → 44px height, 11px 18px padding, fs-md
+
+   Variants:
+     .b-btn-primary    → fondo accent, texto blanco, sombra sutil
+     .b-btn-secondary  → fondo bg-elevated, borde, hover refinado (default)
+     .b-btn-ghost      → transparente, hover sutil
+     .b-btn-danger     → como secondary pero accent err
+     .b-btn-dashed     → borde dashed (para "+ add" actions)
+
+   Modifiers:
+     .b-btn-icon       → cuadrado (width = height), padding ajustado
+     [aria-current]    → estado activo (para tabs)
+     [disabled]        → estado deshabilitado
+*/
+
+.b-btn {
+    /* Base */
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--bg-elevated);
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-1);
+    color: var(--text-2);
+    font-family: var(--font-sans);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    line-height: 1;
+    letter-spacing: 0;
+
+    /* Size: medium (default) */
+    min-height: 36px;
+    padding: 8px 14px;
+
+    /* Layout */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    flex-shrink: 0;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    text-decoration: none;
+
+    /* Motion */
+    transition:
+        background-color 140ms ease,
+        border-color 140ms ease,
+        color 140ms ease,
+        box-shadow 140ms ease,
+        transform 80ms ease,
+        opacity 140ms ease;
+
+    /* Subtle depth (inset highlight + outer shadow) */
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.04) inset,
+        0 1px 2px rgba(0,0,0,0.08);
+}
+[data-theme="light"] .b-btn {
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.7) inset,
+        0 1px 2px rgba(0,0,0,0.06);
+}
+
+.b-btn:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--line-3);
+    color: var(--text-1);
+}
+.b-btn:active:not(:disabled):not([aria-disabled="true"]) {
+    transform: translateY(0.5px);
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.02) inset,
+        0 1px 1px rgba(0,0,0,0.06);
+}
+.b-btn:focus-visible {
+    outline: none;
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.04) inset,
+        0 0 0 3px var(--accent-soft),
+        0 1px 2px rgba(0,0,0,0.08);
+    border-color: var(--accent);
+}
+.b-btn:disabled,
+.b-btn[aria-disabled="true"] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ── Sizes ──────────────────────────────────────────────────────────── */
+.b-btn-sm {
+    min-height: 28px;
+    padding: 5px 10px;
+    font-size: var(--fs-xs);
+    gap: 5px;
+}
+.b-btn-lg {
+    min-height: 44px;
+    padding: 11px 18px;
+    font-size: var(--fs-md);
+    font-weight: var(--fw-semibold);
+    gap: 8px;
+}
+
+/* ── Icon-only (square) ─────────────────────────────────────────────── */
+.b-btn-icon {
+    width: 36px;
+    padding: 0;
+    gap: 0;
+}
+.b-btn-icon.b-btn-sm { width: 28px; }
+.b-btn-icon.b-btn-lg { width: 44px; }
+
+/* ── Variants ───────────────────────────────────────────────────────── */
+
+/* Primary: solid accent, white text */
+.b-btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: var(--fw-semibold);
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.18) inset,
+        0 1px 2px rgba(56,105,171,0.25),
+        0 2px 6px rgba(56,105,171,0.18);
+}
+.b-btn-primary:hover {
+    background: color-mix(in srgb, var(--accent) 92%, white);
+    border-color: color-mix(in srgb, var(--accent) 92%, white);
+    color: #fff;
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.22) inset,
+        0 2px 4px rgba(56,105,171,0.32),
+        0 4px 10px rgba(56,105,171,0.22);
+}
+.b-btn-primary:active:not(:disabled):not([aria-disabled="true"]) {
+    background: color-mix(in srgb, var(--accent) 92%, black);
+    border-color: color-mix(in srgb, var(--accent) 92%, black);
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.1) inset,
+        0 1px 1px rgba(56,105,171,0.2);
+}
+.b-btn-primary:focus-visible {
+    border-color: var(--accent);
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.18) inset,
+        0 0 0 3px var(--accent-soft),
+        0 1px 2px rgba(56,105,171,0.25);
+}
+
+/* Ghost: transparent base, subtle hover */
+.b-btn-ghost {
+    background: transparent;
+    border-color: transparent;
+    color: var(--text-3);
+    box-shadow: none;
+}
+.b-btn-ghost:hover {
+    background: var(--bg-card-hover);
+    border-color: transparent;
+    color: var(--text-1);
+    box-shadow: none;
+}
+.b-btn-ghost:active:not(:disabled):not([aria-disabled="true"]) {
+    background: var(--bg-card);
+    transform: translateY(0.5px);
+}
+.b-btn-ghost:focus-visible {
+    border-color: transparent;
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Danger: same baseline as secondary but err accents on hover */
+.b-btn-danger {
+    color: var(--err);
+}
+.b-btn-danger:hover {
+    background: rgba(217,107,107,0.08);
+    border-color: var(--err);
+    color: var(--err);
+}
+.b-btn-danger:focus-visible {
+    border-color: var(--err);
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.04) inset,
+        0 0 0 3px rgba(217,107,107,0.18);
+}
+
+/* Dashed: for "+ add" patterns */
+.b-btn-dashed {
+    background: transparent;
+    border-style: dashed;
+    border-color: var(--line-2);
+    color: var(--text-4);
+    box-shadow: none;
+}
+.b-btn-dashed:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    border-style: dashed;
+    color: var(--accent);
+    box-shadow: none;
+}
+.b-btn-dashed:focus-visible {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* ── Tab variant (for view switcher) ────────────────────────────────── */
+.b-btn-tab {
+    background: transparent;
+    border: none;
+    border-radius: var(--r-1);
+    color: var(--text-3);
+    font-weight: var(--fw-medium);
+    min-height: 36px;
+    padding: 8px 14px;
+    box-shadow: none;
+    gap: 7px;
+}
+.b-btn-tab:hover {
+    background: var(--bg-card-hover);
+    color: var(--text-1);
+    box-shadow: none;
+}
+.b-btn-tab[aria-current="true"] {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: var(--fw-semibold);
+}
+.b-btn-tab[aria-current="true"]:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+.b-btn-tab:disabled {
+    color: var(--text-5);
+    opacity: 0.45;
+    background: transparent;
+}
+.b-btn-tab:focus-visible {
+    box-shadow: 0 0 0 3px var(--accent-soft);
 }

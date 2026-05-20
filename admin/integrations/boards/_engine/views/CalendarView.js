@@ -129,14 +129,14 @@ export function CalendarView({ store }) {
     return html`
         <div class="b-cal-wrap">
             <div class="b-cal-header">
-                <button class="b-cal-nav" onClick=${() => setCursor(addMonths(cursor, -1))} aria-label="Mes anterior">
+                <button class="b-btn b-btn-secondary b-btn-icon b-btn-sm" onClick=${() => setCursor(addMonths(cursor, -1))} aria-label="Mes anterior">
                     <${Icon} name="chevron-left" size=${14} strokeWidth=${2.2} />
                 </button>
                 <div class="b-cal-month">${MONTHS[cursor.getMonth()]} ${cursor.getFullYear()}</div>
-                <button class="b-cal-nav" onClick=${() => setCursor(addMonths(cursor, 1))} aria-label="Mes siguiente">
+                <button class="b-btn b-btn-secondary b-btn-icon b-btn-sm" onClick=${() => setCursor(addMonths(cursor, 1))} aria-label="Mes siguiente">
                     <${Icon} name="chevron-right" size=${14} strokeWidth=${2.2} />
                 </button>
-                <button class="b-cal-nav" onClick=${() => setCursor(startOfMonth(new Date()))} style=${{ marginLeft: 'auto' }}>Hoy</button>
+                <button class="b-btn b-btn-secondary b-btn-sm" onClick=${() => setCursor(startOfMonth(new Date()))} style=${{ marginLeft: 'auto' }}>Hoy</button>
             </div>
 
             <div class="b-cal-grid">

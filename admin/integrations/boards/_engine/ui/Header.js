@@ -38,7 +38,7 @@ export function Header({ store, currentView, setView }) {
                 <div class="b-view-switcher" role="tablist">
                     ${VIEWS.map((v) => html`
                         <button key=${v.id}
-                                class="b-view-btn"
+                                class="b-btn b-btn-tab"
                                 aria-current=${currentView === v.id ? 'true' : 'false'}
                                 disabled=${!v.enabled}
                                 title=${v.enabled ? '' : 'Disponible en próximos milestones'}
@@ -47,7 +47,7 @@ export function Header({ store, currentView, setView }) {
                         </button>
                     `)}
                 </div>
-                <button class="b-theme-toggle"
+                <button class="b-btn b-btn-secondary b-btn-icon"
                         onClick=${() => store.setTheme(theme === 'dark' ? 'light' : 'dark')}
                         title=${theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'}
                         aria-label="Cambiar tema">
@@ -68,7 +68,7 @@ export function Header({ store, currentView, setView }) {
                     const label = t === 'crm' ? 'Nuevo lead' : t === 'tasks' ? 'Nueva tarea' : 'Nuevo item';
                     const seedName = t === 'crm' ? 'Lead sin título' : t === 'tasks' ? 'Tarea sin título' : 'Item sin título';
                     return html`
-                        <button class="b-new-item-btn"
+                        <button class="b-btn b-btn-primary"
                                 onClick=${async () => {
                                     const item = await store.createItem({
                                         name: seedName,
@@ -77,7 +77,7 @@ export function Header({ store, currentView, setView }) {
                                     if (item) store.openDrawer(item.id);
                                 }}
                                 aria-label=${label}>
-                            <${Icon} name="plus" size=${14} strokeWidth=${2.2} />
+                            <${Icon} name="plus" size=${14} strokeWidth=${2.4} />
                             ${label}
                         </button>
                     `;
@@ -89,7 +89,7 @@ export function Header({ store, currentView, setView }) {
                     `)}
                     <${AddFilterButton} meta=${meta} store=${store} activeFilters=${activeFilters} />
                     ${(activeFilters.length > 0 || prefs.search) ? html`
-                        <button class="b-clear-all"
+                        <button class="b-btn b-btn-ghost b-btn-sm"
                                 onClick=${() => { store.clearFilters(); store.setSearch(''); }}
                                 aria-label="Limpiar todo">Limpiar</button>
                     ` : null}
@@ -166,7 +166,7 @@ function AddFilterButton({ meta, store, activeFilters }) {
 
     return html`
         <span style=${{ position: 'relative' }} ref=${wrapRef}>
-            <button class="b-filter-add" onClick=${() => setOpen(!open)} aria-label="Añadir filtro" title="Añadir filtro">
+            <button class="b-btn b-btn-sm b-btn-dashed" onClick=${() => setOpen(!open)} aria-label="Añadir filtro" title="Añadir filtro">
                 <${Icon} name="filter" size=${12} strokeWidth=${2} />
                 Filtro
             </button>
@@ -220,7 +220,7 @@ function FilterValuePicker({ col, store, onCommit, onBack }) {
 
     return html`
         <h4 style=${{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button onClick=${onBack} aria-label="Volver" title="Volver" style=${{ color: 'var(--text-4)', display: 'inline-flex', alignItems: 'center' }}>
+            <button class="b-btn b-btn-ghost b-btn-icon b-btn-sm" onClick=${onBack} aria-label="Volver" title="Volver">
                 <${Icon} name="chevron-left" size=${14} />
             </button>
             ${col.name}
@@ -269,15 +269,7 @@ function FilterValuePicker({ col, store, onCommit, onBack }) {
         ` : null}
 
         <div style=${{ display: 'flex', justifyContent: 'flex-end', gap: '4px', marginTop: '8px' }}>
-            <button onClick=${commit} style=${{
-                background: 'var(--accent)',
-                color: '#fff',
-                padding: '8px 16px',
-                borderRadius: 'var(--r-1)',
-                fontSize: 'var(--fs-sm)',
-                fontWeight: 'var(--fw-semibold)',
-                cursor: 'pointer',
-            }}>Aplicar filtro</button>
+            <button class="b-btn b-btn-primary b-btn-sm" onClick=${commit}>Aplicar filtro</button>
         </div>
     `;
 }

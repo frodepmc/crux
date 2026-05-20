@@ -163,11 +163,11 @@ export function TimelineView({ store }) {
                 </div>
                 <div class="b-tl-zoom">
                     <span>Zoom</span>
-                    <button class="b-tl-nav" onClick=${() => setDayPx(Math.max(12, dayPx - 8))} aria-label="Zoom out">
+                    <button class="b-btn b-btn-secondary b-btn-icon b-btn-sm" onClick=${() => setDayPx(Math.max(12, dayPx - 8))} aria-label="Zoom out">
                         <${Icon} name="minus" size=${13} strokeWidth=${2.4} />
                     </button>
                     <span class="b-tl-zoom-value">${dayPx}px/día</span>
-                    <button class="b-tl-nav" onClick=${() => setDayPx(Math.min(64, dayPx + 8))} aria-label="Zoom in">
+                    <button class="b-btn b-btn-secondary b-btn-icon b-btn-sm" onClick=${() => setDayPx(Math.min(64, dayPx + 8))} aria-label="Zoom in">
                         <${Icon} name="plus" size=${13} strokeWidth=${2.4} />
                     </button>
                 </div>

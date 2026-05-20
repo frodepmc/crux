@@ -13,21 +13,6 @@
     align-items: center;
     gap: var(--sp-3);
 }
-.b-cal-nav {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--line-2);
-    border-radius: var(--r-1);
-    color: var(--text-2);
-    padding: 6px 10px;
-    font-size: var(--fs-sm);
-    min-height: 30px;
-    transition: border-color 120ms, color 120ms;
-}
-.b-cal-nav:hover { border-color: var(--accent-line); }
 .b-cal-month {
     font-size: var(--fs-lg);
     font-weight: var(--fw-semibold);
