@@ -24,10 +24,16 @@ const kvMock = {
         for (const k of keys) if (memStore.delete(k)) n += 1;
         return n;
     },
-    mget: async (...keys) => keys.map((k) => (memStore.has(k) ? JSON.parse(JSON.stringify(memStore.get(k))) : null)),
+    mget: async (...args) => {
+        // @vercel/kv acepta tanto array como varargs: kv.mget([k1, k2]) o kv.mget(k1, k2)
+        const keys = args.length === 1 && Array.isArray(args[0]) ? args[0] : args;
+        return keys.map((k) => (memStore.has(k) ? JSON.parse(JSON.stringify(memStore.get(k))) : null));
+    },
     keys: async (pattern) => {
-        // pattern simplificado: prefix*
-        if (!pattern.endsWith('*')) return [...memStore.keys()].filter((k) => k === pattern);
+        // Solo soportamos patrones tipo "prefix*". Throw si llega otra cosa para evitar
+        // que tests pasen silenciosamente por matchings vacíos.
+        if (typeof pattern !== 'string') throw new Error('kvMock.keys: pattern debe ser string');
+        if (!pattern.endsWith('*')) throw new Error('kvMock.keys: solo se soportan patrones "prefix*", recibido: ' + pattern);
         const prefix = pattern.slice(0, -1);
         return [...memStore.keys()].filter((k) => k.startsWith(prefix));
     },
@@ -65,6 +71,8 @@ const boards = require(path.join(__dirname, '..', 'api', '_lib', 'boards.js'));
     check('K_META is a function', typeof boards.K_META === 'function');
     check('K_META(b_crm) returns correct shape', boards.K_META('b_crm') === 'crux:boards:b_crm:meta');
     check('K_ITEM(b, i) returns correct shape', boards.K_ITEM('b_crm', 'i_acme') === 'crux:boards:b_crm:item:i_acme');
+
+    // ─── (Tasks 4-9 añaden más tests aquí, antes del console.log) ──────────
 
     console.log(failures === 0 ? '\nAll tests passed ✓' : '\n' + failures + ' test(s) FAILED');
     process.exit(failures === 0 ? 0 : 1);
