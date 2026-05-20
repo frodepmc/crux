@@ -3,7 +3,7 @@
 // Cada cell usa renderEditor del tipo de columna correspondiente.
 
 import { html } from 'htm/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useStore } from '../hooks.js';
 import { getColumnType } from '../columns/registry.js';
 import { Icon } from './Icon.js';
@@ -30,12 +30,14 @@ export function ItemDrawer({ store }) {
     return html`
         <div class="b-drawer-veil" onClick=${() => store.closeDrawer()} />
         <aside class="b-drawer" role="dialog" aria-label="Detalle item">
-            <header style=${{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--sp-4)' }}>
+            <header class="b-drawer-header">
                 <h2>${item.name}</h2>
-                <button onClick=${() => store.closeDrawer()} style=${{ color: 'var(--text-4)', padding: '4px 8px' }} aria-label="Cerrar"><${Icon} name="x" size=${18} /></button>
+                <button class="b-drawer-close" onClick=${() => store.closeDrawer()} aria-label="Cerrar">
+                    <${Icon} name="x" size=${18} />
+                </button>
             </header>
 
-            <div style=${{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)' }}>
+            <div class="b-drawer-body">
                 <${Field} label="Nombre" id="name">
                     <${NameInput} item=${item} store=${store} />
                 <//>
@@ -85,14 +87,24 @@ function Field({ label, id, children }) {
 function NameInput({ item, store }) {
     const [draft, setDraft] = useState(item.name);
     const itemId = item.id;
+    const ref = useRef(null);
     // Cuando el item cambia (otro user lo editó), resync el draft
     useEffect(() => { setDraft(item.name); }, [itemId, item.name]);
+    useEffect(() => {
+        // Autofocus + select-all when the item looks freshly created
+        const seedNames = ['Item sin título', 'Lead sin título', 'Tarea sin título', 'Nuevo item'];
+        if (seedNames.includes(item.name) && ref.current) {
+            ref.current.focus();
+            ref.current.select();
+        }
+    }, [itemId]);
 
     function commit() {
         if (draft !== item.name) store.updateCell(itemId, '__name__', draft);
     }
     return html`
         <input class="b-input" type="text" value=${draft}
+               ref=${ref}
                onChange=${(e) => setDraft(e.target.value)}
                onBlur=${commit}
                onKeyDown=${(e) => { if (e.key === 'Enter') { e.target.blur(); } }}
