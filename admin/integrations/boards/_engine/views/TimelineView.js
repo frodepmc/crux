@@ -1,16 +1,14 @@
 // views/TimelineView.js
-// Vista Timeline: barras horizontales por daterange, eje de días con mes header,
-// flechas SVG entre items conectados por columna 'dependency'.
-// Zoom in/out con dayPx state.
+// Vista Timeline: flex layout con label col + bars area.
 
 import { html } from 'htm/react';
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useStore } from '../hooks.js';
 import { applyFilters } from '../filters.js';
 
 const LABEL_PX = 220;
 const ROW_PX = 52;
-const BAR_GAP = 6;  // espacio entre el final del bar source y la flecha entrante
+const BAR_GAP = 6;
 
 function ymdToDate(ymd) { if (!ymd) return null; const d = new Date(ymd + 'T00:00:00'); return Number.isNaN(d.getTime()) ? null : d; }
 function dateToYmd(d) { const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,'0'); const day = String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
@@ -39,7 +37,6 @@ export function TimelineView({ store }) {
     const state = useStore(store);
     const { meta, itemIndex, itemsById } = state;
     const [dayPx, setDayPx] = useState(28);
-    const scrollerRef = useRef(null);
 
     if (!meta) return html`<div class="b-empty">Cargando…</div>`;
     const dateCol = findTimelineColumn(meta);
@@ -72,22 +69,17 @@ export function TimelineView({ store }) {
         return html`<div class="b-empty">Sin items con rango de fechas para mostrar en Timeline.</div>`;
     }
 
-    // Rango temporal a mostrar: min start - 5 días, max end + 5 días
     const minDate = new Date(Math.min(...rangedItems.map((r) => r.start.getTime())));
     const maxDate = new Date(Math.max(...rangedItems.map((r) => r.end.getTime())));
     const startD = addDays(minDate, -5);
     const endD = addDays(maxDate, 5);
     const totalDays = diffDays(startD, endD) + 1;
-    const totalWidth = totalDays * dayPx + LABEL_PX;
+    const barsWidth = totalDays * dayPx;
 
-    // Build days array
     const days = [];
-    for (let i = 0; i < totalDays; i += 1) {
-        const d = addDays(startD, i);
-        days.push(d);
-    }
+    for (let i = 0; i < totalDays; i += 1) days.push(addDays(startD, i));
 
-    // Build month spans (consecutive days in same month → one cell)
+    // Build month spans
     const monthSpans = [];
     let cursor = 0;
     while (cursor < days.length) {
@@ -107,14 +99,11 @@ export function TimelineView({ store }) {
         cursor += span;
     }
 
-    // Today index (puede caer fuera del rango)
     const today = new Date(); today.setHours(0, 0, 0, 0);
 
-    // Index of items para encontrar la row index por id (para flechas)
     const rowIndexById = {};
     rangedItems.forEach((r, i) => { rowIndexById[r.item.id] = i; });
 
-    // Construir flechas
     const arrows = [];
     if (depCol) {
         for (const r of rangedItems) {
@@ -129,18 +118,11 @@ export function TimelineView({ store }) {
         }
     }
 
-    function barLeft(r) {
-        return LABEL_PX + diffDays(startD, r.start) * dayPx;
-    }
-    function barWidth(r) {
-        return Math.max((diffDays(r.start, r.end) + 1) * dayPx, dayPx);
-    }
-    function barRight(r) {
-        return barLeft(r) + barWidth(r);
-    }
-    function rowMidY(r) {
-        return rowIndexById[r.item.id] * ROW_PX + ROW_PX / 2;
-    }
+    // Coords RELATIVAS al bars-area (no incluyen LABEL_PX)
+    function barLeft(r) { return diffDays(startD, r.start) * dayPx; }
+    function barWidth(r) { return Math.max((diffDays(r.start, r.end) + 1) * dayPx, dayPx); }
+    function barRight(r) { return barLeft(r) + barWidth(r); }
+    function rowMidY(r) { return rowIndexById[r.item.id] * ROW_PX + ROW_PX / 2; }
     function arrowPath(from, to) {
         const x1 = barRight(from);
         const y1 = rowMidY(from);
@@ -149,10 +131,7 @@ export function TimelineView({ store }) {
         const dx = Math.max(20, Math.abs(x2 - x1) / 2);
         return `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
     }
-
     function barTextOverflowOffset(r) {
-        // Cuando la barra es muy estrecha y el nombre no cabe, devolvemos posición
-        // a la derecha de la barra para escribir el nombre fuera. Estimación: 7px/char.
         const estTextWidth = (r.item.name?.length || 0) * 7 + 16;
         return estTextWidth > barWidth(r) ? barRight(r) + 6 : null;
     }
@@ -178,59 +157,67 @@ export function TimelineView({ store }) {
                 </div>
             </div>
 
-            <div class="b-tl-scroller" ref=${scrollerRef}>
-                <div class="b-tl-grid" style=${{ width: totalWidth + 'px' }}>
-                    <div class="b-tl-axis" style=${{ marginLeft: LABEL_PX + 'px', width: (totalWidth - LABEL_PX) + 'px' }}>
-                        <div class="b-tl-axis-months">
-                            ${monthSpans.map((ms) => html`
-                                <div key=${ms.startIdx}
-                                     class="b-tl-axis-month"
-                                     style=${{ width: (ms.span * dayPx) + 'px' }}>
-                                    ${ms.label}
-                                </div>
-                            `)}
-                        </div>
-                        <div class="b-tl-axis-days">
-                            ${days.map((d) => {
-                                const dow = d.getDay();
-                                const weekend = dow === 0 || dow === 6;
-                                const isToday = isSameDay(d, today);
-                                return html`
-                                    <div key=${dateToYmd(d)}
-                                         class="b-tl-axis-tick"
-                                         data-weekend=${weekend ? 'true' : 'false'}
-                                         data-today=${isToday ? 'true' : 'false'}
-                                         style=${{ width: dayPx + 'px' }}>
-                                        ${d.getDate()}
+            <div class="b-tl-scroller">
+                <div class="b-tl-grid">
+
+                    <!-- Axis row -->
+                    <div class="b-tl-axis">
+                        <div class="b-tl-axis-label-spacer">Tarea</div>
+                        <div class="b-tl-axis-bars">
+                            <div class="b-tl-axis-months">
+                                ${monthSpans.map((ms) => html`
+                                    <div key=${ms.startIdx}
+                                         class="b-tl-axis-month"
+                                         style=${{ width: (ms.span * dayPx) + 'px' }}>
+                                        ${ms.label}
                                     </div>
-                                `;
-                            })}
+                                `)}
+                            </div>
+                            <div class="b-tl-axis-days">
+                                ${days.map((d) => {
+                                    const dow = d.getDay();
+                                    const weekend = dow === 0 || dow === 6;
+                                    const isToday = isSameDay(d, today);
+                                    return html`
+                                        <div key=${dateToYmd(d)}
+                                             class="b-tl-axis-tick"
+                                             data-weekend=${weekend ? 'true' : 'false'}
+                                             data-today=${isToday ? 'true' : 'false'}
+                                             style=${{ width: dayPx + 'px' }}>
+                                            ${d.getDate()}
+                                        </div>
+                                    `;
+                                })}
+                            </div>
                         </div>
                     </div>
 
-                    <div class="b-tl-rows" style=${{ position: 'relative' }}>
+                    <!-- Rows -->
+                    <div class="b-tl-rows">
                         ${rangedItems.map((r) => {
                             const overflowOffset = barTextOverflowOffset(r);
                             return html`
                                 <div key=${r.item.id} class="b-tl-row">
                                     <div class="b-tl-row-label" title=${r.item.name}>${r.item.name}</div>
-                                    <div class="b-tl-bar"
-                                         style=${{ left: barLeft(r) + 'px', width: barWidth(r) + 'px' }}
-                                         onClick=${() => store.openDrawer(r.item.id)}
-                                         title=${`${dateToYmd(r.start)} → ${dateToYmd(r.end)}`}>
-                                        ${overflowOffset == null ? r.item.name : ''}
-                                    </div>
-                                    ${overflowOffset != null ? html`
-                                        <div class="b-tl-bar-overflow"
-                                             style=${{ left: overflowOffset + 'px' }}>
-                                            ${r.item.name}
+                                    <div class="b-tl-row-bars" style=${{ width: barsWidth + 'px' }}>
+                                        <div class="b-tl-bar"
+                                             style=${{ left: barLeft(r) + 'px', width: barWidth(r) + 'px' }}
+                                             onClick=${() => store.openDrawer(r.item.id)}
+                                             title=${`${dateToYmd(r.start)} → ${dateToYmd(r.end)}`}>
+                                            ${overflowOffset == null ? r.item.name : ''}
                                         </div>
-                                    ` : null}
+                                        ${overflowOffset != null ? html`
+                                            <div class="b-tl-bar-overflow"
+                                                 style=${{ left: overflowOffset + 'px' }}>
+                                                ${r.item.name}
+                                            </div>
+                                        ` : null}
+                                    </div>
                                 </div>
                             `;
                         })}
 
-                        <svg class="b-tl-arrows" width=${totalWidth} height=${rangedItems.length * ROW_PX}>
+                        <svg class="b-tl-arrows" width=${barsWidth} height=${rangedItems.length * ROW_PX}>
                             <defs>
                                 <marker id="tl-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
                                     <path class="b-tl-arrow-head" d="M 0 0 L 10 5 L 0 10 z" />
