@@ -1,0 +1,153 @@
+/* admin/integrations/boards/_engine/styles/timeline.css */
+
+.b-tl-wrap {
+    padding: var(--sp-4) var(--sp-5);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: var(--sp-3);
+    overflow: hidden;
+}
+
+.b-tl-header {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    flex: 0 0 auto;
+}
+.b-tl-nav {
+    background: var(--bg-elevated);
+    border: 1px solid var(--line-1);
+    border-radius: var(--r-1);
+    color: var(--text-2);
+    padding: var(--sp-2) var(--sp-3);
+    font-size: 0.85rem;
+}
+.b-tl-nav:hover { border-color: var(--accent-line); }
+
+.b-tl-scroller {
+    flex: 1 1 auto;
+    overflow: auto;
+    background: var(--bg-elevated);
+    border: 1px solid var(--line-1);
+    border-radius: var(--r-2);
+    position: relative;
+}
+
+.b-tl-grid {
+    position: relative;
+    min-width: 100%;
+}
+
+.b-tl-axis {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--line-1);
+    display: flex;
+    height: 36px;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--text-5);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+.b-tl-axis-tick {
+    border-right: 1px solid var(--line-1);
+    padding: 8px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+.b-tl-axis-tick[data-month-start="true"] {
+    background: var(--bg-elevated);
+    color: var(--text-3);
+    font-weight: 600;
+}
+
+.b-tl-rows {
+    position: relative;
+}
+
+.b-tl-row {
+    position: relative;
+    height: 44px;
+    border-bottom: 1px solid var(--line-1);
+}
+
+.b-tl-row-label {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--bg-elevated);
+    padding: var(--sp-2) var(--sp-3);
+    font-size: 0.8rem;
+    color: var(--text-2);
+    border-right: 1px solid var(--line-1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 220px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.b-tl-bar {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 22px;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-line);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--r-1);
+    padding: 0 8px;
+    font-size: 0.7rem;
+    color: var(--text-1);
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    transition: filter 120ms;
+}
+.b-tl-bar:hover { filter: brightness(1.15); }
+.b-tl-bar[data-conflict="true"] {
+    border-left-color: var(--warn);
+    background: rgba(217,119,6,0.18);
+}
+
+.b-tl-arrows {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+}
+
+.b-tl-arrow-line {
+    stroke: var(--accent-line);
+    stroke-width: 1.5;
+    fill: none;
+}
+.b-tl-arrow-line[data-conflict="true"] {
+    stroke: var(--warn);
+    stroke-dasharray: 4 3;
+}
+.b-tl-arrow-head {
+    fill: var(--accent-line);
+}
+.b-tl-arrow-head[data-conflict="true"] {
+    fill: var(--warn);
+}
+
+.b-tl-empty {
+    text-align: center;
+    padding: var(--sp-6);
+    color: var(--text-5);
+    font-style: italic;
+}
