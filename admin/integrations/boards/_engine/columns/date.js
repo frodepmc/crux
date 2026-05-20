@@ -1,7 +1,13 @@
 // columns/date.js
-// Date: ISO yyyy-mm-dd. Render relativo + absoluto en tooltip.
+// Render: fecha relativa con color según urgencia.
+// Editor: trigger + mini calendar picker.
+
 import { html } from 'htm/react';
+import { useState } from 'react';
 import { register } from './registry.js';
+import { Icon } from '../ui/Icon.js';
+import { Popover } from '../ui/Popover.js';
+import { CalendarPicker } from '../ui/CalendarPicker.js';
 
 function format(iso) {
     if (!iso) return '';
@@ -23,15 +29,41 @@ function relColor(iso) {
 register({
     type: 'date',
     render: (value) => value
-        ? html`<span style=${{ color: relColor(value) }} title=${value}>${format(value)}</span>`
+        ? html`<span style=${{ color: relColor(value), fontVariantNumeric: 'tabular-nums' }} title=${value}>${format(value)}</span>`
         : html`<span></span>`,
-    renderEditor: (value, ctx, onChange) => html`
-        <input class="b-input b-input-date"
-               type="date"
-               value=${value || ''}
-               onChange=${(e) => onChange(e.target.value || null)}
-               aria-label=${ctx.column.name} />
-    `,
+    renderEditor: (value, ctx, onChange) => {
+        return html`
+            <${Popover}
+                width=${280}
+                trigger=${(openIt, isOpen) => html`
+                    <button type="button"
+                            class="b-cell-trigger"
+                            data-open=${isOpen ? 'true' : 'false'}
+                            onClick=${openIt}
+                            aria-label=${ctx.column.name}>
+                        ${value ? html`
+                            <${Icon} name="calendar" size=${14} strokeWidth=${1.75} style=${{ color: 'var(--text-4)' }} />
+                            <span style=${{ color: relColor(value), fontVariantNumeric: 'tabular-nums' }}>
+                                ${format(value)}
+                            </span>
+                        ` : html`
+                            <${Icon} name="calendar" size=${14} strokeWidth=${1.75} style=${{ color: 'var(--text-5)' }} />
+                            <span class="b-cell-trigger-placeholder">— sin fecha —</span>
+                        `}
+                        <span class="b-cell-trigger-caret">
+                            <${Icon} name="chevron-down" size=${14} />
+                        </span>
+                    </button>
+                `}>
+                ${(close) => html`
+                    <${CalendarPicker}
+                        value=${value}
+                        onChange=${(v) => { onChange(v); close(); }}
+                        onClear=${() => { onChange(null); close(); }} />
+                `}
+            <//>
+        `;
+    },
     compare: (a, b) => {
         const an = a ? new Date(a).getTime() : Infinity;
         const bn = b ? new Date(b).getTime() : Infinity;

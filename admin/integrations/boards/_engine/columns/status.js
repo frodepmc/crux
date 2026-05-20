@@ -1,8 +1,11 @@
 // columns/status.js
-// Status: chip de color a partir de config.options[{id, label, color}].
-// config: { options: [{id, label, color}] }
+// Render: chip de color.
+// Editor: trigger button + popover con lista de opciones (chip + label).
+
 import { html } from 'htm/react';
 import { register } from './registry.js';
+import { Icon } from '../ui/Icon.js';
+import { Popover } from '../ui/Popover.js';
 
 function findOption(value, config) {
     const opts = config?.options || [];
@@ -15,28 +18,57 @@ register({
         const opt = findOption(value, ctx?.column?.config);
         if (!opt) return html`<span></span>`;
         return html`
-            <span style=${{
-                background: opt.color || 'var(--accent)',
-                color: '#fff',
-                padding: '3px 10px',
-                borderRadius: 'var(--r-1)',
-                fontSize: 'var(--fs-xs)',
-                fontWeight: 600,
-                letterSpacing: '0.04em',
-                textTransform: 'uppercase',
-            }}>${opt.label}</span>
+            <span class="b-chip b-chip-status"
+                  style=${{ background: opt.color || 'var(--accent)' }}>
+                ${opt.label}
+            </span>
         `;
     },
     renderEditor: (value, ctx, onChange) => {
         const opts = ctx?.column?.config?.options || [];
+        const opt = findOption(value, ctx?.column?.config);
         return html`
-            <select class="b-input b-input-status"
-                    value=${value || ''}
-                    onChange=${(e) => onChange(e.target.value || null)}
-                    aria-label=${ctx.column.name}>
-                <option value="">—</option>
-                ${opts.map((o) => html`<option key=${o.id} value=${o.id}>${o.label}</option>`)}
-            </select>
+            <${Popover}
+                width=${240}
+                trigger=${(openIt, isOpen) => html`
+                    <button type="button"
+                            class="b-cell-trigger"
+                            data-open=${isOpen ? 'true' : 'false'}
+                            onClick=${openIt}
+                            aria-label=${ctx.column.name}>
+                        ${opt ? html`
+                            <span class="b-chip b-chip-status" style=${{ background: opt.color }}>${opt.label}</span>
+                        ` : html`<span class="b-cell-trigger-placeholder">— sin estado —</span>`}
+                        <span class="b-cell-trigger-caret">
+                            <${Icon} name="chevron-down" size=${14} />
+                        </span>
+                    </button>
+                `}>
+                ${(close) => html`
+                    <div class="b-popover-list">
+                        <div class="b-popover-item"
+                             data-selected=${value == null ? 'true' : 'false'}
+                             onClick=${() => { onChange(null); close(); }}>
+                            <span class="b-cell-trigger-placeholder">— sin estado —</span>
+                            <span class="b-popover-item-check">
+                                <${Icon} name="check" size=${14} strokeWidth=${2.6} />
+                            </span>
+                        </div>
+                        ${opts.map((o) => html`
+                            <div key=${o.id}
+                                 class="b-popover-item"
+                                 data-selected=${o.id === value ? 'true' : 'false'}
+                                 onClick=${() => { onChange(o.id); close(); }}>
+                                <span class="b-chip-dot" style=${{ background: o.color }}></span>
+                                <span>${o.label}</span>
+                                <span class="b-popover-item-check">
+                                    <${Icon} name="check" size=${14} strokeWidth=${2.6} />
+                                </span>
+                            </div>
+                        `)}
+                    </div>
+                `}
+            <//>
         `;
     },
     compare: (a, b, config) => {
