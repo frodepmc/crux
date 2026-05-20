@@ -118,7 +118,7 @@ function CommentsSection({ store, item, comments }) {
                     const isMine = profile && c.authorId === profile.username;
                     return html`
                         <div key=${c.id} style=${{
-                            background: 'var(--bg-card)',
+                            background: 'var(--bg-base)',
                             border: '1px solid var(--line-1)',
                             borderRadius: 'var(--r-2)',
                             padding: 'var(--sp-3)',

@@ -20,7 +20,7 @@
 
 .b-kanban-col {
     flex: 0 0 280px;
-    background: var(--bg-card);
+    background: var(--bg-base);
     border: 1px solid var(--line-1);
     border-radius: var(--r-2);
     display: flex;
@@ -71,15 +71,17 @@
 
 .b-kanban-card {
     background: var(--bg-elevated);
-    border: 1px solid var(--line-1);
+    border: 1px solid var(--line-2);
     border-radius: var(--r-2);
     padding: var(--sp-3);
     cursor: pointer;
-    transition: border-color 120ms, transform 120ms;
+    transition: border-color 120ms, transform 120ms, box-shadow 120ms;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 .b-kanban-card:hover {
     border-color: var(--accent-line);
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 .b-kanban-card[data-dragging="true"] {
     opacity: 0.4;

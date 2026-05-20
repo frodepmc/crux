@@ -28,6 +28,8 @@
     --accent:        #3869AB;
     --accent-soft:   rgba(56,105,171,0.18);
     --accent-line:   rgba(56,105,171,0.35);
+    --accent-chip-bg: rgba(56,105,171,0.18);
+    --accent-chip-fg: var(--text-1);
 
     /* ─── Semantic ─── */
     --ok:    #5CB88A;
@@ -73,4 +75,6 @@
     --accent:      #3869AB;
     --accent-soft: rgba(56,105,171,0.08);
     --accent-line: rgba(56,105,171,0.25);
+    --accent-chip-bg: rgba(56,105,171,0.14);
+    --accent-chip-fg: #1e3a5f;
 }

@@ -151,12 +151,12 @@ a { color: var(--text-2); text-decoration: none; }
     display: inline-flex;
     align-items: center;
     gap: var(--sp-1);
-    background: var(--accent-soft);
+    background: var(--accent-chip-bg);
     border: 1px solid var(--accent-line);
     border-radius: var(--r-1);
     padding: 3px 4px 3px 8px;
     font-size: 0.7rem;
-    color: var(--text-1);
+    color: var(--accent-chip-fg);
     font-family: var(--font-mono);
     letter-spacing: 0.04em;
 }

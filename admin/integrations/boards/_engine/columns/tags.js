@@ -19,12 +19,13 @@ register({
             <div style=${{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
                 ${arr.map((t) => html`
                     <span key=${t} style=${{
-                        background: tagColor(t, ctx?.column?.config) + '22',
-                        color: tagColor(t, ctx?.column?.config),
+                        background: tagColor(t, ctx?.column?.config),
+                        color: '#fff',
                         padding: '2px 8px',
                         borderRadius: '10px',
                         fontSize: '10px',
                         fontWeight: 600,
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
                     }}>${t}</span>
                 `)}
             </div>
@@ -45,8 +46,8 @@ register({
                 <div style=${{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
                     ${arr.map((t) => html`
                         <span key=${t} style=${{
-                            background: tagColor(t, ctx?.column?.config) + '22',
-                            color: tagColor(t, ctx?.column?.config),
+                            background: tagColor(t, ctx?.column?.config),
+                            color: '#fff',
                             padding: '2px 8px 2px 8px',
                             borderRadius: '10px',
                             fontSize: '10px',
@@ -54,6 +55,7 @@ register({
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '4px',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
                         }}>
                             ${t}
                             <button onClick=${() => remove(t)} style=${{

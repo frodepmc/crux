@@ -16,8 +16,8 @@ register({
                     const label = target ? target.name : id;
                     return html`
                         <span key=${id} style=${{
-                            background: 'var(--accent-soft)',
-                            color: 'var(--accent)',
+                            background: 'var(--accent-chip-bg)',
+                            color: 'var(--accent-chip-fg)',
                             padding: '2px 8px',
                             borderRadius: '10px',
                             fontSize: '10px',
@@ -47,8 +47,8 @@ register({
                         const label = target ? target.name : id;
                         return html`
                             <span key=${id} style=${{
-                                background: 'var(--accent-soft)',
-                                color: 'var(--accent)',
+                                background: 'var(--accent-chip-bg)',
+                                color: 'var(--accent-chip-fg)',
                                 padding: '2px 8px',
                                 borderRadius: '10px',
                                 fontSize: '10px',
