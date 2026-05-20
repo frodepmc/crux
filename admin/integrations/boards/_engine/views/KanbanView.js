@@ -139,6 +139,24 @@ function KanbanColumn({ col, meta, team, store, kanbanColumn, draggingId, setDra
                             onDragEnd=${() => { setDraggingId(null); setDropTargetKey(null); }} />
                     `)}
             </div>
+            ${col.key !== NO_VALUE ? html`
+                <button class="b-kanban-add-card"
+                        onClick=${async () => {
+                            const t = store.getState().summary?.type;
+                            const seedName = t === 'crm' ? 'Lead sin título' : t === 'tasks' ? 'Tarea sin título' : 'Item sin título';
+                            const groupId = store.getState().meta?.groups?.[0]?.id || 'g_default';
+                            const item = await store.createItem({
+                                name: seedName,
+                                groupId,
+                                cells: { [kanbanColumn.id]: col.key },
+                            });
+                            if (item) store.openDrawer(item.id);
+                        }}
+                        aria-label=${'Añadir tarjeta a ' + col.label}>
+                    <${Icon} name="plus" size=${12} strokeWidth=${2.4} />
+                    Añadir
+                </button>
+            ` : null}
         </div>
     `;
 }

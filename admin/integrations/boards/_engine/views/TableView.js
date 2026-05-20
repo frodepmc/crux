@@ -13,6 +13,15 @@ export function TableView({ store }) {
     const { meta, itemIndex, itemsById, team } = state;
     const [draggingId, setDraggingId] = useState(null);
     const [dropTargetId, setDropTargetId] = useState(null);
+    const [collapsedGroups, setCollapsedGroups] = useState(new Set());
+    function toggleGroup(gid) {
+        setCollapsedGroups((prev) => {
+            const next = new Set(prev);
+            if (next.has(gid)) next.delete(gid);
+            else next.add(gid);
+            return next;
+        });
+    }
 
     if (!meta) return html`<div class="b-empty">Cargando…</div>`;
     const columns = (meta.columns || []).slice().sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -90,6 +99,22 @@ export function TableView({ store }) {
         onDragEnd();
     }
 
+    // Group items by groupId, respecting meta.groups order
+    const groups = (meta.groups || []).slice().sort((a, b) => (a.order || 0) - (b.order || 0));
+    const itemsByGroupId = {};
+    for (const { item, entry } of itemsInOrder) {
+        const gid = item.groupId || 'g_default';
+        if (!itemsByGroupId[gid]) itemsByGroupId[gid] = [];
+        itemsByGroupId[gid].push({ item, entry });
+    }
+    // Find orphan groups (items with groupId not in meta.groups)
+    const knownGroupIds = new Set(groups.map((g) => g.id));
+    for (const gid of Object.keys(itemsByGroupId)) {
+        if (!knownGroupIds.has(gid)) groups.push({ id: gid, name: gid, color: 'var(--text-5)', order: 999, collapsed: false });
+    }
+    // Per-board collapsed state — keep in component-local state for now
+    const showGroups = groups.length > 1;
+
     return html`
         <div class="b-table-wrap">
             <table class="b-table">
@@ -110,7 +135,36 @@ export function TableView({ store }) {
                     </tr>
                 </thead>
                 <tbody>
-                    ${itemsInOrder.map(({ item }) => html`
+                    ${showGroups ? groups.map((g) => {
+                        const gItems = itemsByGroupId[g.id] || [];
+                        if (gItems.length === 0) return null;
+                        const collapsed = collapsedGroups.has(g.id);
+                        return html`
+                            <${GroupHeader}
+                                key=${'gh-' + g.id}
+                                group=${g}
+                                count=${gItems.length}
+                                colCount=${columns.length + 2}
+                                collapsed=${collapsed}
+                                onToggle=${() => toggleGroup(g.id)} />
+                            ${!collapsed ? gItems.map(({ item }) => html`
+                                <${TableRow}
+                                    key=${item.id}
+                                    item=${item}
+                                    columns=${columns}
+                                    team=${team}
+                                    store=${store}
+                                    dragDisabled=${sortActive}
+                                    isDragging=${item.id === draggingId}
+                                    isDropTarget=${item.id === dropTargetId}
+                                    onDragStart=${() => !sortActive && onDragStart(item)}
+                                    onDragOver=${(e) => !sortActive && onDragOver(e, item)}
+                                    onDragEnd=${onDragEnd}
+                                    onDrop=${(e) => !sortActive && onDrop(e, item)}
+                                    onClick=${() => store.openDrawer(item.id)} />
+                            `) : null}
+                        `;
+                    }) : itemsInOrder.map(({ item }) => html`
                         <${TableRow}
                             key=${item.id}
                             item=${item}
@@ -215,5 +269,22 @@ function InlineCell({ item, column, team, store }) {
             style=${{ cursor: (column.type === 'longtext' || column.type === 'dependency') ? 'pointer' : 'cell' }}>
             ${colType.render(value, { column, team, itemsById: state.itemsById })}
         </td>
+    `;
+}
+
+function GroupHeader({ group, count, colCount, collapsed, onToggle }) {
+    return html`
+        <tr class="b-group-header" onClick=${onToggle}>
+            <td colspan=${colCount}>
+                <div class="b-group-header-inner">
+                    <span class="b-group-chevron" data-collapsed=${collapsed ? 'true' : 'false'}>
+                        <${Icon} name="chevron-down" size=${14} strokeWidth=${2.4} />
+                    </span>
+                    <span class="b-group-color" style=${{ background: group.color || 'var(--accent)' }}></span>
+                    <span class="b-group-name">${group.name}</span>
+                    <span class="b-group-count">${count}</span>
+                </div>
+            </td>
+        </tr>
     `;
 }
