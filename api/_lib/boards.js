@@ -46,6 +46,21 @@ async function setBoardMeta(boardId, meta) {
     return meta;
 }
 
+// ─── item-index ──────────────────────────────────────────────────────────
+async function getItemIndex(boardId) {
+    if (!boardId) throw new Error('boardId required');
+    const data = await kv.get(K_ITEM_INDEX(boardId));
+    if (!Array.isArray(data)) return [];
+    return data;
+}
+
+async function setItemIndex(boardId, arr) {
+    if (!boardId) throw new Error('boardId required');
+    if (!Array.isArray(arr)) throw new Error('itemIndex must be array');
+    await kv.set(K_ITEM_INDEX(boardId), arr);
+    return arr;
+}
+
 module.exports = {
     PREFIX,
     K_INDEX,
@@ -59,4 +74,6 @@ module.exports = {
     setBoardsIndex,
     getBoardMeta,
     setBoardMeta,
+    getItemIndex,
+    setItemIndex,
 };

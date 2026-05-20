@@ -121,6 +121,26 @@ const boards = require(path.join(__dirname, '..', 'api', '_lib', 'boards.js'));
         check('getBoardMeta round-trip', JSON.stringify(got) === JSON.stringify(sampleMeta));
     }
 
+    reset();
+
+    // Test: getItemIndex vacío
+    {
+        const ix = await boards.getItemIndex('b_crm');
+        check('getItemIndex missing → []', Array.isArray(ix) && ix.length === 0);
+    }
+
+    // Test: round-trip + orden preservado
+    {
+        const arr = [
+            { id: 'i_acme', groupId: 'g_default', position: 0 },
+            { id: 'i_farma', groupId: 'g_default', position: 1 },
+            { id: 'i_disney', groupId: 'g_default', position: 2 },
+        ];
+        await boards.setItemIndex('b_crm', arr);
+        const got = await boards.getItemIndex('b_crm');
+        check('itemIndex preserves order', got[0].id === 'i_acme' && got[2].id === 'i_disney');
+    }
+
     // ─── (Tasks 4-9 añaden más tests aquí, antes del console.log) ──────────
 
     console.log(failures === 0 ? '\nAll tests passed ✓' : '\n' + failures + ' test(s) FAILED');
