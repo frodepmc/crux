@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRUX · Boards (Demo CRM)</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/tokens.css" />
+  <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/base.css" />
+  <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/table.css" />
+  <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/kanban.css" />
+  <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/calendar.css" />
+  <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/timeline.css" />
+
+  <script type="importmap">
+    {
+      "imports": {
+        "react":             "https://esm.sh/react@18.3.1",
+        "react-dom/client":  "https://esm.sh/react-dom@18.3.1/client?external=react",
+        "htm/react":         "https://esm.sh/htm@3.1.1/react?external=react"
+      }
+    }
+  </script>
+
+  <style>
+    .b-demo-banner {
+      background: var(--warn);
+      color: #fff;
+      padding: 6px 16px;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="b-demo-banner">DEMO · Datos en memoria · Sin backend · Refresh pierde cambios</div>
+  <div id="root"></div>
+
+  <script type="module">
+    import { createRoot } from 'react-dom/client';
+    import { html } from 'htm/react';
+
+    // Registrar tipos de columna (side-effect imports — mismo orden que board.html)
+    await import('/admin/integrations/boards/_engine/columns/text.js');
+    await import('/admin/integrations/boards/_engine/columns/longtext.js');
+    await import('/admin/integrations/boards/_engine/columns/status.js');
+    await import('/admin/integrations/boards/_engine/columns/tags.js');
+    await import('/admin/integrations/boards/_engine/columns/person.js');
+    await import('/admin/integrations/boards/_engine/columns/date.js');
+    await import('/admin/integrations/boards/_engine/columns/number.js');
+    await import('/admin/integrations/boards/_engine/columns/link.js');
+    await import('/admin/integrations/boards/_engine/columns/email.js');
+    await import('/admin/integrations/boards/_engine/columns/phone.js');
+    await import('/admin/integrations/boards/_engine/columns/checkbox.js');
+    await import('/admin/integrations/boards/_engine/columns/daterange.js');
+    await import('/admin/integrations/boards/_engine/columns/dependency.js');
+
+    const { App } = await import('/admin/integrations/boards/_engine/ui/App.js');
+
+    // ─── Demo store: misma API que createStore() pero sin red ────────────
+    const PHASES = [
+      { id: 'phase_new',       label: 'Nuevo',       color: '#6b7280' },
+      { id: 'phase_contacted', label: 'Contactado',  color: '#3869AB' },
+      { id: 'phase_meeting',   label: 'Reunión',     color: '#5B9BD5' },
+      { id: 'phase_proposal',  label: 'Propuesta',   color: '#D97706' },
+      { id: 'phase_won',       label: 'Ganado',      color: '#059669' },
+      { id: 'phase_lost',      label: 'Perdido',     color: '#DC2626' },
+    ];
+
+    const COLUMNS = [
+      { id: 'col_company', type: 'text',     name: 'Empresa',    order: 1, config: {} },
+      { id: 'col_status',  type: 'status',   name: 'Fase',       order: 2, config: { options: PHASES } },
+      { id: 'col_owner',   type: 'person',   name: 'Dueño',      order: 3, config: {} },
+      { id: 'col_value',   type: 'number',   name: 'Valor',      order: 4, config: { prefix: '€' } },
+      { id: 'col_next',    type: 'date',     name: 'Siguiente',  order: 5, config: {} },
+      { id: 'col_tags',    type: 'tags',     name: 'Tags',       order: 6, config: {} },
+      { id: 'col_email',   type: 'email',    name: 'Email',      order: 7, config: {} },
+      { id: 'col_phone',   type: 'phone',    name: 'Tel',        order: 8, config: {} },
+      { id: 'col_link',    type: 'link',     name: 'Web',        order: 9, config: {} },
+      { id: 'col_notes',   type: 'longtext', name: 'Notas',      order: 10, config: {} },
+    ];
+
+    const TEAM = [
+      { username: 'pedro@cruxmallorca.es', name: 'Pedro', color: '#3869AB' },
+      { username: 'alvaro@cruxmallorca.es', name: 'Alvaro', color: '#D4A84A' },
+      { username: 'marc@cruxmallorca.es',  name: 'Marc',  color: '#5CB88A' },
+      { username: 'javi@cruxmallorca.es',  name: 'Javi',  color: '#D96B6B' },
+    ];
+
+    const SEED = [
+      { id: 'i_acme',  name: 'Acme S.L.',         cells: { col_company: 'Acme S.L.',         col_status: 'phase_meeting',   col_owner: ['pedro@cruxmallorca.es'],  col_value: 2500, col_next: '2026-06-12', col_tags: ['web', 'urgente'],   col_email: 'contacto@acme.com',   col_phone: '+34 600 111 222', col_link: 'https://acme.com',   col_notes: 'Quieren branding + web.' } },
+      { id: 'i_farma', name: 'Farmàcia Rambla',   cells: { col_company: 'Farmàcia Rambla',   col_status: 'phase_proposal',  col_owner: ['alvaro@cruxmallorca.es'], col_value: 4800, col_next: '2026-06-20', col_tags: ['farmacia'],         col_email: 'info@rambla.com',     col_phone: '+34 600 222 333', col_link: 'https://rambla.com', col_notes: 'Web + cuenta corporativa. Iteración por WhatsApp.' } },
+      { id: 'i_disney',name: 'Disney Mallorca',   cells: { col_company: 'Disney Mallorca',   col_status: 'phase_won',       col_owner: ['marc@cruxmallorca.es'],   col_value: 9200, col_next: null,         col_tags: ['evento'],           col_email: 'eventos@disney.es',   col_phone: '+34 600 333 444', col_link: '',                   col_notes: 'Firmado. Inicio el 1 de julio.' } },
+      { id: 'i_uib',   name: 'UIB Investigación', cells: { col_company: 'UIB Investigación', col_status: 'phase_contacted', col_owner: ['javi@cruxmallorca.es'],   col_value: 2000, col_next: '2026-05-25', col_tags: ['investigacion'],    col_email: 'inv@uib.cat',         col_phone: '',                col_link: 'https://uib.cat',    col_notes: 'Pendiente confirmación de presupuesto.' } },
+    ];
+
+    function createDemoStore() {
+      let state = {
+        boardId: 'b_crm_demo',
+        summary: { id: 'b_crm_demo', name: 'CRM Pipeline (Demo)', type: 'crm', color: '#3869AB', icon: 'users', visibility: 'team' },
+        meta: {
+          columns: COLUMNS,
+          groups: [{ id: 'g_default', name: 'Pipeline', color: '#3869AB', order: 1, collapsed: false }],
+          views: {
+            kanban: { columnId: 'col_status' },
+            calendar: { columnId: 'col_next' },
+            timeline: { columnId: 'col_next' },
+          },
+          defaultView: 'kanban',
+        },
+        itemIndex: SEED.map((it, i) => ({ id: it.id, groupId: 'g_default', position: i })),
+        itemsById: Object.fromEntries(SEED.map((it) => [it.id, { ...it, boardId: 'b_crm_demo', groupId: 'g_default', version: 1, updatedAt: new Date().toISOString(), updatedBy: 'demo' }])),
+        prefs: { filters: {}, lastBoard: null, theme: 'dark' },
+        team: TEAM,
+        profile: { username: 'pedro@cruxmallorca.es', name: 'Pedro', role: 'admin', color: '#3869AB', access: ['*'], isAdmin: true },
+        loading: false,
+        error: null,
+        drawer: { open: false, itemId: null },
+        toasts: [],
+        pendingWrites: 0,
+        commentsByItemId: {},
+      };
+      const subs = new Set();
+      function getState() { return state; }
+      function subscribe(fn) { subs.add(fn); return () => subs.delete(fn); }
+      function notify() { subs.forEach((fn) => fn()); }
+      function setState(patch) { state = { ...state, ...patch }; notify(); }
+      function pushToast(tone, text, ttl = 4000) {
+        const id = Math.random().toString(36).slice(2, 8);
+        setState({ toasts: [...state.toasts, { id, tone, text }] });
+        if (ttl) setTimeout(() => setState({ toasts: state.toasts.filter((t) => t.id !== id) }), ttl);
+      }
+      async function hydrate() { /* noop — datos ya cargados */ }
+      async function updateCell(itemId, columnId, value) {
+        const current = state.itemsById[itemId];
+        if (!current) return;
+        const isName = columnId === '__name__';
+        const next = isName
+          ? { ...current, name: String(value || '').slice(0, 200), updatedAt: new Date().toISOString() }
+          : { ...current, cells: { ...current.cells, [columnId]: value }, updatedAt: new Date().toISOString() };
+        setState({ itemsById: { ...state.itemsById, [itemId]: next } });
+      }
+      async function reorderItem(itemId, groupId, position) {
+        const oldIndex = state.itemIndex;
+        const entry = oldIndex.find((x) => x.id === itemId);
+        if (!entry) return;
+        const without = oldIndex.filter((x) => x.id !== itemId);
+        const newEntry = { ...entry, groupId };
+        const sameGroup = without.filter((x) => x.groupId === groupId);
+        const targetPos = Math.max(0, Math.min(position, sameGroup.length));
+        const next = [];
+        let seen = 0, inserted = false;
+        for (const e of without) {
+          if (!inserted && e.groupId === groupId && seen === targetPos) { next.push(newEntry); inserted = true; }
+          if (e.groupId === groupId) seen += 1;
+          next.push(e);
+        }
+        if (!inserted) next.push(newEntry);
+        setState({ itemIndex: next });
+      }
+      async function createItem(payload) {
+        const id = 'i_' + Math.random().toString(36).slice(2, 8);
+        const item = { id, boardId: 'b_crm_demo', groupId: payload.groupId || 'g_default', name: payload.name, cells: payload.cells || {}, version: 1, createdAt: new Date().toISOString() };
+        setState({
+          itemsById: { ...state.itemsById, [id]: item },
+          itemIndex: [...state.itemIndex, { id, groupId: item.groupId, position: state.itemIndex.length }],
+        });
+        return item;
+      }
+      async function deleteItemById(itemId) {
+        const map = { ...state.itemsById }; delete map[itemId];
+        setState({ itemsById: map, itemIndex: state.itemIndex.filter((x) => x.id !== itemId), drawer: { open: false, itemId: null } });
+      }
+      async function loadComments(itemId) {
+        if (state.commentsByItemId[itemId] === undefined) {
+          setState({ commentsByItemId: { ...state.commentsByItemId, [itemId]: [] } });
+        }
+        return state.commentsByItemId[itemId] || [];
+      }
+      async function addComment(itemId, text) {
+        const id = 'c_' + Math.random().toString(36).slice(2, 8);
+        const comment = { id, authorId: 'pedro@cruxmallorca.es', text, createdAt: new Date().toISOString() };
+        const current = state.commentsByItemId[itemId] || [];
+        setState({ commentsByItemId: { ...state.commentsByItemId, [itemId]: [...current, comment] } });
+        return comment;
+      }
+      async function removeComment(itemId, commentId) {
+        const current = state.commentsByItemId[itemId] || [];
+        setState({ commentsByItemId: { ...state.commentsByItemId, [itemId]: current.filter((c) => c.id !== commentId) } });
+      }
+      function openDrawer(itemId) { setState({ drawer: { open: true, itemId } }); }
+      function closeDrawer()      { setState({ drawer: { open: false, itemId: null } }); }
+      function getBoardPrefs() {
+        const f = (state.prefs.filters && state.prefs.filters['b_crm_demo']) || {};
+        return { filters: f.filters || [], search: f.search || '', sortBy: f.sortBy || null, sortDir: f.sortDir || 'asc' };
+      }
+      function setBoardPrefs(patch) {
+        const current = getBoardPrefs();
+        const next = { ...current, ...patch };
+        setState({ prefs: { ...state.prefs, filters: { ...state.prefs.filters, 'b_crm_demo': next } } });
+      }
+      function setSearch(text) { setBoardPrefs({ search: text || '' }); }
+      function setSort(columnId, dir) { setBoardPrefs({ sortBy: columnId, sortDir: dir || 'asc' }); }
+      function clearSort() { setBoardPrefs({ sortBy: null, sortDir: 'asc' }); }
+      function addFilter(filter) {
+        const current = getBoardPrefs();
+        const others = (current.filters || []).filter((f) => f.columnId !== filter.columnId);
+        setBoardPrefs({ filters: [...others, filter] });
+      }
+      function removeFilter(columnId) {
+        const current = getBoardPrefs();
+        setBoardPrefs({ filters: (current.filters || []).filter((f) => f.columnId !== columnId) });
+      }
+      function clearFilters() { setBoardPrefs({ filters: [] }); }
+      function setTheme(theme) {
+        const next = (theme === 'light' || theme === 'dark') ? theme : 'dark';
+        setState({ prefs: { ...state.prefs, theme: next } });
+        document.documentElement.setAttribute('data-theme', next);
+      }
+      return { getState, subscribe, hydrate, updateCell, reorderItem, createItem, deleteItemById, loadComments, addComment, removeComment, openDrawer, closeDrawer, pushToast, getBoardPrefs, setSearch, setSort, clearSort, addFilter, removeFilter, clearFilters, setTheme };
+    }
+
+    window.__cruxProfile = window.__cruxProfile || { username: 'pedro@cruxmallorca.es', name: 'Pedro', role: 'admin', color: '#3869AB', access: ['*'], isAdmin: true };
+    document.documentElement.setAttribute('data-theme', 'dark');
+
+    const store = createDemoStore();
+    createRoot(document.getElementById('root')).render(html`<${App} store=${store} />`);
+  </script>
+</body>
+</html>

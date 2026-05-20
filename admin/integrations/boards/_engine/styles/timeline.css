@@ -1,0 +1,266 @@
+/* admin/integrations/boards/_engine/styles/timeline.css */
+
+.b-tl-wrap {
+    padding: var(--sp-4) var(--sp-5);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: var(--sp-3);
+    overflow: hidden;
+}
+
+.b-tl-header {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    flex: 0 0 auto;
+    padding: 0 var(--sp-2);
+}
+
+.b-tl-counts {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+    font-size: var(--fs-sm);
+    color: var(--text-3);
+}
+.b-tl-counts strong { color: var(--text-1); font-weight: var(--fw-semibold); font-variant-numeric: tabular-nums; }
+.b-tl-conflict {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--warn);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+}
+
+.b-tl-zoom {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--text-5);
+    letter-spacing: var(--letter-mono);
+    text-transform: uppercase;
+}
+.b-tl-zoom-value {
+    min-width: 56px;
+    text-align: center;
+    color: var(--text-3);
+    font-size: var(--fs-xs);
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+/* ── Scroller ────────────────────────────────────────────────────────── */
+.b-tl-scroller {
+    flex: 1 1 auto;
+    overflow: auto;
+    background: var(--bg-elevated);
+    border: 1px solid var(--line-1);
+    border-radius: var(--r-2);
+    position: relative;
+}
+
+.b-tl-grid {
+    position: relative;
+    min-width: 100%;
+}
+
+/* ── Axis (sticky top) ───────────────────────────────────────────────── */
+.b-tl-axis {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--line-2);
+    display: flex;
+    font-family: var(--font-mono);
+}
+
+.b-tl-axis-label-spacer {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    width: 220px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    background: var(--bg-card);
+    border-right: 1px solid var(--line-2);
+    padding: 6px var(--sp-3);
+    font-size: var(--fs-xs);
+    color: var(--text-3);
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-label);
+    display: flex;
+    align-items: center;
+}
+
+.b-tl-axis-bars {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.b-tl-axis-months {
+    display: flex;
+    height: 22px;
+    border-bottom: 1px solid var(--line-1);
+}
+.b-tl-axis-month {
+    flex-shrink: 0;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    color: var(--text-1);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-mono);
+    padding: 4px 8px;
+    border-right: 1px solid var(--line-1);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    background: var(--bg-elevated);
+}
+
+.b-tl-axis-days {
+    display: flex;
+    height: 26px;
+}
+.b-tl-axis-tick {
+    flex-shrink: 0;
+    font-size: var(--fs-xs);
+    color: var(--text-5);
+    padding: 4px 0 4px 4px;
+    border-right: 1px solid var(--line-1);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+}
+.b-tl-axis-tick[data-weekend="true"] { background: rgba(127,127,127,0.06); }
+.b-tl-axis-tick[data-today="true"] {
+    color: var(--accent);
+    font-weight: 700;
+    background: var(--accent-soft);
+}
+
+/* ── Rows ────────────────────────────────────────────────────────────── */
+.b-tl-rows {
+    position: relative;
+}
+
+.b-tl-row {
+    display: flex;
+    align-items: stretch;
+    height: 52px;
+    border-bottom: 1px solid var(--line-1);
+}
+.b-tl-row:nth-child(even) .b-tl-row-bars {
+    background: rgba(127,127,127,0.03);
+}
+
+.b-tl-row-label {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--bg-card);
+    border-right: 1px solid var(--line-2);
+    padding: 0 var(--sp-4);
+    font-size: var(--fs-md);
+    font-weight: var(--fw-medium);
+    color: var(--text-2);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+}
+
+.b-tl-row-bars {
+    flex: 1;
+    position: relative;
+    min-width: 0;
+}
+
+/* ── Bars ────────────────────────────────────────────────────────────── */
+.b-tl-bar {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 30px;
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: var(--r-1);
+    padding: 0 12px;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    transition: filter 120ms, box-shadow 120ms;
+    z-index: 1;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+}
+.b-tl-bar:hover { filter: brightness(1.1); box-shadow: 0 2px 8px rgba(0,0,0,0.28); }
+.b-tl-bar[data-conflict="true"] { background: var(--warn); border-color: var(--warn); }
+
+.b-tl-bar-overflow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: var(--fs-sm);
+    color: var(--text-2);
+    white-space: nowrap;
+    pointer-events: none;
+    padding-left: 8px;
+}
+
+/* ── Arrows overlay (sits inside .b-tl-rows, covers bars-area) ──────── */
+.b-tl-arrows {
+    position: absolute;
+    top: 0;
+    left: 220px;          /* skip the labels column */
+    width: calc(100% - 220px);
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 2;
+}
+
+.b-tl-arrow-line {
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    fill: none;
+    opacity: 0.7;
+}
+.b-tl-arrow-line[data-conflict="true"] {
+    stroke: var(--warn);
+    stroke-dasharray: 5 4;
+    opacity: 0.9;
+}
+.b-tl-arrow-head { fill: var(--accent); opacity: 0.9; }
+.b-tl-arrow-head[data-conflict="true"] { fill: var(--warn); }
+
+/* ── Empty ───────────────────────────────────────────────────────────── */
+.b-tl-empty {
+    text-align: center;
+    padding: var(--sp-6);
+    color: var(--text-5);
+    font-style: italic;
+}
+
+/* ── Mobile ─────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .b-tl-row-label,
+    .b-tl-axis-label-spacer { width: 140px; font-size: var(--fs-xs); }
+    .b-tl-arrows { left: 140px; width: calc(100% - 140px); }
+}

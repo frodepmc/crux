@@ -1,0 +1,111 @@
+/* admin/integrations/boards/_engine/styles/calendar.css */
+
+.b-cal-wrap {
+    padding: var(--sp-4) var(--sp-5);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: var(--sp-3);
+}
+
+.b-cal-header {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+}
+.b-cal-month {
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-semibold);
+    color: var(--text-1);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.005em;
+    text-transform: capitalize;
+}
+
+.b-cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--line-1);
+    border: 1px solid var(--line-1);
+    border-radius: var(--r-2);
+    overflow: hidden;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.b-cal-dow {
+    background: var(--bg-card);
+    color: var(--text-4);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--letter-label);
+    text-transform: uppercase;
+    padding: 10px var(--sp-3);
+    text-align: left;
+}
+
+.b-cal-day {
+    background: var(--bg-elevated);
+    padding: 8px 10px;
+    min-height: 110px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow-y: auto;
+    transition: background 120ms;
+}
+.b-cal-day[data-outside-month="true"] {
+    background: var(--bg-card);
+    opacity: 1;
+    color: var(--text-5);
+}
+.b-cal-day[data-outside-month="true"] .b-cal-day-num {
+    color: var(--text-5);
+}
+.b-cal-day[data-today="true"] .b-cal-day-num {
+    color: var(--accent);
+    font-weight: 700;
+}
+.b-cal-day[data-drop-active="true"] {
+    background: var(--accent-soft);
+}
+
+.b-cal-day-num {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    color: var(--text-3);
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 4px;
+    line-height: 1;
+}
+
+.b-cal-pill {
+    background: var(--accent);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: var(--r-1);
+    font-size: var(--fs-sm);
+    cursor: grab;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: filter 120ms, box-shadow 120ms;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+}
+.b-cal-pill:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.b-cal-pill[data-dragging="true"] {
+    opacity: 0.4;
+}
+.b-cal-pill:active { cursor: grabbing; }
+
+@media (max-width: 768px) {
+    .b-cal-day { min-height: 60px; padding: 4px; }
+    .b-cal-pill { font-size: 0.6rem; }
+}

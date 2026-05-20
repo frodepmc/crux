@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRUX · Boards (Demo Tareas)</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/tokens.css" />
+  <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/base.css" />
+  <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/table.css" />
+  <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/kanban.css" />
+  <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/calendar.css" />
+  <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/timeline.css" />
+
+  <script type="importmap">
+    {
+      "imports": {
+        "react":             "https://esm.sh/react@18.3.1",
+        "react-dom/client":  "https://esm.sh/react-dom@18.3.1/client?external=react",
+        "htm/react":         "https://esm.sh/htm@3.1.1/react?external=react"
+      }
+    }
+  </script>
+
+  <style>
+    .b-demo-banner {
+      background: var(--warn);
+      color: #fff;
+      padding: 6px 16px;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="b-demo-banner">DEMO TAREAS · Datos en memoria · Sin backend · Refresh pierde cambios</div>
+  <div id="root"></div>
+
+  <script type="module">
+    import { createRoot } from 'react-dom/client';
+    import { html } from 'htm/react';
+
+    await import('/admin/integrations/boards/_engine/columns/text.js');
+    await import('/admin/integrations/boards/_engine/columns/longtext.js');
+    await import('/admin/integrations/boards/_engine/columns/status.js');
+    await import('/admin/integrations/boards/_engine/columns/tags.js');
+    await import('/admin/integrations/boards/_engine/columns/person.js');
+    await import('/admin/integrations/boards/_engine/columns/date.js');
+    await import('/admin/integrations/boards/_engine/columns/number.js');
+    await import('/admin/integrations/boards/_engine/columns/link.js');
+    await import('/admin/integrations/boards/_engine/columns/email.js');
+    await import('/admin/integrations/boards/_engine/columns/phone.js');
+    await import('/admin/integrations/boards/_engine/columns/checkbox.js');
+    await import('/admin/integrations/boards/_engine/columns/daterange.js');
+    await import('/admin/integrations/boards/_engine/columns/dependency.js');
+
+    const { App } = await import('/admin/integrations/boards/_engine/ui/App.js');
+
+    const STATUSES = [
+      { id: 's_todo',    label: 'Todo',     color: '#6b7280' },
+      { id: 's_doing',   label: 'Doing',    color: '#3869AB' },
+      { id: 's_review',  label: 'Review',   color: '#D97706' },
+      { id: 's_blocked', label: 'Blocked',  color: '#DC2626' },
+      { id: 's_done',    label: 'Done',     color: '#059669' },
+    ];
+
+    const COLUMNS = [
+      { id: 'col_task',    type: 'text',       name: 'Tarea',       order: 1, config: {} },
+      { id: 'col_status',  type: 'status',     name: 'Status',      order: 2, config: { options: STATUSES } },
+      { id: 'col_assign',  type: 'person',     name: 'Asignado',    order: 3, config: {} },
+      { id: 'col_range',   type: 'daterange',  name: 'Rango',       order: 4, config: {} },
+      { id: 'col_blocked', type: 'checkbox',   name: 'Bloqueado',   order: 5, config: {} },
+      { id: 'col_tags',    type: 'tags',       name: 'Tags',        order: 6, config: {} },
+      { id: 'col_estim',   type: 'number',     name: 'Horas',       order: 7, config: { suffix: ' h' } },
+      { id: 'col_link',    type: 'link',       name: 'Enlace',      order: 8, config: {} },
+      { id: 'col_deps',    type: 'dependency', name: 'Depende de',  order: 9, config: {} },
+      { id: 'col_notes',   type: 'longtext',   name: 'Notas',       order: 10, config: {} },
+    ];
+
+    const TEAM = [
+      { username: 'pedro@cruxmallorca.es', name: 'Pedro', color: '#3869AB' },
+      { username: 'alvaro@cruxmallorca.es', name: 'Alvaro', color: '#D4A84A' },
+      { username: 'marc@cruxmallorca.es',  name: 'Marc',  color: '#5CB88A' },
+      { username: 'javi@cruxmallorca.es',  name: 'Javi',  color: '#D96B6B' },
+    ];
+
+    const SEED_RAW = [
+      { id: 'i_t1', name: 'Diseño cabecera v2',     group: 'g_sprint',  cells: { col_task: 'Diseño cabecera v2', col_status: 's_doing', col_assign: ['marc@cruxmallorca.es'], col_range: { start: '2026-05-18', end: '2026-05-25' }, col_blocked: false, col_tags: ['design', 'sprint-23'], col_estim: 4, col_link: '', col_deps: [], col_notes: 'Variantes: hero compact + hero full-bleed.' } },
+      { id: 'i_t2', name: 'API leads webhook',      group: 'g_sprint',  cells: { col_task: 'API leads webhook', col_status: 's_review', col_assign: ['javi@cruxmallorca.es'], col_range: { start: '2026-05-14', end: '2026-05-21' }, col_blocked: false, col_tags: ['backend', 'sprint-23'], col_estim: 6, col_link: 'https://github.com/frodepmc/crux/pull/12', col_deps: [], col_notes: 'PR enviado, esperando review.' } },
+      { id: 'i_t3', name: 'Migración pricing Acme', group: 'g_sprint',  cells: { col_task: 'Migración pricing Acme', col_status: 's_blocked', col_assign: ['pedro@cruxmallorca.es'], col_range: { start: '2026-05-19', end: '2026-05-22' }, col_blocked: true, col_tags: ['cliente'], col_estim: 3, col_link: '', col_deps: ['i_t2', 'i_t1'], col_notes: 'Esperando confirmación de Acme sobre tier.' } },
+      { id: 'i_t4', name: 'Onboarding Carlos Canet',group: 'g_sprint',  cells: { col_task: 'Onboarding Carlos Canet', col_status: 's_done', col_assign: ['alvaro@cruxmallorca.es'], col_range: { start: '2026-05-12', end: '2026-05-19' }, col_blocked: false, col_tags: ['personas'], col_estim: 8, col_link: '', col_deps: [], col_notes: 'Plan capacidad + buddy asignado.' } },
+      { id: 'i_t5', name: 'Dashboard finanzas V2',  group: 'g_backlog', cells: { col_task: 'Dashboard finanzas V2', col_status: 's_todo', col_assign: [], col_range: null, col_blocked: false, col_tags: ['finanzas'], col_estim: 16, col_link: '', col_deps: [], col_notes: 'Cuando termine el sprint actual.' } },
+      { id: 'i_t6', name: 'Audit accesibilidad web',group: 'g_backlog', cells: { col_task: 'Audit accesibilidad web', col_status: 's_todo', col_assign: [], col_range: null, col_blocked: false, col_tags: ['a11y', 'web'], col_estim: 6, col_link: '', col_deps: [], col_notes: 'WCAG 2.2 AA.' } },
+    ];
+
+    function createDemoStore() {
+      let state = {
+        boardId: 'b_tareas_demo',
+        summary: { id: 'b_tareas_demo', name: 'Tareas Equipo (Demo)', type: 'tasks', color: '#5CB88A', icon: 'layers', visibility: 'team' },
+        meta: {
+          columns: COLUMNS,
+          groups: [
+            { id: 'g_sprint',  name: 'Sprint actual', color: '#3869AB', order: 1, collapsed: false },
+            { id: 'g_backlog', name: 'Backlog',       color: '#6b7280', order: 2, collapsed: false },
+          ],
+          views: {
+            kanban: { columnId: 'col_status' },
+            calendar: { columnId: 'col_range' },
+            timeline: { columnId: 'col_range' },
+          },
+          defaultView: 'table',
+        },
+        itemIndex: SEED_RAW.map((it, i) => ({ id: it.id, groupId: it.group, position: i })),
+        itemsById: Object.fromEntries(SEED_RAW.map((it) => [it.id, { id: it.id, boardId: 'b_tareas_demo', groupId: it.group, name: it.name, cells: it.cells, version: 1, updatedAt: new Date().toISOString(), updatedBy: 'demo' }])),
+        prefs: { filters: {}, lastBoard: null, theme: 'dark' },
+        team: TEAM,
+        profile: { username: 'pedro@cruxmallorca.es', name: 'Pedro', role: 'admin', color: '#3869AB', access: ['*'], isAdmin: true },
+        loading: false,
+        error: null,
+        drawer: { open: false, itemId: null },
+        toasts: [],
+        pendingWrites: 0,
+        commentsByItemId: {
+          i_t2: [
+            { id: 'c1', authorId: 'pedro@cruxmallorca.es', text: 'Lookin good, PR aprobado en cuanto el CI pase.', createdAt: '2026-05-19T10:00:00Z' },
+            { id: 'c2', authorId: 'marc@cruxmallorca.es',  text: 'Subo cobertura mañana.', createdAt: '2026-05-19T14:30:00Z' },
+          ],
+        },
+      };
+      const subs = new Set();
+      function getState() { return state; }
+      function subscribe(fn) { subs.add(fn); return () => subs.delete(fn); }
+      function notify() { subs.forEach((fn) => fn()); }
+      function setState(patch) { state = { ...state, ...patch }; notify(); }
+      function pushToast(tone, text, ttl = 4000) {
+        const id = Math.random().toString(36).slice(2, 8);
+        setState({ toasts: [...state.toasts, { id, tone, text }] });
+        if (ttl) setTimeout(() => setState({ toasts: state.toasts.filter((t) => t.id !== id) }), ttl);
+      }
+      async function hydrate() {}
+      async function updateCell(itemId, columnId, value) {
+        const current = state.itemsById[itemId]; if (!current) return;
+        const isName = columnId === '__name__';
+        const next = isName
+          ? { ...current, name: String(value || '').slice(0, 200), updatedAt: new Date().toISOString() }
+          : { ...current, cells: { ...current.cells, [columnId]: value }, updatedAt: new Date().toISOString() };
+        setState({ itemsById: { ...state.itemsById, [itemId]: next } });
+      }
+      async function reorderItem(itemId, groupId, position) {
+        const oldIndex = state.itemIndex;
+        const entry = oldIndex.find((x) => x.id === itemId); if (!entry) return;
+        const without = oldIndex.filter((x) => x.id !== itemId);
+        const newEntry = { ...entry, groupId };
+        const sameGroup = without.filter((x) => x.groupId === groupId);
+        const targetPos = Math.max(0, Math.min(position, sameGroup.length));
+        const next = []; let seen = 0, inserted = false;
+        for (const e of without) {
+          if (!inserted && e.groupId === groupId && seen === targetPos) { next.push(newEntry); inserted = true; }
+          if (e.groupId === groupId) seen += 1;
+          next.push(e);
+        }
+        if (!inserted) next.push(newEntry);
+        setState({ itemIndex: next });
+      }
+      async function createItem(payload) {
+        const id = 'i_' + Math.random().toString(36).slice(2, 8);
+        const item = { id, boardId: 'b_tareas_demo', groupId: payload.groupId || 'g_sprint', name: payload.name, cells: payload.cells || {}, version: 1, createdAt: new Date().toISOString() };
+        setState({
+          itemsById: { ...state.itemsById, [id]: item },
+          itemIndex: [...state.itemIndex, { id, groupId: item.groupId, position: state.itemIndex.length }],
+        });
+        return item;
+      }
+      async function deleteItemById(itemId) {
+        const map = { ...state.itemsById }; delete map[itemId];
+        setState({ itemsById: map, itemIndex: state.itemIndex.filter((x) => x.id !== itemId), drawer: { open: false, itemId: null } });
+      }
+      async function loadComments(itemId) {
+        if (state.commentsByItemId[itemId] === undefined) {
+          setState({ commentsByItemId: { ...state.commentsByItemId, [itemId]: [] } });
+        }
+        return state.commentsByItemId[itemId] || [];
+      }
+      async function addComment(itemId, text) {
+        const id = 'c_' + Math.random().toString(36).slice(2, 8);
+        const comment = { id, authorId: 'pedro@cruxmallorca.es', text, createdAt: new Date().toISOString() };
+        const current = state.commentsByItemId[itemId] || [];
+        setState({ commentsByItemId: { ...state.commentsByItemId, [itemId]: [...current, comment] } });
+        return comment;
+      }
+      async function removeComment(itemId, commentId) {
+        const current = state.commentsByItemId[itemId] || [];
+        setState({ commentsByItemId: { ...state.commentsByItemId, [itemId]: current.filter((c) => c.id !== commentId) } });
+      }
+      function openDrawer(itemId) { setState({ drawer: { open: true, itemId } }); }
+      function closeDrawer()      { setState({ drawer: { open: false, itemId: null } }); }
+      function getBoardPrefs() {
+        const f = (state.prefs.filters && state.prefs.filters['b_tareas_demo']) || {};
+        return { filters: f.filters || [], search: f.search || '', sortBy: f.sortBy || null, sortDir: f.sortDir || 'asc' };
+      }
+      function setBoardPrefs(patch) {
+        const current = getBoardPrefs();
+        const next = { ...current, ...patch };
+        setState({ prefs: { ...state.prefs, filters: { ...state.prefs.filters, 'b_tareas_demo': next } } });
+      }
+      function setSearch(text) { setBoardPrefs({ search: text || '' }); }
+      function setSort(columnId, dir) { setBoardPrefs({ sortBy: columnId, sortDir: dir || 'asc' }); }
+      function clearSort() { setBoardPrefs({ sortBy: null, sortDir: 'asc' }); }
+      function addFilter(filter) {
+        const current = getBoardPrefs();
+        const others = (current.filters || []).filter((f) => f.columnId !== filter.columnId);
+        setBoardPrefs({ filters: [...others, filter] });
+      }
+      function removeFilter(columnId) {
+        const current = getBoardPrefs();
+        setBoardPrefs({ filters: (current.filters || []).filter((f) => f.columnId !== columnId) });
+      }
+      function clearFilters() { setBoardPrefs({ filters: [] }); }
+      function setTheme(theme) {
+        const next = (theme === 'light' || theme === 'dark') ? theme : 'dark';
+        setState({ prefs: { ...state.prefs, theme: next } });
+        document.documentElement.setAttribute('data-theme', next);
+      }
+      return { getState, subscribe, hydrate, updateCell, reorderItem, createItem, deleteItemById, loadComments, addComment, removeComment, openDrawer, closeDrawer, pushToast, getBoardPrefs, setSearch, setSort, clearSort, addFilter, removeFilter, clearFilters, setTheme };
+    }
+
+    // Fake __cruxProfile so the comments delete button enables for demo author
+    window.__cruxProfile = window.__cruxProfile || { username: 'pedro@cruxmallorca.es', name: 'Pedro', role: 'admin', color: '#3869AB', access: ['*'], isAdmin: true };
+    document.documentElement.setAttribute('data-theme', 'dark');
+
+    const store = createDemoStore();
+    createRoot(document.getElementById('root')).render(html`<${App} store=${store} />`);
+  </script>
+</body>
+</html>

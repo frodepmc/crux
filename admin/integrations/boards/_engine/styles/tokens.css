@@ -1,0 +1,103 @@
+/* admin/integrations/boards/_engine/styles/tokens.css
+ *
+ * Design tokens del motor de boards. Editorial dark default.
+ * Todas las CSS vars permiten override con [data-theme="light"] en V1.5.
+ */
+
+:root, [data-theme="dark"] {
+    /* ─── Base ─── */
+    --bg-base:        #0E1A2B;
+    --bg-elevated:    #121d2f;
+    --bg-card:        #161e2e;
+    --bg-card-hover:  #1a2638;
+    --bg-input:       #1a2333;
+
+    /* ─── Lines ─── */
+    --line-1: #1a2638;
+    --line-2: #262f43;
+    --line-3: #3a4256;
+
+    /* ─── Text ─── */
+    --text-1: #FAFAF8;
+    --text-2: #E8E4E0;
+    --text-3: #C8C2BC;
+    --text-4: #8a8a87;
+    --text-5: #6a7a8a;
+
+    /* ─── Accents ─── */
+    --accent:        #3869AB;
+    --accent-soft:   rgba(56,105,171,0.18);
+    --accent-line:   rgba(56,105,171,0.35);
+    --accent-chip-bg: rgba(56,105,171,0.18);
+    --accent-chip-fg: var(--text-1);
+
+    /* ─── Semantic ─── */
+    --ok:    #5CB88A;
+    --warn:  #D97706;
+    --err:   #D96B6B;
+    --info:  #3869AB;
+
+    /* ─── Radius ─── */
+    --r-1: 2px;
+    --r-2: 4px;
+    --r-3: 8px;
+
+    /* ─── Type ─── */
+    --font-sans: 'Instrument Sans', -apple-system, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+    /* ─── Spacing scale ─── */
+    --sp-1: 4px;
+    --sp-2: 8px;
+    --sp-3: 12px;
+    --sp-4: 16px;
+    --sp-5: 24px;
+    --sp-6: 32px;
+    --sp-7: 48px;
+    --sp-8: 64px;
+
+    /* ─── Type scale (consistent rhythm) ─── */
+    --fs-xs: 11px;
+    --fs-sm: 12px;
+    --fs-base: 13.5px;
+    --fs-md: 14px;
+    --fs-lg: 16px;
+    --fs-xl: 19px;
+    --fs-2xl: 24px;
+
+    --fw-regular: 400;
+    --fw-medium: 500;
+    --fw-semibold: 600;
+    --fw-bold: 700;
+
+    --lh-tight: 1.25;
+    --lh-normal: 1.5;
+    --lh-relaxed: 1.65;
+
+    --letter-mono: 0.04em;
+    --letter-label: 0.12em;
+}
+
+[data-theme="light"] {
+    --bg-base:        #FAFAFA;
+    --bg-elevated:    #FFFFFF;
+    --bg-card:        #FFFFFF;
+    --bg-card-hover:  #F4F6F8;
+    --bg-input:       #FFFFFF;
+
+    --line-1: #E8ECF0;
+    --line-2: #CBD5E0;
+    --line-3: #A0AEC0;
+
+    --text-1: #0E1A2B;
+    --text-2: #1a2a3a;
+    --text-3: #4a5568;
+    --text-4: #718096;
+    --text-5: #A0AEC0;
+
+    --accent:      #3869AB;
+    --accent-soft: rgba(56,105,171,0.08);
+    --accent-line: rgba(56,105,171,0.25);
+    --accent-chip-bg: rgba(56,105,171,0.14);
+    --accent-chip-fg: #1e3a5f;
+}

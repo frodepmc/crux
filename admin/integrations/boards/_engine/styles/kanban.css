@@ -1,0 +1,174 @@
+/* admin/integrations/boards/_engine/styles/kanban.css
+ *
+ * Vista Kanban: columnas horizontales scroll, cards verticales con DnD.
+ */
+
+.b-kanban-wrap {
+    padding: var(--sp-4) var(--sp-5);
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: 100%;
+}
+
+.b-kanban {
+    display: flex;
+    gap: var(--sp-3);
+    align-items: flex-start;
+    min-width: max-content;
+    padding-bottom: var(--sp-4);
+}
+
+.b-kanban-col {
+    flex: 0 0 300px;
+    background: var(--bg-base);
+    border: 1px solid var(--line-1);
+    border-radius: var(--r-2);
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 220px);
+    transition: border-color 120ms, background 120ms;
+}
+.b-kanban-col[data-drop-active="true"] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    box-shadow: 0 0 0 2px var(--accent-line);
+}
+.b-kanban-col[data-drop-active="true"] .b-kanban-col-header {
+    background: var(--accent-soft);
+}
+
+.b-kanban-col-header {
+    padding: var(--sp-3) var(--sp-4);
+    border-bottom: 1px solid var(--line-2);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    background: var(--bg-elevated);
+}
+.b-kanban-col-chip {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+.b-kanban-col-label {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    color: var(--text-2);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-mono);
+}
+.b-kanban-col-count {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-medium);
+    color: var(--text-4);
+    background: var(--bg-card);
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1px solid var(--line-1);
+}
+
+.b-kanban-col-body {
+    padding: var(--sp-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    overflow-y: auto;
+    flex: 1 1 auto;
+}
+
+.b-kanban-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-2);
+    padding: var(--sp-4);
+    cursor: pointer;
+    transition: border-color 120ms, transform 120ms, box-shadow 120ms;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.b-kanban-card:hover {
+    border-color: var(--accent-line);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.b-kanban-card[data-dragging="true"] {
+    opacity: 0.4;
+}
+.b-kanban-card[data-drop-target="true"] {
+    position: relative;
+}
+.b-kanban-card[data-drop-target="true"]::before,
+.b-kanban-card[data-drop-target="true"]::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 2px;
+    pointer-events: none;
+    box-shadow: 0 0 0 2px var(--accent-soft);
+}
+.b-kanban-card[data-drop-target="true"][data-drop-position="top"]::before {
+    top: -5px;
+}
+.b-kanban-card[data-drop-target="true"][data-drop-position="bottom"]::after {
+    bottom: -5px;
+}
+.b-kanban-card[data-drop-target="true"][data-drop-position="none"]::before,
+.b-kanban-card[data-drop-target="true"][data-drop-position="none"]::after {
+    display: none;
+}
+
+.b-kanban-card-title {
+    font-weight: var(--fw-semibold);
+    color: var(--text-1);
+    font-size: var(--fs-md);
+    margin-bottom: var(--sp-3);
+    line-height: var(--lh-tight);
+    letter-spacing: -0.005em;
+}
+
+.b-kanban-card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.b-kanban-card-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--fs-sm);
+    color: var(--text-3);
+}
+.b-kanban-card-label {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--text-5);
+    font-weight: var(--fw-medium);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-label);
+    flex: 0 0 56px;
+}
+
+.b-kanban-empty {
+    padding: var(--sp-4);
+    text-align: center;
+    color: var(--text-5);
+    font-size: var(--fs-sm);
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .b-kanban-col {
+        flex: 0 0 240px;
+    }
+}
+
+/* ── Add card button ─────────────────────────────────────────────────── */
+.b-kanban-add-card {
+    margin: var(--sp-2);
+    width: calc(100% - var(--sp-3) - var(--sp-3));
+}
