@@ -128,6 +128,31 @@ async function deleteBoardCascade(boardId) {
     return { deletedKeys: keys.length };
 }
 
+// ─── comments ────────────────────────────────────────────────────────────
+async function getComments(boardId, itemId) {
+    if (!boardId || !itemId) throw new Error('boardId+itemId required');
+    const data = await kv.get(K_COMMENTS(boardId, itemId));
+    if (!Array.isArray(data)) return [];
+    return data;
+}
+
+async function appendComment(boardId, itemId, comment) {
+    if (!boardId || !itemId) throw new Error('boardId+itemId required');
+    if (!comment || !comment.text) throw new Error('comment.text required');
+    const list = await getComments(boardId, itemId);
+    const next = [...list, comment];
+    await kv.set(K_COMMENTS(boardId, itemId), next);
+    return comment;
+}
+
+async function deleteComment(boardId, itemId, commentId) {
+    if (!boardId || !itemId || !commentId) throw new Error('boardId+itemId+commentId required');
+    const list = await getComments(boardId, itemId);
+    const next = list.filter((c) => c.id !== commentId);
+    await kv.set(K_COMMENTS(boardId, itemId), next);
+    return true;
+}
+
 module.exports = {
     PREFIX,
     K_INDEX,
@@ -150,4 +175,7 @@ module.exports = {
     getUserPrefs,
     patchUserPrefs,
     deleteBoardCascade,
+    getComments,
+    appendComment,
+    deleteComment,
 };

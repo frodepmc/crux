@@ -222,6 +222,32 @@ const boards = require(path.join(__dirname, '..', 'api', '_lib', 'boards.js'));
         check('cascade removes items', await boards.getItem('b_crm', 'i_x') === null);
     }
 
+    reset();
+
+    // Test: getComments missing → []
+    {
+        const cs = await boards.getComments('b_x', 'i_x');
+        check('getComments missing → []', Array.isArray(cs) && cs.length === 0);
+    }
+
+    // Test: appendComment + getComments
+    {
+        const c1 = { id: 'c1', authorId: 'pedro@cruxmallorca.es', text: 'Hola', createdAt: '2026-05-20T10:00:00Z' };
+        const c2 = { id: 'c2', authorId: 'marc@cruxmallorca.es',  text: 'Adios', createdAt: '2026-05-20T10:05:00Z' };
+        await boards.appendComment('b_x', 'i_x', c1);
+        await boards.appendComment('b_x', 'i_x', c2);
+        const cs = await boards.getComments('b_x', 'i_x');
+        check('appendComment order preserved', cs[0].id === 'c1' && cs[1].id === 'c2');
+        check('appendComment length 2', cs.length === 2);
+    }
+
+    // Test: deleteComment
+    {
+        await boards.deleteComment('b_x', 'i_x', 'c1');
+        const cs = await boards.getComments('b_x', 'i_x');
+        check('deleteComment removes only the target', cs.length === 1 && cs[0].id === 'c2');
+    }
+
     // ─── (Tasks 4-9 añaden más tests aquí, antes del console.log) ──────────
 
     console.log(failures === 0 ? '\nAll tests passed ✓' : '\n' + failures + ' test(s) FAILED');

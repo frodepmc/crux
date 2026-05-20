@@ -38,6 +38,9 @@ export const api = {
     patchItem:         (id, iid, payload)  => call('PATCH',  `/api/boards/${id}/items/${iid}`, payload),
     deleteItem:        (id, iid)           => call('DELETE', `/api/boards/${id}/items/${iid}`),
     reorderItem:       (id, payload)       => call('POST',   `/api/boards/${id}/items/reorder`, payload),
+    listComments:   (id, iid)              => call('GET',    `/api/boards/${id}/comments/${iid}`),
+    addComment:     (id, iid, text)        => call('POST',   `/api/boards/${id}/comments/${iid}`, { text }),
+    deleteComment:  (id, iid, cid)         => call('DELETE', `/api/boards/${id}/comments/${iid}?commentId=${encodeURIComponent(cid)}`),
 
     getUserPrefs:      ()                  => call('GET',    '/api/user/board-prefs'),
     patchUserPrefs:    (patch)             => call('PATCH',  '/api/user/board-prefs', patch),
