@@ -75,7 +75,11 @@
     const boards = data.boards || [];
     const root = document.getElementById('hub-content');
     if (boards.length === 0) {
-      root.innerHTML = '<div class="b-empty">No tienes acceso a ningún board todavía.</div>';
+      root.innerHTML = `
+        <div class="b-empty">
+          <div class="b-empty-title">Sin boards visibles</div>
+          <div class="b-empty-sub">No tienes acceso a ningún board todavía. Pide al admin que cree uno o te invite a un board privado.</div>
+        </div>`;
     } else {
       root.innerHTML = '<div class="hub-grid">' + boards.map((b) => `
         <a class="hub-card" href="/admin/integrations/boards/board.html?id=${encodeURIComponent(b.id)}">

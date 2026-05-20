@@ -179,7 +179,7 @@ function AddFilterButton({ meta, store, activeFilters }) {
                             : filterableColumns.map((col) => html`
                                 <div key=${col.id}
                                      class="b-filter-popover-row"
-                                     onClick=${() => setSelectedColId(col.id)}>${col.name} <span style=${{ color: 'var(--text-5)', fontSize: '0.65rem' }}>${col.type}</span></div>
+                                     onClick=${() => setSelectedColId(col.id)}>${col.name} <span style=${{ color: 'var(--text-5)', fontSize: 'var(--fs-xs)', fontFamily: 'var(--font-mono)' }}>${col.type}</span></div>
                             `)}
                     ` : html`
                         <${FilterValuePicker}
@@ -220,7 +220,7 @@ function FilterValuePicker({ col, store, onCommit, onBack }) {
 
     return html`
         <h4 style=${{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button onClick=${onBack} style=${{ color: 'var(--text-4)', display: 'inline-flex', alignItems: 'center' }}>
+            <button onClick=${onBack} aria-label="Volver" title="Volver" style=${{ color: 'var(--text-4)', display: 'inline-flex', alignItems: 'center' }}>
                 <${Icon} name="chevron-left" size=${14} />
             </button>
             ${col.name}

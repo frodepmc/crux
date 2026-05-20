@@ -35,8 +35,11 @@ module.exports = async function handler(req, res) {
             const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
             if (!body || typeof body !== 'object') return res.status(400).json({ error: 'body required' });
 
-            // CAS por version
-            if (typeof body.version === 'number' && body.version !== current.version) {
+            // CAS por version (obligatorio: protege contra last-write-wins silencioso)
+            if (typeof body.version !== 'number') {
+                return res.status(400).json({ error: 'version required' });
+            }
+            if (body.version !== current.version) {
                 return res.status(409).json({
                     error: 'version conflict',
                     serverVersion: current.version,

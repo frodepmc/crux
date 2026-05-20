@@ -21,7 +21,7 @@ register({
                             color: 'var(--accent-chip-fg)',
                             padding: '2px 8px',
                             borderRadius: '10px',
-                            fontSize: '10px',
+                            fontSize: 'var(--fs-xs)',
                             fontWeight: 600,
                             display: 'inline-flex',
                             alignItems: 'center',
@@ -37,7 +37,9 @@ register({
     renderEditor: (value, ctx, onChange) => {
         const ids = Array.isArray(value) ? value : (value ? [value] : []);
         const itemsById = ctx?.itemsById || {};
-        const allItems = Object.values(itemsById).filter((it) => !ids.includes(it.id) && it.id !== ctx?.item?.id);
+        const allItems = Object.values(itemsById)
+            .filter((it) => !ids.includes(it.id) && it.id !== ctx?.item?.id)
+            .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
         function add(targetId) {
             if (!targetId || ids.includes(targetId)) return;
             onChange([...ids, targetId]);
@@ -57,7 +59,7 @@ register({
                                 color: 'var(--accent-chip-fg)',
                                 padding: '2px 8px',
                                 borderRadius: '10px',
-                                fontSize: '10px',
+                                fontSize: 'var(--fs-xs)',
                                 fontWeight: 600,
                                 display: 'inline-flex',
                                 alignItems: 'center',

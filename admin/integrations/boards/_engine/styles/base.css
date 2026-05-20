@@ -296,11 +296,11 @@ a { color: var(--text-2); text-decoration: none; }
 }
 
 .b-filter-popover h4 {
-    font-size: 0.7rem;
+    font-size: var(--fs-xs);
     font-family: var(--font-mono);
     color: var(--text-5);
     text-transform: uppercase;
-    letter-spacing: 0.15em;
+    letter-spacing: var(--letter-label);
     margin-bottom: 4px;
 }
 
@@ -308,7 +308,7 @@ a { color: var(--text-2); text-decoration: none; }
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.8rem;
+    font-size: var(--fs-sm);
     color: var(--text-2);
     padding: 4px 6px;
     border-radius: var(--r-1);
@@ -324,7 +324,7 @@ a { color: var(--text-2); text-decoration: none; }
     border-radius: var(--r-1);
     color: var(--text-2);
     padding: var(--sp-2);
-    font-size: 0.8rem;
+    font-size: var(--fs-sm);
     width: 100%;
 }
 .b-filter-popover .b-input:focus { outline: none; border-color: var(--accent); }
@@ -332,10 +332,10 @@ a { color: var(--text-2); text-decoration: none; }
 .b-clear-all {
     background: transparent;
     color: var(--text-5);
-    font-size: 0.7rem;
+    font-size: var(--fs-xs);
     font-family: var(--font-mono);
     text-transform: uppercase;
-    letter-spacing: 0.15em;
+    letter-spacing: var(--letter-label);
     padding: 4px 8px;
 }
 .b-clear-all:hover { color: var(--err); }

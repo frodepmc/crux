@@ -23,6 +23,19 @@ export function ItemDrawer({ store }) {
         if (comments === undefined) store.loadComments(item.id);
     }, [item.id, comments]);
 
+    // Cerrar drawer con Escape (a menos que el foco esté en un textarea con texto)
+    useEffect(() => {
+        function onKey(e) {
+            if (e.key !== 'Escape') return;
+            const tag = e.target?.tagName;
+            // Si el usuario está escribiendo en un textarea con contenido, no robar el Escape
+            if (tag === 'TEXTAREA' && e.target.value) return;
+            store.closeDrawer();
+        }
+        document.addEventListener('keydown', onKey);
+        return () => document.removeEventListener('keydown', onKey);
+    }, [store]);
+
     function updateCell(columnId, value) {
         store.updateCell(item.id, columnId, value);
     }
@@ -56,7 +69,7 @@ export function ItemDrawer({ store }) {
                 <div style=${{ marginTop: 'var(--sp-5)', borderTop: '1px solid var(--line-1)', paddingTop: 'var(--sp-3)' }}>
                     <button onClick=${() => {
                         if (confirm('¿Borrar este item?')) store.deleteItemById(item.id);
-                    }} style=${{ color: 'var(--err)', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    }} style=${{ color: 'var(--err)', fontSize: 'var(--fs-md)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                         <${Icon} name="trash" size=${14} />
                         Borrar item
                     </button>
@@ -134,17 +147,19 @@ function CommentsSection({ store, item, comments }) {
     return html`
         <div style=${{ marginTop: 'var(--sp-5)', borderTop: '1px solid var(--line-1)', paddingTop: 'var(--sp-4)', display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
             <div style=${{
-                fontSize: '0.65rem',
+                fontSize: 'var(--fs-xs)',
                 fontFamily: 'var(--font-mono)',
                 color: 'var(--text-5)',
                 textTransform: 'uppercase',
-                letterSpacing: '0.15em',
+                letterSpacing: 'var(--letter-label)',
             }}>Comentarios (${comments.length})</div>
 
             ${comments.length === 0
-                ? html`<div style=${{ color: 'var(--text-5)', fontSize: '0.8rem', fontStyle: 'italic' }}>Sin comentarios todavía.</div>`
+                ? html`<div style=${{ color: 'var(--text-5)', fontSize: 'var(--fs-sm)', fontStyle: 'italic' }}>Sin comentarios todavía.</div>`
                 : comments.map((c) => {
                     const isMine = profile && c.authorId === profile.username;
+                    const isAdmin = profile && profile.role === 'admin';
+                    const canDelete = isMine || isAdmin;
                     return html`
                         <div key=${c.id} style=${{
                             background: 'var(--bg-base)',
@@ -155,18 +170,18 @@ function CommentsSection({ store, item, comments }) {
                             flexDirection: 'column',
                             gap: '4px',
                         }}>
-                            <div style=${{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.7rem', color: 'var(--text-5)' }}>
+                            <div style=${{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: 'var(--fs-xs)', color: 'var(--text-5)' }}>
                                 <strong style=${{ color: 'var(--text-2)' }}>${c.authorId}</strong>
                                 <span style=${{ fontFamily: 'var(--font-mono)' }}>${fmtDate(c.createdAt)}</span>
-                                ${isMine ? html`
+                                ${canDelete ? html`
                                     <button onClick=${() => {
                                         if (confirm('¿Borrar comentario?')) store.removeComment(item.id, c.id);
-                                    }} style=${{ marginLeft: 'auto', color: 'var(--err)', display: 'inline-flex', alignItems: 'center' }} aria-label="Borrar comentario">
+                                    }} style=${{ marginLeft: 'auto', color: 'var(--err)', display: 'inline-flex', alignItems: 'center' }} aria-label="Borrar comentario" title=${isMine ? 'Borrar mi comentario' : 'Borrar comentario (admin)'}>
                                         <${Icon} name="trash" size=${12} />
                                     </button>
                                 ` : null}
                             </div>
-                            <div style=${{ color: 'var(--text-2)', fontSize: '0.85rem', whiteSpace: 'pre-wrap' }}>${c.text}</div>
+                            <div style=${{ color: 'var(--text-2)', fontSize: 'var(--fs-md)', whiteSpace: 'pre-wrap' }}>${c.text}</div>
                         </div>
                     `;
                 })}
@@ -184,8 +199,8 @@ function CommentsSection({ store, item, comments }) {
                         color: '#fff',
                         padding: 'var(--sp-2) var(--sp-3)',
                         borderRadius: 'var(--r-1)',
-                        fontSize: '0.8rem',
-                        fontWeight: 600,
+                        fontSize: 'var(--fs-sm)',
+                        fontWeight: 'var(--fw-semibold)',
                         opacity: (!draft.trim() || pending) ? 0.4 : 1,
                         display: 'inline-flex',
                         alignItems: 'center',

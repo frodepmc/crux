@@ -56,7 +56,7 @@ register({
                                checked=${arr.includes(m.username)}
                                onChange=${() => toggle(m.username)} />
                         ${avatar(m)}
-                        <span style=${{ fontSize: '0.85rem' }}>${m.name}</span>
+                        <span style=${{ fontSize: 'var(--fs-md)' }}>${m.name}</span>
                     </label>
                 `)}
             </div>

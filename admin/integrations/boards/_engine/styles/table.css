@@ -116,9 +116,9 @@
         content: attr(data-label);
         display: block;
         font-family: var(--font-mono);
-        font-size: 0.6rem;
+        font-size: var(--fs-xs);
         text-transform: uppercase;
-        letter-spacing: 0.15em;
+        letter-spacing: var(--letter-label);
         color: var(--text-5);
         margin-bottom: var(--sp-1);
     }

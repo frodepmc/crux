@@ -2,12 +2,11 @@
 // Vista Timeline: flex layout con label col + bars area.
 
 import { html } from 'htm/react';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useStore } from '../hooks.js';
 import { applyFilters } from '../filters.js';
 import { Icon } from '../ui/Icon.js';
 
-const LABEL_PX = 220;
 const ROW_PX = 52;
 const BAR_GAP = 6;
 
@@ -128,7 +127,7 @@ export function TimelineView({ store }) {
         }
     }
 
-    // Coords RELATIVAS al bars-area (no incluyen LABEL_PX)
+    // Coords RELATIVAS al bars-area (no incluyen el ancho del label-col; el .b-tl-arrows SVG se desplaza con left:220px en CSS)
     function barLeft(r) { return diffDays(startD, r.start) * dayPx; }
     function barWidth(r) { return Math.max((diffDays(r.start, r.end) + 1) * dayPx, dayPx); }
     function barRight(r) { return barLeft(r) + barWidth(r); }

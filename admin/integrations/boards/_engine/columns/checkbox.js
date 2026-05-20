@@ -16,8 +16,8 @@ register({
             borderRadius: '3px',
             background: value ? 'var(--ok)' : 'transparent',
             color: '#fff',
-            fontSize: '11px',
-            fontWeight: 700,
+            fontSize: 'var(--fs-xs)',
+            fontWeight: 'var(--fw-bold)',
         }}>${value ? html`<${Icon} name="check" size=${12} strokeWidth=${3} color="#fff" />` : ''}</span>
     `,
     renderEditor: (value, ctx, onChange) => html`
@@ -26,7 +26,7 @@ register({
                    checked=${!!value}
                    onChange=${(e) => onChange(e.target.checked)}
                    aria-label=${ctx.column.name} />
-            <span style=${{ fontSize: '0.85rem', color: 'var(--text-3)' }}>${value ? 'Sí' : 'No'}</span>
+            <span style=${{ fontSize: 'var(--fs-md)', color: 'var(--text-3)' }}>${value ? 'Sí' : 'No'}</span>
         </label>
     `,
     compare: (a, b) => (b ? 1 : 0) - (a ? 1 : 0),

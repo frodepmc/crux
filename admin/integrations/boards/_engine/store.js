@@ -33,7 +33,11 @@ export function createStore(boardId) {
     function pushToast(tone, text, ttl = 4000) {
         const id = Math.random().toString(36).slice(2, 8);
         setState({ toasts: [...state.toasts, { id, tone, text }] });
-        if (ttl) setTimeout(() => setState({ toasts: state.toasts.filter((t) => t.id !== id) }), ttl);
+        // Usar el `state` actual (referencia mutable del closure de createStore) en el callback,
+        // no la snapshot capturada al schedular; si no, ráfagas de toasts se "resucitan" entre sí.
+        if (ttl) setTimeout(() => {
+            setState({ toasts: state.toasts.filter((t) => t.id !== id) });
+        }, ttl);
     }
 
     // ── Filters / search / sort (per-board, persisted to user-prefs) ──
@@ -41,38 +45,44 @@ export function createStore(boardId) {
         return state.prefs.filters?.[boardId] || { filters: [], search: '', sortBy: null, sortDir: 'asc' };
     }
 
+    // Persistencia unificada: filtros y theme comparten el mismo debounce.
+    // Cada llamada acumula los campos a persistir; el timer hace UN solo PATCH
+    // con todo (evita que setTheme cancele un persist de filtros pendiente o viceversa).
+    let persistTimer = null;
+    let pendingPersistThemeChange = false;
+    let pendingPersistFiltersChange = false;
+
+    function flushPersist() {
+        persistTimer = null;
+        const patch = { lastBoard: boardId };
+        if (pendingPersistFiltersChange) {
+            patch.filters = { ...state.prefs.filters, [boardId]: getBoardPrefs() };
+            pendingPersistFiltersChange = false;
+        }
+        if (pendingPersistThemeChange) {
+            patch.theme = state.prefs.theme;
+            pendingPersistThemeChange = false;
+        }
+        api.patchUserPrefs(patch).catch((err) => {
+            console.warn('[boards] persist prefs failed:', err.message);
+        });
+    }
+
     function setTheme(theme) {
         const next = (theme === 'light' || theme === 'dark') ? theme : 'dark';
         setState({ prefs: { ...state.prefs, theme: next } });
-        // Apply to DOM
         if (typeof document !== 'undefined') {
             document.documentElement.setAttribute('data-theme', next);
         }
-        // Persist (debounced via schedulePersist trick — but we want lastBoard too)
+        pendingPersistThemeChange = true;
         if (persistTimer) clearTimeout(persistTimer);
-        persistTimer = setTimeout(async () => {
-            try {
-                await api.patchUserPrefs({ theme: next, lastBoard: boardId });
-            } catch (err) {
-                console.warn('[boards] persist theme failed:', err.message);
-            }
-        }, 400);
+        persistTimer = setTimeout(flushPersist, 400);
     }
 
-    let persistTimer = null;
     function schedulePersist() {
+        pendingPersistFiltersChange = true;
         if (persistTimer) clearTimeout(persistTimer);
-        persistTimer = setTimeout(async () => {
-            try {
-                const patch = {
-                    filters: { ...state.prefs.filters, [boardId]: getBoardPrefs() },
-                    lastBoard: boardId,
-                };
-                await api.patchUserPrefs(patch);
-            } catch (err) {
-                console.warn('[boards] persist prefs failed:', err.message);
-            }
-        }, 400);
+        persistTimer = setTimeout(flushPersist, 400);
     }
 
     function setBoardPrefs(patch) {

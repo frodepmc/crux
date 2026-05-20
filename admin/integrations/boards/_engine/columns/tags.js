@@ -24,7 +24,7 @@ register({
                         color: '#fff',
                         padding: '2px 8px',
                         borderRadius: '10px',
-                        fontSize: '10px',
+                        fontSize: 'var(--fs-xs)',
                         fontWeight: 600,
                         boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
                     }}>${t}</span>
@@ -51,7 +51,7 @@ register({
                             color: '#fff',
                             padding: '2px 8px 2px 8px',
                             borderRadius: '10px',
-                            fontSize: '10px',
+                            fontSize: 'var(--fs-xs)',
                             fontWeight: 600,
                             display: 'inline-flex',
                             alignItems: 'center',

@@ -157,7 +157,7 @@
     padding: var(--sp-4);
     text-align: center;
     color: var(--text-5);
-    font-size: 0.75rem;
+    font-size: var(--fs-sm);
     font-style: italic;
 }
 

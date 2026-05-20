@@ -2,7 +2,7 @@
 // Vista Tabla: render de filas + click para abrir drawer + DnD nativo de reorden.
 
 import { html } from 'htm/react';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useStore } from '../hooks.js';
 import { getColumnType } from '../columns/registry.js';
 import { applyFilters, applySort } from '../filters.js';
@@ -218,7 +218,6 @@ export function TableView({ store }) {
 
 function TableRow({ item, columns, team, store, dragDisabled, isDragging, isDropTarget, dropPosition,
                    onDragStart, onDragOver, onDragEnd, onDrop, onClick }) {
-    const handleRef = useRef(null);
     const [draggable, setDraggable] = useState(false);
 
     return html`
@@ -237,8 +236,7 @@ function TableRow({ item, columns, team, store, dragDisabled, isDragging, isDrop
             }}>
             <td onMouseDown=${() => !dragDisabled && setDraggable(true)}
                 onMouseUp=${() => setDraggable(false)}>
-                <span ref=${handleRef}
-                      class="b-row-handle"
+                <span class="b-row-handle"
                       data-disabled=${dragDisabled ? 'true' : 'false'}
                       title=${dragDisabled ? 'Quita el sort para reordenar' : 'Arrastra para reordenar'}
                       aria-hidden="true">

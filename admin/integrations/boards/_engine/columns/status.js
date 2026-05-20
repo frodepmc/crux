@@ -20,7 +20,7 @@ register({
                 color: '#fff',
                 padding: '3px 10px',
                 borderRadius: 'var(--r-1)',
-                fontSize: '11px',
+                fontSize: 'var(--fs-xs)',
                 fontWeight: 600,
                 letterSpacing: '0.04em',
                 textTransform: 'uppercase',
