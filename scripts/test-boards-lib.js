@@ -91,6 +91,36 @@ const boards = require(path.join(__dirname, '..', 'api', '_lib', 'boards.js'));
         check('setBoardsIndex + get round-trip', JSON.stringify(ix) === JSON.stringify(sample));
     }
 
+    reset();
+
+    // Test: getBoardMeta devuelve null cuando no existe
+    {
+        const meta = await boards.getBoardMeta('b_crm');
+        check('getBoardMeta missing → null', meta === null);
+    }
+
+    // Test: round-trip de meta
+    {
+        const sampleMeta = {
+            createdAt: '2026-05-19T10:00:00Z',
+            createdBy: 'pedro@cruxmallorca.es',
+            columns: [
+                { id: 'col_name', type: 'text', name: 'Lead', order: 1, config: {} },
+                { id: 'col_status', type: 'status', name: 'Fase', order: 2,
+                  config: { options: [
+                      { id: 'phase_new', label: 'Nuevo', color: '#6b7280' },
+                      { id: 'phase_meeting', label: 'Reunión', color: '#3869AB' },
+                  ] } },
+            ],
+            groups: [{ id: 'g_default', name: 'Pipeline', color: '#3869AB', order: 1, collapsed: false }],
+            views: { kanban: { columnId: 'col_status' } },
+            defaultView: 'kanban',
+        };
+        await boards.setBoardMeta('b_crm', sampleMeta);
+        const got = await boards.getBoardMeta('b_crm');
+        check('getBoardMeta round-trip', JSON.stringify(got) === JSON.stringify(sampleMeta));
+    }
+
     // ─── (Tasks 4-9 añaden más tests aquí, antes del console.log) ──────────
 
     console.log(failures === 0 ? '\nAll tests passed ✓' : '\n' + failures + ' test(s) FAILED');

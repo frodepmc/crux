@@ -31,6 +31,21 @@ async function setBoardsIndex(arr) {
     return arr;
 }
 
+// ─── meta ────────────────────────────────────────────────────────────────
+async function getBoardMeta(boardId) {
+    if (!boardId) throw new Error('boardId required');
+    const data = await kv.get(K_META(boardId));
+    if (data == null) return null;
+    return data;
+}
+
+async function setBoardMeta(boardId, meta) {
+    if (!boardId) throw new Error('boardId required');
+    if (!meta || typeof meta !== 'object') throw new Error('meta must be object');
+    await kv.set(K_META(boardId), meta);
+    return meta;
+}
+
 module.exports = {
     PREFIX,
     K_INDEX,
@@ -42,4 +57,6 @@ module.exports = {
     K_USER_PREFS,
     getBoardsIndex,
     setBoardsIndex,
+    getBoardMeta,
+    setBoardMeta,
 };
