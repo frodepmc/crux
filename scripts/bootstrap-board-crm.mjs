@@ -77,7 +77,7 @@ async function run() {
         columns: COLUMNS,
         groups: GROUPS,
         views: { kanban: { columnId: 'col_status' } },
-        defaultView: 'table',
+        defaultView: 'kanban',
     });
 
     console.log('Seeding leads…');
