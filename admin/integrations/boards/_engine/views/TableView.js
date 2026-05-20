@@ -48,9 +48,24 @@ export function TableView({ store }) {
 
     if (itemsInOrder.length === 0) {
         if (allItems.length > 0) {
-            return html`<div class="b-empty">Sin items con los filtros activos. <button onClick=${() => { store.clearFilters(); store.setSearch(''); }} style=${{ color: 'var(--accent)', marginLeft: '8px' }}>Limpiar filtros</button></div>`;
+            return html`
+                <div class="b-empty">
+                    <${Icon} name="search" size=${28} strokeWidth=${1.5} style=${{ marginBottom: '12px', opacity: 0.5 }} />
+                    <div class="b-empty-title">Sin coincidencias</div>
+                    <div class="b-empty-sub">Ningún item pasa los filtros actuales.</div>
+                    <button onClick=${() => { store.clearFilters(); store.setSearch(''); }} class="b-empty-action">
+                        Limpiar filtros y búsqueda
+                    </button>
+                </div>
+            `;
         }
-        return html`<div class="b-empty">No hay items en este board.</div>`;
+        return html`
+            <div class="b-empty">
+                <${Icon} name="plus" size=${28} strokeWidth=${1.5} style=${{ marginBottom: '12px', opacity: 0.5 }} />
+                <div class="b-empty-title">Board vacío</div>
+                <div class="b-empty-sub">Aún no hay items. Crea el primero desde el header.</div>
+            </div>
+        `;
     }
 
     function onDragStart(item) {

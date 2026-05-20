@@ -44,8 +44,11 @@ export function TimelineView({ store }) {
     if (!dateCol) {
         return html`
             <div class="b-empty">
-                Este board no tiene columna de tipo <code>daterange</code>.<br/>
-                Añade una y configura <code>meta.views.timeline.columnId</code>.
+                <${Icon} name="calendar" size=${28} strokeWidth=${1.5} style=${{ marginBottom: '12px', opacity: 0.5 }} />
+                <div class="b-empty-title">Sin columna de rango</div>
+                <div class="b-empty-sub">
+                    Añade una columna tipo <code>daterange</code> al board para ver Timeline.
+                </div>
             </div>
         `;
     }
@@ -67,7 +70,13 @@ export function TimelineView({ store }) {
         .filter(Boolean);
 
     if (rangedItems.length === 0) {
-        return html`<div class="b-empty">Sin items con rango de fechas para mostrar en Timeline.</div>`;
+        return html`
+            <div class="b-empty">
+                <${Icon} name="calendar" size=${28} strokeWidth=${1.5} style=${{ marginBottom: '12px', opacity: 0.5 }} />
+                <div class="b-empty-title">Sin items con rango asignado</div>
+                <div class="b-empty-sub">Define <code>${dateCol.name}</code> en al menos un item para verlo en Timeline.</div>
+            </div>
+        `;
     }
 
     const minDate = new Date(Math.min(...rangedItems.map((r) => r.start.getTime())));

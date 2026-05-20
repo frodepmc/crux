@@ -80,8 +80,11 @@ export function CalendarView({ store }) {
     if (!col) {
         return html`
             <div class="b-empty">
-                Este board no tiene columna de fecha.<br/>
-                Añade una columna tipo <code>date</code> o <code>daterange</code> y configura <code>meta.views.calendar.columnId</code>.
+                <${Icon} name="calendar" size=${28} strokeWidth=${1.5} style=${{ marginBottom: '12px', opacity: 0.5 }} />
+                <div class="b-empty-title">Sin columna de fecha</div>
+                <div class="b-empty-sub">
+                    Añade una columna tipo <code>date</code> o <code>daterange</code> al board para usar Calendar.
+                </div>
             </div>
         `;
     }

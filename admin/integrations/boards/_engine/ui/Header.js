@@ -58,23 +58,30 @@ export function Header({ store, currentView, setView }) {
             <div class="b-header-search-row">
                 <input class="b-search-input"
                        type="search"
-                       placeholder="Buscar por nombre…"
+                       placeholder="Buscar items en este board…"
                        value=${prefs.search || ''}
                        onChange=${(e) => store.setSearch(e.target.value)}
                        aria-label="Buscar" />
 
-                <button class="b-new-item-btn"
-                        onClick=${async () => {
-                            const item = await store.createItem({
-                                name: 'Nuevo item',
-                                groupId: state.meta?.groups?.[0]?.id || 'g_default',
-                            });
-                            if (item) store.openDrawer(item.id);
-                        }}
-                        aria-label="Crear nuevo item">
-                    <${Icon} name="plus" size=${14} strokeWidth=${2.2} />
-                    Nuevo
-                </button>
+                ${(() => {
+                    const t = state.summary?.type;
+                    const label = t === 'crm' ? 'Nuevo lead' : t === 'tasks' ? 'Nueva tarea' : 'Nuevo item';
+                    const seedName = t === 'crm' ? 'Lead sin título' : t === 'tasks' ? 'Tarea sin título' : 'Item sin título';
+                    return html`
+                        <button class="b-new-item-btn"
+                                onClick=${async () => {
+                                    const item = await store.createItem({
+                                        name: seedName,
+                                        groupId: state.meta?.groups?.[0]?.id || 'g_default',
+                                    });
+                                    if (item) store.openDrawer(item.id);
+                                }}
+                                aria-label=${label}>
+                            <${Icon} name="plus" size=${14} strokeWidth=${2.2} />
+                            ${label}
+                        </button>
+                    `;
+                })()}
 
                 <div class="b-filter-chips">
                     ${activeFilters.map((f) => html`
@@ -102,7 +109,8 @@ function FilterChip({ filter, meta, store }) {
             <span>${valueDisplay}</span>
             <button class="b-filter-chip-x"
                     onClick=${() => store.removeFilter(filter.columnId)}
-                    aria-label="Quitar filtro">
+                    aria-label=${`Quitar filtro: ${colName}`}
+                    title=${`Quitar filtro: ${colName}`}>
                 <${Icon} name="x" size=${12} strokeWidth=${2.4} />
             </button>
         </span>
@@ -158,16 +166,16 @@ function AddFilterButton({ meta, store, activeFilters }) {
 
     return html`
         <span style=${{ position: 'relative' }} ref=${wrapRef}>
-            <button class="b-filter-add" onClick=${() => setOpen(!open)} aria-label="Añadir filtro">
+            <button class="b-filter-add" onClick=${() => setOpen(!open)} aria-label="Añadir filtro" title="Añadir filtro">
                 <${Icon} name="filter" size=${12} strokeWidth=${2} />
                 Filtro
             </button>
             ${open ? html`
                 <div class="b-filter-popover" role="dialog" aria-label="Añadir filtro">
                     ${!selectedCol ? html`
-                        <h4>Filtrar por</h4>
+                        <h4>Elige columna</h4>
                         ${filterableColumns.length === 0
-                            ? html`<div style=${{ color: 'var(--text-5)', fontSize: '0.8rem', fontStyle: 'italic' }}>Sin columnas filtrables.</div>`
+                            ? html`<div style=${{ color: 'var(--text-5)', fontSize: 'var(--fs-sm)', fontStyle: 'italic', padding: 'var(--sp-2)' }}>No quedan columnas filtrables por añadir.</div>`
                             : filterableColumns.map((col) => html`
                                 <div key=${col.id}
                                      class="b-filter-popover-row"
@@ -222,7 +230,7 @@ function FilterValuePicker({ col, store, onCommit, onBack }) {
             <input class="b-input" type="text" value=${text}
                    onChange=${(e) => setText(e.target.value)}
                    onKeyDown=${(e) => { if (e.key === 'Enter') commit(); }}
-                   placeholder="Contiene…" autoFocus />
+                   placeholder="Texto que debe contener…" autoFocus />
         ` : null}
 
         ${op === 'bool' ? html`
@@ -264,10 +272,12 @@ function FilterValuePicker({ col, store, onCommit, onBack }) {
             <button onClick=${commit} style=${{
                 background: 'var(--accent)',
                 color: '#fff',
-                padding: '4px 12px',
+                padding: '8px 16px',
                 borderRadius: 'var(--r-1)',
-                fontSize: '0.75rem',
-            }}>Aplicar</button>
+                fontSize: 'var(--fs-sm)',
+                fontWeight: 'var(--fw-semibold)',
+                cursor: 'pointer',
+            }}>Aplicar filtro</button>
         </div>
     `;
 }
@@ -289,7 +299,7 @@ function TagsOrDepsPicker({ col, state, selected, toggle }) {
     }
 
     if (values.length === 0) {
-        return html`<div style=${{ color: 'var(--text-5)', fontSize: '0.75rem', fontStyle: 'italic' }}>Sin valores disponibles.</div>`;
+        return html`<div style=${{ color: 'var(--text-5)', fontSize: 'var(--fs-sm)', fontStyle: 'italic', padding: 'var(--sp-2)' }}>No hay valores que filtrar todavía.</div>`;
     }
 
     if (col.type === 'tags') {

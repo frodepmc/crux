@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { useStore } from '../hooks.js';
 import { getColumnType } from '../columns/registry.js';
 import { applyFilters } from '../filters.js';
+import { Icon } from '../ui/Icon.js';
 
 const NO_VALUE = '__no_value__';
 
@@ -45,8 +46,11 @@ export function KanbanView({ store }) {
     if (!kanbanColumn) {
         return html`
             <div class="b-empty">
-                Este board no tiene columna Kanban configurada.<br/>
-                Define <code>meta.views.kanban.columnId</code> apuntando a una columna de tipo <code>status</code>.
+                <${Icon} name="filter" size=${28} strokeWidth=${1.5} style=${{ marginBottom: '12px', opacity: 0.5 }} />
+                <div class="b-empty-title">Sin columna Kanban configurada</div>
+                <div class="b-empty-sub">
+                    Añade una columna de tipo <code>status</code> al board y configúrala como <code>meta.views.kanban.columnId</code>.
+                </div>
             </div>
         `;
     }
@@ -57,7 +61,12 @@ export function KanbanView({ store }) {
     const columns = buildColumns(items, kanbanColumn);
 
     if (columns.length === 0) {
-        return html`<div class="b-empty">La columna Kanban no tiene fases configuradas.</div>`;
+        return html`
+            <div class="b-empty">
+                <div class="b-empty-title">Sin fases configuradas</div>
+                <div class="b-empty-sub">La columna Kanban no tiene <code>options</code> en su <code>config</code>.</div>
+            </div>
+        `;
     }
 
     return html`

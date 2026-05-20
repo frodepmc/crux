@@ -33,8 +33,22 @@ export function App({ store }) {
         }
     }, [state.meta?.defaultView]);
 
-    if (state.loading) return html`<div class="b-empty">Cargando board…</div>`;
-    if (state.error)   return html`<div class="b-empty" style=${{ color: 'var(--err)' }}>Error: ${state.error}</div>`;
+    if (state.loading) {
+        return html`
+            <div class="b-empty">
+                <div class="b-spinner"></div>
+                <div class="b-empty-title" style=${{ marginTop: '12px' }}>Cargando board…</div>
+            </div>
+        `;
+    }
+    if (state.error) {
+        return html`
+            <div class="b-empty">
+                <div class="b-empty-title" style=${{ color: 'var(--err)' }}>No se pudo cargar el board</div>
+                <div class="b-empty-sub">${state.error}</div>
+            </div>
+        `;
+    }
 
     const ViewComp = VIEW_COMPONENTS[view] || TableView;
 
