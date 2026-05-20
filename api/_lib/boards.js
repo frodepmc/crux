@@ -90,6 +90,29 @@ async function deleteItem(boardId, itemId) {
     return true;
 }
 
+// ─── user prefs ──────────────────────────────────────────────────────────
+const DEFAULT_PREFS = Object.freeze({ filters: {}, lastBoard: null, theme: 'dark' });
+
+async function getUserPrefs(userId) {
+    if (!userId) throw new Error('userId required');
+    const data = await kv.get(K_USER_PREFS(userId));
+    if (data == null) return JSON.parse(JSON.stringify(DEFAULT_PREFS));
+    return { ...DEFAULT_PREFS, ...data, filters: { ...(data.filters || {}) } };
+}
+
+async function patchUserPrefs(userId, patch) {
+    if (!userId) throw new Error('userId required');
+    if (!patch || typeof patch !== 'object') throw new Error('patch must be object');
+    const current = await getUserPrefs(userId);
+    const next = {
+        ...current,
+        ...patch,
+        filters: { ...current.filters, ...(patch.filters || {}) },
+    };
+    await kv.set(K_USER_PREFS(userId), next);
+    return next;
+}
+
 module.exports = {
     PREFIX,
     K_INDEX,
@@ -109,4 +132,6 @@ module.exports = {
     setItem,
     mgetItems,
     deleteItem,
+    getUserPrefs,
+    patchUserPrefs,
 };

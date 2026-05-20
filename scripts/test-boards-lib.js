@@ -183,6 +183,29 @@ const boards = require(path.join(__dirname, '..', 'api', '_lib', 'boards.js'));
         check('deleteItem removes', got === null);
     }
 
+    reset();
+
+    // Test: getUserPrefs default
+    {
+        const p = await boards.getUserPrefs('pedro@cruxmallorca.es');
+        check('getUserPrefs default shape', p && typeof p === 'object' && p.filters && p.theme);
+        check('getUserPrefs default theme', p.theme === 'dark');
+        check('getUserPrefs default lastBoard', p.lastBoard === null);
+    }
+
+    // Test: patchUserPrefs merge parcial
+    {
+        await boards.patchUserPrefs('pedro@cruxmallorca.es', { lastBoard: 'b_crm' });
+        const p1 = await boards.getUserPrefs('pedro@cruxmallorca.es');
+        check('patchUserPrefs sets lastBoard', p1.lastBoard === 'b_crm');
+        check('patchUserPrefs preserves theme', p1.theme === 'dark');
+
+        await boards.patchUserPrefs('pedro@cruxmallorca.es', { filters: { b_crm: { status: 'phase_new' } } });
+        const p2 = await boards.getUserPrefs('pedro@cruxmallorca.es');
+        check('patchUserPrefs sets nested filter', p2.filters.b_crm.status === 'phase_new');
+        check('patchUserPrefs preserves lastBoard after second patch', p2.lastBoard === 'b_crm');
+    }
+
     // ─── (Tasks 4-9 añaden más tests aquí, antes del console.log) ──────────
 
     console.log(failures === 0 ? '\nAll tests passed ✓' : '\n' + failures + ' test(s) FAILED');
