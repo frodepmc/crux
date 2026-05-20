@@ -1,4 +1,8 @@
-/* admin/integrations/boards/_engine/styles/timeline.css */
+/* admin/integrations/boards/_engine/styles/timeline.css
+ *
+ * Vista Timeline: barras horizontales por daterange, eje de días con month labels,
+ * flechas SVG entre dependencias. Optimizado para dark + light.
+ */
 
 .b-tl-wrap {
     padding: var(--sp-4) var(--sp-5);
@@ -14,16 +18,66 @@
     align-items: center;
     gap: var(--sp-3);
     flex: 0 0 auto;
+    padding: 0 var(--sp-2);
 }
+
+.b-tl-counts {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+    font-size: 0.8rem;
+    color: var(--text-3);
+}
+.b-tl-counts strong {
+    color: var(--text-1);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+.b-tl-conflict {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--warn);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.b-tl-zoom {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--text-5);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
 .b-tl-nav {
     background: var(--bg-elevated);
-    border: 1px solid var(--line-1);
+    border: 1px solid var(--line-2);
     border-radius: var(--r-1);
     color: var(--text-2);
-    padding: var(--sp-2) var(--sp-3);
-    font-size: 0.85rem;
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    font-family: var(--font-sans);
+    transition: border-color 120ms, color 120ms;
+    line-height: 1;
 }
-.b-tl-nav:hover { border-color: var(--accent-line); }
+.b-tl-nav:hover {
+    border-color: var(--accent);
+    color: var(--text-1);
+}
+
+.b-tl-zoom-value {
+    min-width: 56px;
+    text-align: center;
+    color: var(--text-3);
+    font-size: 0.7rem;
+    text-transform: none;
+    letter-spacing: 0;
+}
 
 .b-tl-scroller {
     flex: 1 1 auto;
@@ -42,27 +96,56 @@
 .b-tl-axis {
     position: sticky;
     top: 0;
-    z-index: 2;
+    z-index: 3;
     background: var(--bg-card);
-    border-bottom: 1px solid var(--line-1);
+    border-bottom: 1px solid var(--line-2);
     display: flex;
-    height: 36px;
+    flex-direction: column;
     font-family: var(--font-mono);
-    font-size: 0.6rem;
-    color: var(--text-5);
-    letter-spacing: 0.1em;
+}
+
+.b-tl-axis-months {
+    display: flex;
+    height: 22px;
+    border-bottom: 1px solid var(--line-1);
+}
+.b-tl-axis-month {
+    flex-shrink: 0;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-1);
     text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 4px 8px;
+    border-right: 1px solid var(--line-1);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    background: var(--bg-elevated);
+}
+
+.b-tl-axis-days {
+    display: flex;
+    height: 28px;
 }
 .b-tl-axis-tick {
-    border-right: 1px solid var(--line-1);
-    padding: 8px;
     flex-shrink: 0;
+    font-size: 0.6rem;
+    color: var(--text-5);
+    padding: 6px 0 4px 4px;
+    border-right: 1px solid var(--line-1);
     box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    letter-spacing: 0;
 }
-.b-tl-axis-tick[data-month-start="true"] {
-    background: var(--bg-elevated);
-    color: var(--text-3);
-    font-weight: 600;
+.b-tl-axis-tick[data-weekend="true"] {
+    background: var(--bg-card);
+}
+.b-tl-axis-tick[data-today="true"] {
+    color: var(--accent);
+    font-weight: 700;
+    background: var(--accent-soft);
 }
 
 .b-tl-rows {
@@ -71,19 +154,22 @@
 
 .b-tl-row {
     position: relative;
-    height: 44px;
+    height: 52px;
     border-bottom: 1px solid var(--line-1);
+}
+.b-tl-row:nth-child(even) {
+    background: rgba(127,127,127,0.025);
 }
 
 .b-tl-row-label {
     position: sticky;
     left: 0;
-    z-index: 1;
+    z-index: 2;
     background: var(--bg-elevated);
-    padding: var(--sp-2) var(--sp-3);
+    padding: 0 var(--sp-3);
     font-size: 0.8rem;
     color: var(--text-2);
-    border-right: 1px solid var(--line-1);
+    border-right: 1px solid var(--line-2);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -94,30 +180,56 @@
     height: 100%;
 }
 
+.b-tl-weekend-col {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: rgba(127,127,127,0.04);
+    pointer-events: none;
+    z-index: 0;
+}
+
 .b-tl-bar {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    height: 22px;
-    background: var(--accent-soft);
-    border: 1px solid var(--accent-line);
-    border-left: 3px solid var(--accent);
+    height: 28px;
+    background: var(--accent);
+    border: 1px solid var(--accent);
     border-radius: var(--r-1);
-    padding: 0 8px;
-    font-size: 0.7rem;
-    color: var(--text-1);
+    padding: 0 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fff;
     display: flex;
     align-items: center;
     cursor: pointer;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    transition: filter 120ms;
+    transition: filter 120ms, box-shadow 120ms;
+    z-index: 1;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
-.b-tl-bar:hover { filter: brightness(1.15); }
+.b-tl-bar:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
 .b-tl-bar[data-conflict="true"] {
-    border-left-color: var(--warn);
-    background: rgba(217,119,6,0.18);
+    background: var(--warn);
+    border-color: var(--warn);
+}
+
+.b-tl-bar-overflow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.75rem;
+    color: var(--text-2);
+    white-space: nowrap;
+    pointer-events: none;
+    padding-left: 8px;
+    text-shadow: 0 1px 0 var(--bg-elevated);
 }
 
 .b-tl-arrows {
@@ -127,19 +239,23 @@
     height: 100%;
     pointer-events: none;
     overflow: visible;
+    z-index: 2;
 }
 
 .b-tl-arrow-line {
-    stroke: var(--accent-line);
+    stroke: var(--accent);
     stroke-width: 1.5;
     fill: none;
+    opacity: 0.65;
 }
 .b-tl-arrow-line[data-conflict="true"] {
     stroke: var(--warn);
-    stroke-dasharray: 4 3;
+    stroke-dasharray: 5 4;
+    opacity: 0.85;
 }
 .b-tl-arrow-head {
-    fill: var(--accent-line);
+    fill: var(--accent);
+    opacity: 0.85;
 }
 .b-tl-arrow-head[data-conflict="true"] {
     fill: var(--warn);
@@ -150,4 +266,8 @@
     padding: var(--sp-6);
     color: var(--text-5);
     font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .b-tl-row-label { width: 140px; font-size: 0.7rem; }
 }
