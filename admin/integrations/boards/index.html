@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRUX · Boards</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <!-- Guard idéntico a board.html (mismo bloque) -->
+  <script>
+    (function () {
+      var styleEl = document.createElement('style');
+      styleEl.id = 'crux-admin-guard-style';
+      styleEl.textContent = 'body{visibility:hidden}html{background:#0E1A2B}#crux-guard-veil{position:fixed;inset:0;z-index:999999;background:#0E1A2B;color:#3869AB;display:flex;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.25em;text-transform:uppercase;visibility:visible}';
+      document.head.appendChild(styleEl);
+      document.addEventListener('DOMContentLoaded', function () {
+        if (document.getElementById('crux-guard-veil')) return;
+        var veil = document.createElement('div');
+        veil.id = 'crux-guard-veil';
+        veil.textContent = 'Verificando sesión…';
+        document.body.appendChild(veil);
+      });
+      var reveal = function (profile) {
+        var s = document.getElementById('crux-admin-guard-style'); if (s) s.remove();
+        var v = document.getElementById('crux-guard-veil'); if (v) v.remove();
+        window.__cruxProfile = profile || null;
+      };
+      fetch('/api/auth/me', { method: 'GET', credentials: 'same-origin', cache: 'no-store' })
+        .then(function (r) { if (!r.ok) throw new Error('unauth'); return r.json(); })
+        .then(function (profile) {
+          var access = Array.isArray(profile.access) ? profile.access : [];
+          if (!(access.includes('*') || access.includes('boards'))) { window.location.replace('/admin/hub'); return; }
+          reveal(profile);
+        }).catch(function () { window.location.replace('/admin'); });
+    })();
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/tokens.css" />
+  <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/base.css" />
+  <style>
+    .hub-wrap { padding: var(--sp-6) var(--sp-5); max-width: 920px; margin: 0 auto; }
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--sp-3); }
+    .hub-card { background: var(--bg-elevated); border: 1px solid var(--line-1); border-radius: var(--r-2); padding: var(--sp-4); text-decoration: none; transition: border-color 120ms, transform 120ms; }
+    .hub-card:hover { border-color: var(--accent-line); transform: translateY(-1px); }
+    .hub-card-icon { width: 32px; height: 32px; border-radius: var(--r-2); margin-bottom: var(--sp-3); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; }
+    .hub-card-title { color: var(--text-1); font-weight: 600; margin-bottom: 2px; }
+    .hub-card-meta { color: var(--text-5); font-size: 0.7rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; }
+  </style>
+</head>
+<body>
+  <div class="hub-wrap">
+    <header style="margin-bottom: var(--sp-5)">
+      <div style="font-family:var(--font-mono);font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:6px">BOARDS</div>
+      <h1 style="color:var(--text-1);font-size:1.6rem;font-weight:600">Mis tableros</h1>
+    </header>
+    <div id="hub-content"><div class="b-empty">Cargando…</div></div>
+  </div>
+
+  <script type="module">
+    const r = await fetch('/api/boards', { credentials: 'same-origin' });
+    const data = await r.json();
+    const boards = data.boards || [];
+    const root = document.getElementById('hub-content');
+    if (boards.length === 0) {
+      root.innerHTML = '<div class="b-empty">No tienes acceso a ningún board todavía.</div>';
+    } else {
+      root.innerHTML = '<div class="hub-grid">' + boards.map((b) => `
+        <a class="hub-card" href="/admin/integrations/boards/board.html?id=${encodeURIComponent(b.id)}">
+          <div class="hub-card-icon" style="background:${b.color || '#3869AB'}">${(b.name || '?')[0]}</div>
+          <div class="hub-card-title">${b.name}</div>
+          <div class="hub-card-meta">${b.type || 'CUSTOM'} · ${b.visibility}</div>
+        </a>`).join('') + '</div>';
+    }
+  </script>
+</body>
+</html>

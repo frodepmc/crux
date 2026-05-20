@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRUX · Boards</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <!-- CRUX · Admin session guard (idéntico patrón a communication.html) -->
+  <script>
+    (function () {
+      var styleEl = document.createElement('style');
+      styleEl.id = 'crux-admin-guard-style';
+      styleEl.textContent = 'body{visibility:hidden}html{background:#0E1A2B}#crux-guard-veil{position:fixed;inset:0;z-index:999999;background:#0E1A2B;color:#3869AB;display:flex;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.25em;text-transform:uppercase;visibility:visible}';
+      document.head.appendChild(styleEl);
+
+      document.addEventListener('DOMContentLoaded', function () {
+        if (document.getElementById('crux-guard-veil')) return;
+        var veil = document.createElement('div');
+        veil.id = 'crux-guard-veil';
+        veil.textContent = 'Verificando sesión…';
+        document.body.appendChild(veil);
+      });
+
+      var isLocal = /^(localhost|127\.0\.0\.1|0\.0\.0\.0)$/.test(window.location.hostname);
+      var wantsPreview = new URLSearchParams(window.location.search).has('__preview');
+      var reveal = function (profile) {
+        var s = document.getElementById('crux-admin-guard-style'); if (s) s.remove();
+        var v = document.getElementById('crux-guard-veil'); if (v) v.remove();
+        window.__cruxProfile = profile || null;
+      };
+      if (isLocal && wantsPreview) {
+        reveal({ username: 'preview@localhost', name: 'Preview Local', role: 'admin',
+                 color: '#3869AB', access: ['*'], isAdmin: true });
+        return;
+      }
+      fetch('/api/auth/me', { method: 'GET', credentials: 'same-origin', cache: 'no-store' })
+        .then(function (r) { if (!r.ok) throw new Error('unauth'); return r.json(); })
+        .then(function (profile) {
+          var access = Array.isArray(profile.access) ? profile.access : [];
+          var hasAccess = access.includes('*') || access.includes('boards');
+          if (!hasAccess) { window.location.replace('/admin/hub'); return; }
+          reveal(profile);
+        })
+        .catch(function () { window.location.replace('/admin'); });
+    })();
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/tokens.css" />
+  <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/base.css" />
+  <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/table.css" />
+
+  <!-- Import map: garantiza una sola instancia de React en todos los módulos -->
+  <script type="importmap">
+    {
+      "imports": {
+        "react":             "https://esm.sh/react@18.3.1",
+        "react-dom/client":  "https://esm.sh/react-dom@18.3.1/client?external=react",
+        "htm/react":         "https://esm.sh/htm@3.1.1/react?external=react"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="module">
+    import { createRoot } from 'react-dom/client';
+    import { html } from 'htm/react';
+
+    // Registrar tipos de columna (side-effect imports)
+    await import('/admin/integrations/boards/_engine/columns/text.js');
+    await import('/admin/integrations/boards/_engine/columns/longtext.js');
+    await import('/admin/integrations/boards/_engine/columns/status.js');
+    await import('/admin/integrations/boards/_engine/columns/tags.js');
+    await import('/admin/integrations/boards/_engine/columns/person.js');
+    await import('/admin/integrations/boards/_engine/columns/date.js');
+    await import('/admin/integrations/boards/_engine/columns/number.js');
+    await import('/admin/integrations/boards/_engine/columns/link.js');
+    await import('/admin/integrations/boards/_engine/columns/email.js');
+    await import('/admin/integrations/boards/_engine/columns/phone.js');
+
+    const { createStore } = await import('/admin/integrations/boards/_engine/store.js');
+    const { App } = await import('/admin/integrations/boards/_engine/ui/App.js');
+
+    const params = new URLSearchParams(location.search);
+    const boardId = params.get('id');
+    if (!boardId) {
+      document.getElementById('root').innerHTML =
+        '<div class="b-empty" style="color:var(--err)">Falta ?id=&lt;boardId&gt; en la URL.</div>';
+    } else {
+      const store = createStore(boardId);
+      createRoot(document.getElementById('root')).render(html`<${App} store=${store} />`);
+    }
+  </script>
+</body>
+</html>
