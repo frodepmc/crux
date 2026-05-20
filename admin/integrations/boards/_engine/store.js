@@ -35,6 +35,57 @@ export function createStore(boardId) {
         if (ttl) setTimeout(() => setState({ toasts: state.toasts.filter((t) => t.id !== id) }), ttl);
     }
 
+    // ── Filters / search / sort (per-board, persisted to user-prefs) ──
+    function getBoardPrefs() {
+        return state.prefs.filters?.[boardId] || { filters: [], search: '', sortBy: null, sortDir: 'asc' };
+    }
+
+    let persistTimer = null;
+    function schedulePersist() {
+        if (persistTimer) clearTimeout(persistTimer);
+        persistTimer = setTimeout(async () => {
+            try {
+                const patch = {
+                    filters: { ...state.prefs.filters, [boardId]: getBoardPrefs() },
+                    lastBoard: boardId,
+                };
+                await api.patchUserPrefs(patch);
+            } catch (err) {
+                console.warn('[boards] persist prefs failed:', err.message);
+            }
+        }, 400);
+    }
+
+    function setBoardPrefs(patch) {
+        const current = getBoardPrefs();
+        const next = { ...current, ...patch };
+        setState({
+            prefs: {
+                ...state.prefs,
+                filters: { ...state.prefs.filters, [boardId]: next },
+            },
+        });
+        schedulePersist();
+    }
+
+    function setSearch(text) { setBoardPrefs({ search: text || '' }); }
+    function setSort(columnId, dir) { setBoardPrefs({ sortBy: columnId, sortDir: dir || 'asc' }); }
+    function clearSort() { setBoardPrefs({ sortBy: null, sortDir: 'asc' }); }
+
+    function addFilter(filter) {
+        const current = getBoardPrefs();
+        // Reemplazar si ya existe filtro para ese columnId
+        const others = (current.filters || []).filter((f) => f.columnId !== filter.columnId);
+        setBoardPrefs({ filters: [...others, filter] });
+    }
+    function removeFilter(columnId) {
+        const current = getBoardPrefs();
+        setBoardPrefs({ filters: (current.filters || []).filter((f) => f.columnId !== columnId) });
+    }
+    function clearFilters() {
+        setBoardPrefs({ filters: [] });
+    }
+
     // ── Hydrate ────────────────────────────────────────────────────────
     async function hydrate() {
         setState({ loading: true, error: null });
@@ -202,5 +253,6 @@ export function createStore(boardId) {
         loadComments, addComment, removeComment,
         openDrawer, closeDrawer,
         pushToast,
+        getBoardPrefs, setSearch, setSort, clearSort, addFilter, removeFilter, clearFilters,
     };
 }
