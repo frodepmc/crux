@@ -16,7 +16,20 @@ const K_ITEM_INDEX = (id) => PREFIX + id + ':item-index';          // array [{id
 const K_ITEM = (id, itemId) => PREFIX + id + ':item:' + itemId;    // un item con cells, version, etc.
 const K_COMMENTS = (id, itemId) => PREFIX + id + ':comments:' + itemId;
 const K_DEPS = (id) => PREFIX + id + ':deps';
-const K_USER_PREFS = (userId) => 'crux:boards:user:' + userId + ':prefs';
+const K_USER_PREFS = (userId) => PREFIX + 'user:' + userId + ':prefs';
+
+// ─── boards:index ─────────────────────────────────────────────────────────
+async function getBoardsIndex() {
+    const data = await kv.get(K_INDEX);
+    if (!Array.isArray(data)) return [];
+    return data;
+}
+
+async function setBoardsIndex(arr) {
+    if (!Array.isArray(arr)) throw new Error('setBoardsIndex requires array');
+    await kv.set(K_INDEX, arr);
+    return arr;
+}
 
 module.exports = {
     PREFIX,
@@ -27,4 +40,6 @@ module.exports = {
     K_COMMENTS,
     K_DEPS,
     K_USER_PREFS,
+    getBoardsIndex,
+    setBoardsIndex,
 };

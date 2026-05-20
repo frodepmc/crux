@@ -72,6 +72,25 @@ const boards = require(path.join(__dirname, '..', 'api', '_lib', 'boards.js'));
     check('K_META(b_crm) returns correct shape', boards.K_META('b_crm') === 'crux:boards:b_crm:meta');
     check('K_ITEM(b, i) returns correct shape', boards.K_ITEM('b_crm', 'i_acme') === 'crux:boards:b_crm:item:i_acme');
 
+    reset();
+
+    // Test: getBoardsIndex devuelve [] cuando vacío
+    {
+        const ix = await boards.getBoardsIndex();
+        check('getBoardsIndex empty → []', Array.isArray(ix) && ix.length === 0);
+    }
+
+    // Test: setBoardsIndex persiste, getBoardsIndex devuelve
+    {
+        const sample = [
+            { id: 'b_crm', name: 'CRM Pipeline', type: 'crm', color: '#3869AB', icon: 'users', visibility: 'team' },
+            { id: 'b_tasks', name: 'Tareas Equipo', type: 'tasks', color: '#5CB88A', icon: 'layers', visibility: 'private', members: ['pedro@cruxmallorca.es'] },
+        ];
+        await boards.setBoardsIndex(sample);
+        const ix = await boards.getBoardsIndex();
+        check('setBoardsIndex + get round-trip', JSON.stringify(ix) === JSON.stringify(sample));
+    }
+
     // ─── (Tasks 4-9 añaden más tests aquí, antes del console.log) ──────────
 
     console.log(failures === 0 ? '\nAll tests passed ✓' : '\n' + failures + ' test(s) FAILED');
