@@ -36,9 +36,7 @@ export function ItemDrawer({ store }) {
 
             <div style=${{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)' }}>
                 <${Field} label="Nombre" id="name">
-                    <input class="b-input" type="text" value=${item.name}
-                           onChange=${(e) => store.updateCell(item.id, '__name__', e.target.value)}
-                           aria-label="Nombre" />
+                    <${NameInput} item=${item} store=${store} />
                 <//>
 
                 ${columns.map((col) => {
@@ -79,14 +77,28 @@ function Field({ label, id, children }) {
     `;
 }
 
+function NameInput({ item, store }) {
+    const [draft, setDraft] = useState(item.name);
+    const itemId = item.id;
+    // Cuando el item cambia (otro user lo editó), resync el draft
+    useEffect(() => { setDraft(item.name); }, [itemId, item.name]);
+
+    function commit() {
+        if (draft !== item.name) store.updateCell(itemId, '__name__', draft);
+    }
+    return html`
+        <input class="b-input" type="text" value=${draft}
+               onChange=${(e) => setDraft(e.target.value)}
+               onBlur=${commit}
+               onKeyDown=${(e) => { if (e.key === 'Enter') { e.target.blur(); } }}
+               aria-label="Nombre" />
+    `;
+}
+
 function CommentsSection({ store, item, comments }) {
     const [draft, setDraft] = useState('');
     const [pending, setPending] = useState(false);
-    const [profile, setProfile] = useState(null);
-
-    useEffect(() => {
-        if (window.__cruxProfile) setProfile(window.__cruxProfile);
-    }, []);
+    const profile = store.getState().profile || (typeof window !== 'undefined' ? window.__cruxProfile : null);
 
     async function send() {
         if (!draft.trim() || pending) return;

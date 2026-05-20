@@ -57,6 +57,10 @@
 }
 .b-table tbody tr:hover .b-row-handle { opacity: 1; }
 .b-row-handle:active { cursor: grabbing; }
+.b-row-handle[data-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.3 !important;
+}
 
 .b-table td.b-cell-name {
     font-weight: 600;

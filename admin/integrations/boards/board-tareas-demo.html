@@ -119,6 +119,7 @@
         itemsById: Object.fromEntries(SEED_RAW.map((it) => [it.id, { id: it.id, boardId: 'b_tareas_demo', groupId: it.group, name: it.name, cells: it.cells, version: 1, updatedAt: new Date().toISOString(), updatedBy: 'demo' }])),
         prefs: { filters: {}, lastBoard: null, theme: 'dark' },
         team: TEAM,
+        profile: { username: 'pedro@cruxmallorca.es', name: 'Pedro', role: 'admin', color: '#3869AB', access: ['*'], isAdmin: true },
         loading: false,
         error: null,
         drawer: { open: false, itemId: null },

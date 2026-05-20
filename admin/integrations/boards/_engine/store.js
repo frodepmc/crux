@@ -12,6 +12,7 @@ const initialState = {
     itemsById: {},           // { itemId: {id, name, cells, version, ...} }
     prefs: { filters: {}, lastBoard: null, theme: 'dark' },
     team: [],                // [{ username, name, color }]
+    profile: null,
     loading: true,
     error: null,
     drawer: { open: false, itemId: null },
@@ -128,6 +129,7 @@ export function createStore(boardId) {
                 itemsById: items.items,
                 prefs: prefs.prefs,
                 team: team.team || [],
+                profile: (typeof window !== 'undefined' && window.__cruxProfile) || null,
                 loading: false,
             });
         } catch (err) {

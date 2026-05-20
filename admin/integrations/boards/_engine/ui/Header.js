@@ -62,6 +62,16 @@ export function Header({ store, currentView, setView }) {
                        onChange=${(e) => store.setSearch(e.target.value)}
                        aria-label="Buscar" />
 
+                <button class="b-new-item-btn"
+                        onClick=${async () => {
+                            const item = await store.createItem({
+                                name: 'Nuevo item',
+                                groupId: state.meta?.groups?.[0]?.id || 'g_default',
+                            });
+                            if (item) store.openDrawer(item.id);
+                        }}
+                        aria-label="Crear nuevo item">+ Nuevo</button>
+
                 <div class="b-filter-chips">
                     ${activeFilters.map((f) => html`
                         <${FilterChip} key=${f.columnId} filter=${f} meta=${meta} store=${store} />

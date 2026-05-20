@@ -17,6 +17,7 @@ export function TableView({ store }) {
     const columns = (meta.columns || []).slice().sort((a, b) => (a.order || 0) - (b.order || 0));
 
     const prefs = store.getBoardPrefs();
+    const sortActive = prefs.sortBy != null;
     const allItems = itemIndex.map((entry) => itemsById[entry.id]).filter(Boolean);
     const filtered = applyFilters(allItems, { filters: prefs.filters, search: prefs.search });
     const columnsById = Object.fromEntries((meta.columns || []).map((c) => [c.id, c]));
@@ -100,12 +101,13 @@ export function TableView({ store }) {
                             columns=${columns}
                             team=${team}
                             store=${store}
+                            dragDisabled=${sortActive}
                             isDragging=${item.id === draggingId}
                             isDropTarget=${item.id === dropTargetId}
-                            onDragStart=${() => onDragStart(item)}
-                            onDragOver=${(e) => onDragOver(e, item)}
+                            onDragStart=${() => !sortActive && onDragStart(item)}
+                            onDragOver=${(e) => !sortActive && onDragOver(e, item)}
                             onDragEnd=${onDragEnd}
-                            onDrop=${(e) => onDrop(e, item)}
+                            onDrop=${(e) => !sortActive && onDrop(e, item)}
                             onClick=${() => store.openDrawer(item.id)} />
                     `)}
                 </tbody>
@@ -114,7 +116,7 @@ export function TableView({ store }) {
     `;
 }
 
-function TableRow({ item, columns, team, store, isDragging, isDropTarget,
+function TableRow({ item, columns, team, store, dragDisabled, isDragging, isDropTarget,
                    onDragStart, onDragOver, onDragEnd, onDrop, onClick }) {
     const handleRef = useRef(null);
     const [draggable, setDraggable] = useState(false);
@@ -123,7 +125,7 @@ function TableRow({ item, columns, team, store, isDragging, isDropTarget,
         <tr data-item-id=${item.id}
             data-dragging=${isDragging ? 'true' : 'false'}
             data-drop-target=${isDropTarget ? 'true' : 'false'}
-            draggable=${draggable}
+            draggable=${dragDisabled ? false : draggable}
             onDragStart=${onDragStart}
             onDragOver=${onDragOver}
             onDragEnd=${() => { setDraggable(false); onDragEnd(); }}
@@ -132,9 +134,13 @@ function TableRow({ item, columns, team, store, isDragging, isDropTarget,
                 if (e.target.closest('.b-row-handle')) return;
                 onClick();
             }}>
-            <td onMouseDown=${() => setDraggable(true)}
+            <td onMouseDown=${() => !dragDisabled && setDraggable(true)}
                 onMouseUp=${() => setDraggable(false)}>
-                <span ref=${handleRef} class="b-row-handle" aria-hidden="true">⋮⋮</span>
+                <span ref=${handleRef}
+                      class="b-row-handle"
+                      data-disabled=${dragDisabled ? 'true' : 'false'}
+                      title=${dragDisabled ? 'Quita el sort para reordenar' : 'Arrastra para reordenar'}
+                      aria-hidden="true">⋮⋮</span>
             </td>
             <td class="b-cell-name" data-label="Nombre">${item.name}</td>
             ${columns.map((col) => html`
