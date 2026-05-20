@@ -69,12 +69,13 @@ function Field({ label, id, children }) {
         <div>
             <label for=${id} style=${{
                 display: 'block',
-                fontSize: '0.65rem',
+                fontSize: 'var(--fs-xs)',
                 fontFamily: 'var(--font-mono)',
-                color: 'var(--text-5)',
+                fontWeight: 'var(--fw-semibold)',
+                color: 'var(--text-4)',
                 textTransform: 'uppercase',
-                letterSpacing: '0.15em',
-                marginBottom: 'var(--sp-1)',
+                letterSpacing: 'var(--letter-label)',
+                marginBottom: '8px',
             }}>${label}</label>
             ${children}
         </div>

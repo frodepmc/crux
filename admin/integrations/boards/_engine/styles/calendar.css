@@ -29,10 +29,12 @@
 }
 .b-cal-nav:hover { border-color: var(--accent-line); }
 .b-cal-month {
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-semibold);
     color: var(--text-1);
     font-variant-numeric: tabular-nums;
+    letter-spacing: -0.005em;
+    text-transform: capitalize;
 }
 
 .b-cal-grid {
@@ -49,19 +51,20 @@
 
 .b-cal-dow {
     background: var(--bg-card);
-    color: var(--text-5);
+    color: var(--text-4);
     font-family: var(--font-mono);
-    font-size: 0.6rem;
-    letter-spacing: 0.15em;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--letter-label);
     text-transform: uppercase;
-    padding: var(--sp-2) var(--sp-3);
+    padding: 10px var(--sp-3);
     text-align: left;
 }
 
 .b-cal-day {
     background: var(--bg-elevated);
-    padding: var(--sp-2);
-    min-height: 100px;
+    padding: 8px 10px;
+    min-height: 110px;
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -85,18 +88,20 @@
 }
 
 .b-cal-day-num {
-    font-size: 0.75rem;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
     color: var(--text-3);
     font-variant-numeric: tabular-nums;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
+    line-height: 1;
 }
 
 .b-cal-pill {
     background: var(--accent);
     color: #fff;
-    padding: 3px 8px;
+    padding: 4px 10px;
     border-radius: var(--r-1);
-    font-size: 0.7rem;
+    font-size: var(--fs-sm);
     cursor: grab;
     line-height: 1.2;
     white-space: nowrap;

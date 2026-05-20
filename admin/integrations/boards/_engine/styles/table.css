@@ -1,13 +1,13 @@
 /* admin/integrations/boards/_engine/styles/table.css */
 
 .b-table-wrap {
-    padding: var(--sp-4) var(--sp-5);
+    padding: var(--sp-5);
 }
 
 .b-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.85rem;
+    font-size: var(--fs-md);
     background: var(--bg-elevated);
     border-radius: var(--r-2);
     overflow: hidden;
@@ -15,23 +15,29 @@
 }
 .b-table thead tr {
     background: var(--bg-card);
-    color: var(--text-5);
+    color: var(--text-4);
     font-family: var(--font-mono);
-    font-size: 0.65rem;
+    font-size: var(--fs-xs);
     text-transform: uppercase;
-    letter-spacing: 0.15em;
+    letter-spacing: var(--letter-label);
 }
 .b-table th {
-    padding: var(--sp-3) var(--sp-4);
+    padding: 14px var(--sp-4);
     text-align: left;
-    font-weight: 600;
-    border-bottom: 1px solid var(--line-1);
+    font-weight: var(--fw-semibold);
+    border-bottom: 1px solid var(--line-2);
+    white-space: nowrap;
+}
+.b-table th:hover {
+    color: var(--text-2);
+    background: var(--bg-card-hover);
 }
 .b-table td {
-    padding: var(--sp-3) var(--sp-4);
+    padding: 12px var(--sp-4);
     color: var(--text-3);
     border-top: 1px solid var(--line-1);
     vertical-align: middle;
+    font-size: var(--fs-md);
 }
 .b-table tbody tr {
     transition: background 120ms;
@@ -63,8 +69,9 @@
 }
 
 .b-table td.b-cell-name {
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
     color: var(--text-1);
+    font-size: var(--fs-md);
 }
 
 /* ── Empty state ─── */

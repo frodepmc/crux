@@ -53,6 +53,29 @@
     --sp-4: 16px;
     --sp-5: 24px;
     --sp-6: 32px;
+    --sp-7: 48px;
+    --sp-8: 64px;
+
+    /* ─── Type scale (consistent rhythm) ─── */
+    --fs-xs: 11px;
+    --fs-sm: 12px;
+    --fs-base: 13.5px;
+    --fs-md: 14px;
+    --fs-lg: 16px;
+    --fs-xl: 19px;
+    --fs-2xl: 24px;
+
+    --fw-regular: 400;
+    --fw-medium: 500;
+    --fw-semibold: 600;
+    --fw-bold: 700;
+
+    --lh-tight: 1.25;
+    --lh-normal: 1.5;
+    --lh-relaxed: 1.65;
+
+    --letter-mono: 0.04em;
+    --letter-label: 0.12em;
 }
 
 [data-theme="light"] {
