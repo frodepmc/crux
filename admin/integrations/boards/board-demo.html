@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/tokens.css" />
   <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/base.css" />
   <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/table.css" />
+  <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/kanban.css" />
 
   <script type="importmap">
     {
@@ -101,7 +102,7 @@
           columns: COLUMNS,
           groups: [{ id: 'g_default', name: 'Pipeline', color: '#3869AB', order: 1, collapsed: false }],
           views: { kanban: { columnId: 'col_status' } },
-          defaultView: 'table',
+          defaultView: 'kanban',
         },
         itemIndex: SEED.map((it, i) => ({ id: it.id, groupId: 'g_default', position: i })),
         itemsById: Object.fromEntries(SEED.map((it) => [it.id, { ...it, boardId: 'b_crm_demo', groupId: 'g_default', version: 1, updatedAt: new Date().toISOString(), updatedBy: 'demo' }])),
