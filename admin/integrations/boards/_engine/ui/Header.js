@@ -7,7 +7,7 @@ import { useStore } from '../hooks.js';
 
 const VIEWS = [
     { id: 'table',    label: 'Tabla',    enabled: true },
-    { id: 'kanban',   label: 'Kanban',   enabled: false },
+    { id: 'kanban',   label: 'Kanban',   enabled: true },
     { id: 'calendar', label: 'Calendar', enabled: false },
     { id: 'timeline', label: 'Timeline', enabled: false },
 ];

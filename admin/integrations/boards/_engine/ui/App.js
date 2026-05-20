@@ -8,10 +8,12 @@ import { Header } from './Header.js';
 import { ItemDrawer } from './ItemDrawer.js';
 import { Toasts } from './Toast.js';
 import { TableView } from '../views/TableView.js';
+import { KanbanView } from '../views/KanbanView.js';
 
 const VIEW_COMPONENTS = {
     table: TableView,
-    // kanban, calendar, timeline: añadidos en M2-M4
+    kanban: KanbanView,
+    // calendar, timeline: añadidos en M3-M4
 };
 
 export function App({ store }) {
