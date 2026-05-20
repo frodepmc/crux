@@ -123,7 +123,11 @@ async function run() {
     await api('PATCH', `/api/boards/${bid}/meta`, {
         columns: COLUMNS,
         groups: GROUPS,
-        views: { kanban: { columnId: 'col_status' } },
+        views: {
+            kanban: { columnId: 'col_status' },
+            calendar: { columnId: 'col_range' },
+            timeline: { columnId: 'col_range' },
+        },
         defaultView: 'table',
     });
 

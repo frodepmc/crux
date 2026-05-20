@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/base.css" />
   <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/table.css" />
   <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/kanban.css" />
+  <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/calendar.css" />
+  <link rel="stylesheet" href="/admin/integrations/boards/_engine/styles/timeline.css" />
 
   <script type="importmap">
     {
@@ -90,7 +92,7 @@
     const SEED_RAW = [
       { id: 'i_t1', name: 'Diseño cabecera v2',     group: 'g_sprint',  cells: { col_task: 'Diseño cabecera v2', col_status: 's_doing', col_assign: ['marc@cruxmallorca.es'], col_range: { start: '2026-05-18', end: '2026-05-25' }, col_blocked: false, col_tags: ['design', 'sprint-23'], col_estim: 4, col_link: '', col_deps: [], col_notes: 'Variantes: hero compact + hero full-bleed.' } },
       { id: 'i_t2', name: 'API leads webhook',      group: 'g_sprint',  cells: { col_task: 'API leads webhook', col_status: 's_review', col_assign: ['javi@cruxmallorca.es'], col_range: { start: '2026-05-14', end: '2026-05-21' }, col_blocked: false, col_tags: ['backend', 'sprint-23'], col_estim: 6, col_link: 'https://github.com/frodepmc/crux/pull/12', col_deps: [], col_notes: 'PR enviado, esperando review.' } },
-      { id: 'i_t3', name: 'Migración pricing Acme', group: 'g_sprint',  cells: { col_task: 'Migración pricing Acme', col_status: 's_blocked', col_assign: ['pedro@cruxmallorca.es'], col_range: { start: '2026-05-19', end: '2026-05-22' }, col_blocked: true, col_tags: ['cliente'], col_estim: 3, col_link: '', col_deps: ['i_t2'], col_notes: 'Esperando confirmación de Acme sobre tier.' } },
+      { id: 'i_t3', name: 'Migración pricing Acme', group: 'g_sprint',  cells: { col_task: 'Migración pricing Acme', col_status: 's_blocked', col_assign: ['pedro@cruxmallorca.es'], col_range: { start: '2026-05-19', end: '2026-05-22' }, col_blocked: true, col_tags: ['cliente'], col_estim: 3, col_link: '', col_deps: ['i_t2', 'i_t1'], col_notes: 'Esperando confirmación de Acme sobre tier.' } },
       { id: 'i_t4', name: 'Onboarding Carlos Canet',group: 'g_sprint',  cells: { col_task: 'Onboarding Carlos Canet', col_status: 's_done', col_assign: ['alvaro@cruxmallorca.es'], col_range: { start: '2026-05-12', end: '2026-05-19' }, col_blocked: false, col_tags: ['personas'], col_estim: 8, col_link: '', col_deps: [], col_notes: 'Plan capacidad + buddy asignado.' } },
       { id: 'i_t5', name: 'Dashboard finanzas V2',  group: 'g_backlog', cells: { col_task: 'Dashboard finanzas V2', col_status: 's_todo', col_assign: [], col_range: null, col_blocked: false, col_tags: ['finanzas'], col_estim: 16, col_link: '', col_deps: [], col_notes: 'Cuando termine el sprint actual.' } },
       { id: 'i_t6', name: 'Audit accesibilidad web',group: 'g_backlog', cells: { col_task: 'Audit accesibilidad web', col_status: 's_todo', col_assign: [], col_range: null, col_blocked: false, col_tags: ['a11y', 'web'], col_estim: 6, col_link: '', col_deps: [], col_notes: 'WCAG 2.2 AA.' } },
@@ -106,7 +108,11 @@
             { id: 'g_sprint',  name: 'Sprint actual', color: '#3869AB', order: 1, collapsed: false },
             { id: 'g_backlog', name: 'Backlog',       color: '#6b7280', order: 2, collapsed: false },
           ],
-          views: { kanban: { columnId: 'col_status' } },
+          views: {
+            kanban: { columnId: 'col_status' },
+            calendar: { columnId: 'col_range' },
+            timeline: { columnId: 'col_range' },
+          },
           defaultView: 'table',
         },
         itemIndex: SEED_RAW.map((it, i) => ({ id: it.id, groupId: it.group, position: i })),

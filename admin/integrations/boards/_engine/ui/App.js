@@ -9,11 +9,14 @@ import { ItemDrawer } from './ItemDrawer.js';
 import { Toasts } from './Toast.js';
 import { TableView } from '../views/TableView.js';
 import { KanbanView } from '../views/KanbanView.js';
+import { CalendarView } from '../views/CalendarView.js';
+import { TimelineView } from '../views/TimelineView.js';
 
 const VIEW_COMPONENTS = {
     table: TableView,
     kanban: KanbanView,
-    // calendar, timeline: añadidos en M3-M4
+    calendar: CalendarView,
+    timeline: TimelineView,
 };
 
 export function App({ store }) {

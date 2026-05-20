@@ -8,8 +8,8 @@ import { useStore } from '../hooks.js';
 const VIEWS = [
     { id: 'table',    label: 'Tabla',    enabled: true },
     { id: 'kanban',   label: 'Kanban',   enabled: true },
-    { id: 'calendar', label: 'Calendar', enabled: false },
-    { id: 'timeline', label: 'Timeline', enabled: false },
+    { id: 'calendar', label: 'Calendar', enabled: true },
+    { id: 'timeline', label: 'Timeline', enabled: true },
 ];
 
 export function Header({ store, currentView, setView }) {
