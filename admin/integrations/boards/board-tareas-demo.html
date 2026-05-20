@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CRUX · Boards (Demo CRM)</title>
+  <title>CRUX · Boards (Demo Tareas)</title>
   <meta name="robots" content="noindex, nofollow" />
 
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -36,14 +36,13 @@
   </style>
 </head>
 <body>
-  <div class="b-demo-banner">DEMO · Datos en memoria · Sin backend · Refresh pierde cambios</div>
+  <div class="b-demo-banner">DEMO TAREAS · Datos en memoria · Sin backend · Refresh pierde cambios</div>
   <div id="root"></div>
 
   <script type="module">
     import { createRoot } from 'react-dom/client';
     import { html } from 'htm/react';
 
-    // Registrar tipos de columna (side-effect imports — mismo orden que board.html)
     await import('/admin/integrations/boards/_engine/columns/text.js');
     await import('/admin/integrations/boards/_engine/columns/longtext.js');
     await import('/admin/integrations/boards/_engine/columns/status.js');
@@ -60,27 +59,25 @@
 
     const { App } = await import('/admin/integrations/boards/_engine/ui/App.js');
 
-    // ─── Demo store: misma API que createStore() pero sin red ────────────
-    const PHASES = [
-      { id: 'phase_new',       label: 'Nuevo',       color: '#6b7280' },
-      { id: 'phase_contacted', label: 'Contactado',  color: '#3869AB' },
-      { id: 'phase_meeting',   label: 'Reunión',     color: '#5B9BD5' },
-      { id: 'phase_proposal',  label: 'Propuesta',   color: '#D97706' },
-      { id: 'phase_won',       label: 'Ganado',      color: '#059669' },
-      { id: 'phase_lost',      label: 'Perdido',     color: '#DC2626' },
+    const STATUSES = [
+      { id: 's_todo',    label: 'Todo',     color: '#6b7280' },
+      { id: 's_doing',   label: 'Doing',    color: '#3869AB' },
+      { id: 's_review',  label: 'Review',   color: '#D97706' },
+      { id: 's_blocked', label: 'Blocked',  color: '#DC2626' },
+      { id: 's_done',    label: 'Done',     color: '#059669' },
     ];
 
     const COLUMNS = [
-      { id: 'col_company', type: 'text',     name: 'Empresa',    order: 1, config: {} },
-      { id: 'col_status',  type: 'status',   name: 'Fase',       order: 2, config: { options: PHASES } },
-      { id: 'col_owner',   type: 'person',   name: 'Dueño',      order: 3, config: {} },
-      { id: 'col_value',   type: 'number',   name: 'Valor',      order: 4, config: { prefix: '€' } },
-      { id: 'col_next',    type: 'date',     name: 'Siguiente',  order: 5, config: {} },
-      { id: 'col_tags',    type: 'tags',     name: 'Tags',       order: 6, config: {} },
-      { id: 'col_email',   type: 'email',    name: 'Email',      order: 7, config: {} },
-      { id: 'col_phone',   type: 'phone',    name: 'Tel',        order: 8, config: {} },
-      { id: 'col_link',    type: 'link',     name: 'Web',        order: 9, config: {} },
-      { id: 'col_notes',   type: 'longtext', name: 'Notas',      order: 10, config: {} },
+      { id: 'col_task',    type: 'text',       name: 'Tarea',       order: 1, config: {} },
+      { id: 'col_status',  type: 'status',     name: 'Status',      order: 2, config: { options: STATUSES } },
+      { id: 'col_assign',  type: 'person',     name: 'Asignado',    order: 3, config: {} },
+      { id: 'col_range',   type: 'daterange',  name: 'Rango',       order: 4, config: {} },
+      { id: 'col_blocked', type: 'checkbox',   name: 'Bloqueado',   order: 5, config: {} },
+      { id: 'col_tags',    type: 'tags',       name: 'Tags',        order: 6, config: {} },
+      { id: 'col_estim',   type: 'number',     name: 'Horas',       order: 7, config: { suffix: ' h' } },
+      { id: 'col_link',    type: 'link',       name: 'Enlace',      order: 8, config: {} },
+      { id: 'col_deps',    type: 'dependency', name: 'Depende de',  order: 9, config: {} },
+      { id: 'col_notes',   type: 'longtext',   name: 'Notas',       order: 10, config: {} },
     ];
 
     const TEAM = [
@@ -90,25 +87,30 @@
       { username: 'javi@cruxmallorca.es',  name: 'Javi',  color: '#D96B6B' },
     ];
 
-    const SEED = [
-      { id: 'i_acme',  name: 'Acme S.L.',         cells: { col_company: 'Acme S.L.',         col_status: 'phase_meeting',   col_owner: ['pedro@cruxmallorca.es'],  col_value: 2500, col_next: '2026-06-12', col_tags: ['web', 'urgente'],   col_email: 'contacto@acme.com',   col_phone: '+34 600 111 222', col_link: 'https://acme.com',   col_notes: 'Quieren branding + web.' } },
-      { id: 'i_farma', name: 'Farmàcia Rambla',   cells: { col_company: 'Farmàcia Rambla',   col_status: 'phase_proposal',  col_owner: ['alvaro@cruxmallorca.es'], col_value: 4800, col_next: '2026-06-20', col_tags: ['farmacia'],         col_email: 'info@rambla.com',     col_phone: '+34 600 222 333', col_link: 'https://rambla.com', col_notes: 'Web + cuenta corporativa. Iteración por WhatsApp.' } },
-      { id: 'i_disney',name: 'Disney Mallorca',   cells: { col_company: 'Disney Mallorca',   col_status: 'phase_won',       col_owner: ['marc@cruxmallorca.es'],   col_value: 9200, col_next: null,         col_tags: ['evento'],           col_email: 'eventos@disney.es',   col_phone: '+34 600 333 444', col_link: '',                   col_notes: 'Firmado. Inicio el 1 de julio.' } },
-      { id: 'i_uib',   name: 'UIB Investigación', cells: { col_company: 'UIB Investigación', col_status: 'phase_contacted', col_owner: ['javi@cruxmallorca.es'],   col_value: 2000, col_next: '2026-05-25', col_tags: ['investigacion'],    col_email: 'inv@uib.cat',         col_phone: '',                col_link: 'https://uib.cat',    col_notes: 'Pendiente confirmación de presupuesto.' } },
+    const SEED_RAW = [
+      { id: 'i_t1', name: 'Diseño cabecera v2',     group: 'g_sprint',  cells: { col_task: 'Diseño cabecera v2', col_status: 's_doing', col_assign: ['marc@cruxmallorca.es'], col_range: { start: '2026-05-18', end: '2026-05-25' }, col_blocked: false, col_tags: ['design', 'sprint-23'], col_estim: 4, col_link: '', col_deps: [], col_notes: 'Variantes: hero compact + hero full-bleed.' } },
+      { id: 'i_t2', name: 'API leads webhook',      group: 'g_sprint',  cells: { col_task: 'API leads webhook', col_status: 's_review', col_assign: ['javi@cruxmallorca.es'], col_range: { start: '2026-05-14', end: '2026-05-21' }, col_blocked: false, col_tags: ['backend', 'sprint-23'], col_estim: 6, col_link: 'https://github.com/frodepmc/crux/pull/12', col_deps: [], col_notes: 'PR enviado, esperando review.' } },
+      { id: 'i_t3', name: 'Migración pricing Acme', group: 'g_sprint',  cells: { col_task: 'Migración pricing Acme', col_status: 's_blocked', col_assign: ['pedro@cruxmallorca.es'], col_range: { start: '2026-05-19', end: '2026-05-22' }, col_blocked: true, col_tags: ['cliente'], col_estim: 3, col_link: '', col_deps: ['i_t2'], col_notes: 'Esperando confirmación de Acme sobre tier.' } },
+      { id: 'i_t4', name: 'Onboarding Carlos Canet',group: 'g_sprint',  cells: { col_task: 'Onboarding Carlos Canet', col_status: 's_done', col_assign: ['alvaro@cruxmallorca.es'], col_range: { start: '2026-05-12', end: '2026-05-19' }, col_blocked: false, col_tags: ['personas'], col_estim: 8, col_link: '', col_deps: [], col_notes: 'Plan capacidad + buddy asignado.' } },
+      { id: 'i_t5', name: 'Dashboard finanzas V2',  group: 'g_backlog', cells: { col_task: 'Dashboard finanzas V2', col_status: 's_todo', col_assign: [], col_range: null, col_blocked: false, col_tags: ['finanzas'], col_estim: 16, col_link: '', col_deps: [], col_notes: 'Cuando termine el sprint actual.' } },
+      { id: 'i_t6', name: 'Audit accesibilidad web',group: 'g_backlog', cells: { col_task: 'Audit accesibilidad web', col_status: 's_todo', col_assign: [], col_range: null, col_blocked: false, col_tags: ['a11y', 'web'], col_estim: 6, col_link: '', col_deps: [], col_notes: 'WCAG 2.2 AA.' } },
     ];
 
     function createDemoStore() {
       let state = {
-        boardId: 'b_crm_demo',
-        summary: { id: 'b_crm_demo', name: 'CRM Pipeline (Demo)', type: 'crm', color: '#3869AB', icon: 'users', visibility: 'team' },
+        boardId: 'b_tareas_demo',
+        summary: { id: 'b_tareas_demo', name: 'Tareas Equipo (Demo)', type: 'tasks', color: '#5CB88A', icon: 'layers', visibility: 'team' },
         meta: {
           columns: COLUMNS,
-          groups: [{ id: 'g_default', name: 'Pipeline', color: '#3869AB', order: 1, collapsed: false }],
+          groups: [
+            { id: 'g_sprint',  name: 'Sprint actual', color: '#3869AB', order: 1, collapsed: false },
+            { id: 'g_backlog', name: 'Backlog',       color: '#6b7280', order: 2, collapsed: false },
+          ],
           views: { kanban: { columnId: 'col_status' } },
-          defaultView: 'kanban',
+          defaultView: 'table',
         },
-        itemIndex: SEED.map((it, i) => ({ id: it.id, groupId: 'g_default', position: i })),
-        itemsById: Object.fromEntries(SEED.map((it) => [it.id, { ...it, boardId: 'b_crm_demo', groupId: 'g_default', version: 1, updatedAt: new Date().toISOString(), updatedBy: 'demo' }])),
+        itemIndex: SEED_RAW.map((it, i) => ({ id: it.id, groupId: it.group, position: i })),
+        itemsById: Object.fromEntries(SEED_RAW.map((it) => [it.id, { id: it.id, boardId: 'b_tareas_demo', groupId: it.group, name: it.name, cells: it.cells, version: 1, updatedAt: new Date().toISOString(), updatedBy: 'demo' }])),
         prefs: { filters: {}, lastBoard: null, theme: 'dark' },
         team: TEAM,
         loading: false,
@@ -116,7 +118,12 @@
         drawer: { open: false, itemId: null },
         toasts: [],
         pendingWrites: 0,
-        commentsByItemId: {},
+        commentsByItemId: {
+          i_t2: [
+            { id: 'c1', authorId: 'pedro@cruxmallorca.es', text: 'Lookin good, PR aprobado en cuanto el CI pase.', createdAt: '2026-05-19T10:00:00Z' },
+            { id: 'c2', authorId: 'marc@cruxmallorca.es',  text: 'Subo cobertura mañana.', createdAt: '2026-05-19T14:30:00Z' },
+          ],
+        },
       };
       const subs = new Set();
       function getState() { return state; }
@@ -128,10 +135,9 @@
         setState({ toasts: [...state.toasts, { id, tone, text }] });
         if (ttl) setTimeout(() => setState({ toasts: state.toasts.filter((t) => t.id !== id) }), ttl);
       }
-      async function hydrate() { /* noop — datos ya cargados */ }
+      async function hydrate() {}
       async function updateCell(itemId, columnId, value) {
-        const current = state.itemsById[itemId];
-        if (!current) return;
+        const current = state.itemsById[itemId]; if (!current) return;
         const isName = columnId === '__name__';
         const next = isName
           ? { ...current, name: String(value || '').slice(0, 200), updatedAt: new Date().toISOString() }
@@ -140,14 +146,12 @@
       }
       async function reorderItem(itemId, groupId, position) {
         const oldIndex = state.itemIndex;
-        const entry = oldIndex.find((x) => x.id === itemId);
-        if (!entry) return;
+        const entry = oldIndex.find((x) => x.id === itemId); if (!entry) return;
         const without = oldIndex.filter((x) => x.id !== itemId);
         const newEntry = { ...entry, groupId };
         const sameGroup = without.filter((x) => x.groupId === groupId);
         const targetPos = Math.max(0, Math.min(position, sameGroup.length));
-        const next = [];
-        let seen = 0, inserted = false;
+        const next = []; let seen = 0, inserted = false;
         for (const e of without) {
           if (!inserted && e.groupId === groupId && seen === targetPos) { next.push(newEntry); inserted = true; }
           if (e.groupId === groupId) seen += 1;
@@ -158,7 +162,7 @@
       }
       async function createItem(payload) {
         const id = 'i_' + Math.random().toString(36).slice(2, 8);
-        const item = { id, boardId: 'b_crm_demo', groupId: payload.groupId || 'g_default', name: payload.name, cells: payload.cells || {}, version: 1, createdAt: new Date().toISOString() };
+        const item = { id, boardId: 'b_tareas_demo', groupId: payload.groupId || 'g_sprint', name: payload.name, cells: payload.cells || {}, version: 1, createdAt: new Date().toISOString() };
         setState({
           itemsById: { ...state.itemsById, [id]: item },
           itemIndex: [...state.itemIndex, { id, groupId: item.groupId, position: state.itemIndex.length }],
@@ -191,6 +195,7 @@
       return { getState, subscribe, hydrate, updateCell, reorderItem, createItem, deleteItemById, loadComments, addComment, removeComment, openDrawer, closeDrawer, pushToast };
     }
 
+    // Fake __cruxProfile so the comments delete button enables for demo author
     window.__cruxProfile = window.__cruxProfile || { username: 'pedro@cruxmallorca.es', name: 'Pedro', role: 'admin', color: '#3869AB', access: ['*'], isAdmin: true };
 
     const store = createDemoStore();
