@@ -61,6 +61,35 @@ async function setItemIndex(boardId, arr) {
     return arr;
 }
 
+// ─── item CRUD ───────────────────────────────────────────────────────────
+async function getItem(boardId, itemId) {
+    if (!boardId || !itemId) throw new Error('boardId+itemId required');
+    const data = await kv.get(K_ITEM(boardId, itemId));
+    if (data == null) return null;
+    return data;
+}
+
+async function setItem(boardId, itemId, item) {
+    if (!boardId || !itemId) throw new Error('boardId+itemId required');
+    if (!item || typeof item !== 'object') throw new Error('item must be object');
+    await kv.set(K_ITEM(boardId, itemId), item);
+    return item;
+}
+
+async function mgetItems(boardId, itemIds) {
+    if (!boardId) throw new Error('boardId required');
+    if (!Array.isArray(itemIds) || itemIds.length === 0) return [];
+    const keys = itemIds.map((id) => K_ITEM(boardId, id));
+    const arr = await kv.mget(...keys);
+    return arr.map((v) => (v == null ? null : v));
+}
+
+async function deleteItem(boardId, itemId) {
+    if (!boardId || !itemId) throw new Error('boardId+itemId required');
+    await kv.del(K_ITEM(boardId, itemId), K_COMMENTS(boardId, itemId));
+    return true;
+}
+
 module.exports = {
     PREFIX,
     K_INDEX,
@@ -76,4 +105,8 @@ module.exports = {
     setBoardMeta,
     getItemIndex,
     setItemIndex,
+    getItem,
+    setItem,
+    mgetItems,
+    deleteItem,
 };

@@ -141,6 +141,48 @@ const boards = require(path.join(__dirname, '..', 'api', '_lib', 'boards.js'));
         check('itemIndex preserves order', got[0].id === 'i_acme' && got[2].id === 'i_disney');
     }
 
+    reset();
+
+    // Test: getItem missing → null
+    {
+        const it = await boards.getItem('b_crm', 'i_missing');
+        check('getItem missing → null', it === null);
+    }
+
+    // Test: setItem + getItem
+    {
+        const item = {
+            id: 'i_acme', boardId: 'b_crm', groupId: 'g_default',
+            name: 'Acme S.L.',
+            cells: { col_status: 'phase_new', col_value: 2500 },
+            version: 1,
+            createdAt: '2026-05-19T10:00:00Z',
+            updatedAt: '2026-05-19T10:00:00Z',
+            updatedBy: 'pedro@cruxmallorca.es',
+        };
+        await boards.setItem('b_crm', 'i_acme', item);
+        const got = await boards.getItem('b_crm', 'i_acme');
+        check('setItem + getItem round-trip', got.name === 'Acme S.L.' && got.version === 1);
+    }
+
+    // Test: mgetItems devuelve en el orden pedido, con nulls para missing
+    {
+        await boards.setItem('b_crm', 'i_a', { id: 'i_a', name: 'A', cells: {}, version: 1 });
+        await boards.setItem('b_crm', 'i_b', { id: 'i_b', name: 'B', cells: {}, version: 1 });
+        const arr = await boards.mgetItems('b_crm', ['i_a', 'i_missing', 'i_b']);
+        check('mgetItems length', arr.length === 3);
+        check('mgetItems preserves order', arr[0]?.id === 'i_a' && arr[2]?.id === 'i_b');
+        check('mgetItems null for missing', arr[1] === null);
+    }
+
+    // Test: deleteItem
+    {
+        await boards.setItem('b_crm', 'i_del', { id: 'i_del', name: 'X', cells: {}, version: 1 });
+        await boards.deleteItem('b_crm', 'i_del');
+        const got = await boards.getItem('b_crm', 'i_del');
+        check('deleteItem removes', got === null);
+    }
+
     // ─── (Tasks 4-9 añaden más tests aquí, antes del console.log) ──────────
 
     console.log(failures === 0 ? '\nAll tests passed ✓' : '\n' + failures + ' test(s) FAILED');
