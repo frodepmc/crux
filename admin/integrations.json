@@ -20,13 +20,14 @@
         "meta": ["React inline", "KV backed", "Hitos & iteraciones"]
     },
     {
-        "id": "leads",
-        "name": "CRM de leads",
-        "description": "Pipeline de contactos desde la web, WhatsApp e Instagram. Con seguimiento y etiquetas por fase.",
-        "status": "soon",
-        "roles": ["admin", "sales"],
-        "icon": "users",
-        "meta": ["Conversaciones", "Tags", "Alertas"]
+        "id": "boards",
+        "name": "Boards",
+        "description": "Tableros configurables para CRM, tareas y cualquier flujo que necesitéis organizar.",
+        "path": "/admin/integrations/boards/",
+        "status": "live",
+        "roles": ["admin"],
+        "icon": "layers",
+        "meta": ["React modules", "KV granular", "Tabla/Kanban/Calendar/Timeline"]
     },
     {
         "id": "newsletter",
