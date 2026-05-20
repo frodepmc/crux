@@ -198,7 +198,29 @@
       }
       function openDrawer(itemId) { setState({ drawer: { open: true, itemId } }); }
       function closeDrawer()      { setState({ drawer: { open: false, itemId: null } }); }
-      return { getState, subscribe, hydrate, updateCell, reorderItem, createItem, deleteItemById, loadComments, addComment, removeComment, openDrawer, closeDrawer, pushToast };
+      function getBoardPrefs() {
+        const f = (state.prefs.filters && state.prefs.filters['b_tareas_demo']) || {};
+        return { filters: f.filters || [], search: f.search || '', sortBy: f.sortBy || null, sortDir: f.sortDir || 'asc' };
+      }
+      function setBoardPrefs(patch) {
+        const current = getBoardPrefs();
+        const next = { ...current, ...patch };
+        setState({ prefs: { ...state.prefs, filters: { ...state.prefs.filters, 'b_tareas_demo': next } } });
+      }
+      function setSearch(text) { setBoardPrefs({ search: text || '' }); }
+      function setSort(columnId, dir) { setBoardPrefs({ sortBy: columnId, sortDir: dir || 'asc' }); }
+      function clearSort() { setBoardPrefs({ sortBy: null, sortDir: 'asc' }); }
+      function addFilter(filter) {
+        const current = getBoardPrefs();
+        const others = (current.filters || []).filter((f) => f.columnId !== filter.columnId);
+        setBoardPrefs({ filters: [...others, filter] });
+      }
+      function removeFilter(columnId) {
+        const current = getBoardPrefs();
+        setBoardPrefs({ filters: (current.filters || []).filter((f) => f.columnId !== columnId) });
+      }
+      function clearFilters() { setBoardPrefs({ filters: [] }); }
+      return { getState, subscribe, hydrate, updateCell, reorderItem, createItem, deleteItemById, loadComments, addComment, removeComment, openDrawer, closeDrawer, pushToast, getBoardPrefs, setSearch, setSort, clearSort, addFilter, removeFilter, clearFilters };
     }
 
     // Fake __cruxProfile so the comments delete button enables for demo author
