@@ -9,6 +9,7 @@
 import { html } from 'htm/react';
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useStore } from '../hooks.js';
+import { applyFilters } from '../filters.js';
 
 const DAY_PX = 28;  // ancho por día
 const LABEL_PX = 220;
@@ -50,7 +51,9 @@ export function TimelineView({ store }) {
     }
     const depCol = findDependencyColumn(meta);
 
-    const items = itemIndex.map((entry) => itemsById[entry.id]).filter(Boolean);
+    const prefs = store.getBoardPrefs();
+    const allItems = itemIndex.map((entry) => itemsById[entry.id]).filter(Boolean);
+    const items = applyFilters(allItems, { filters: prefs.filters, search: prefs.search });
     const rangedItems = items
         .map((it) => {
             const v = it.cells?.[dateCol.id];

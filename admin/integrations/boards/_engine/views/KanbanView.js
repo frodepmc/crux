@@ -6,6 +6,7 @@ import { html } from 'htm/react';
 import { useState } from 'react';
 import { useStore } from '../hooks.js';
 import { getColumnType } from '../columns/registry.js';
+import { applyFilters } from '../filters.js';
 
 const NO_VALUE = '__no_value__';
 
@@ -50,7 +51,9 @@ export function KanbanView({ store }) {
         `;
     }
 
-    const items = itemIndex.map((entry) => itemsById[entry.id]).filter(Boolean);
+    const prefs = store.getBoardPrefs();
+    const allItems = itemIndex.map((entry) => itemsById[entry.id]).filter(Boolean);
+    const items = applyFilters(allItems, { filters: prefs.filters, search: prefs.search });
     const columns = buildColumns(items, kanbanColumn);
 
     if (columns.length === 0) {

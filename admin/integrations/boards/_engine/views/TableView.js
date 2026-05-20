@@ -5,6 +5,7 @@ import { html } from 'htm/react';
 import { useState, useRef } from 'react';
 import { useStore } from '../hooks.js';
 import { getColumnType } from '../columns/registry.js';
+import { applyFilters, applySort } from '../filters.js';
 
 export function TableView({ store }) {
     const state = useStore(store);
@@ -14,11 +15,39 @@ export function TableView({ store }) {
 
     if (!meta) return html`<div class="b-empty">Cargando…</div>`;
     const columns = (meta.columns || []).slice().sort((a, b) => (a.order || 0) - (b.order || 0));
-    const itemsInOrder = itemIndex
-        .map((entry) => ({ entry, item: itemsById[entry.id] }))
-        .filter((x) => x.item);
+
+    const prefs = store.getBoardPrefs();
+    const allItems = itemIndex.map((entry) => itemsById[entry.id]).filter(Boolean);
+    const filtered = applyFilters(allItems, { filters: prefs.filters, search: prefs.search });
+    const columnsById = Object.fromEntries((meta.columns || []).map((c) => [c.id, c]));
+    let sorted = filtered;
+    if (prefs.sortBy === '__name__') {
+        sorted = filtered.slice().sort((a, b) => {
+            const r = String(a.name || '').localeCompare(String(b.name || ''));
+            return prefs.sortDir === 'desc' ? -r : r;
+        });
+    } else if (prefs.sortBy) {
+        sorted = applySort(filtered, { sortBy: prefs.sortBy, sortDir: prefs.sortDir }, columnsById);
+    }
+    const itemsInOrder = sorted.map((item) => ({ entry: itemIndex.find((x) => x.id === item.id), item }));
+
+    function toggleSort(columnId) {
+        if (prefs.sortBy === columnId) {
+            if (prefs.sortDir === 'asc') store.setSort(columnId, 'desc');
+            else store.clearSort();
+        } else {
+            store.setSort(columnId, 'asc');
+        }
+    }
+    function sortIndicator(columnId) {
+        if (prefs.sortBy !== columnId) return '';
+        return prefs.sortDir === 'asc' ? ' ↑' : ' ↓';
+    }
 
     if (itemsInOrder.length === 0) {
+        if (allItems.length > 0) {
+            return html`<div class="b-empty">Sin items con los filtros activos. <button onClick=${() => { store.clearFilters(); store.setSearch(''); }} style=${{ color: 'var(--accent)', marginLeft: '8px' }}>Limpiar filtros</button></div>`;
+        }
         return html`<div class="b-empty">No hay items en este board.</div>`;
     }
 
@@ -50,8 +79,17 @@ export function TableView({ store }) {
                 <thead>
                     <tr>
                         <th style=${{ width: '24px' }}></th>
-                        <th>Nombre</th>
-                        ${columns.map((c) => html`<th key=${c.id}>${c.name}</th>`)}
+                        <th onClick=${() => toggleSort('__name__')}
+                            style=${{ cursor: 'pointer' }}>
+                            Nombre${sortIndicator('__name__')}
+                        </th>
+                        ${columns.map((c) => html`
+                            <th key=${c.id}
+                                onClick=${() => toggleSort(c.id)}
+                                style=${{ cursor: 'pointer' }}>
+                                ${c.name}${sortIndicator(c.id)}
+                            </th>
+                        `)}
                     </tr>
                 </thead>
                 <tbody>

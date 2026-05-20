@@ -6,6 +6,7 @@
 import { html } from 'htm/react';
 import { useState } from 'react';
 import { useStore } from '../hooks.js';
+import { applyFilters } from '../filters.js';
 
 const DOW = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 const MONTHS = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -96,7 +97,9 @@ export function CalendarView({ store }) {
         cells.push(d);
     }
 
-    const items = itemIndex.map((entry) => itemsById[entry.id]).filter(Boolean);
+    const prefs = store.getBoardPrefs();
+    const allItems = itemIndex.map((entry) => itemsById[entry.id]).filter(Boolean);
+    const items = applyFilters(allItems, { filters: prefs.filters, search: prefs.search });
     const itemsByYmd = {};
     for (const item of items) {
         const ymd = getItemDateYmd(item, col);
