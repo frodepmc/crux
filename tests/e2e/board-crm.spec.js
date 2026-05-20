@@ -85,3 +85,56 @@ test('drag row reorders and persists', async ({ page }) => {
     const firstRowAfter = await page.locator('.b-table tbody tr').first().locator('.b-cell-name').textContent();
     expect(firstRowAfter).not.toBe(firstRowBefore);
 });
+
+test('view switcher: tabla ↔ kanban', async ({ page }) => {
+    await page.goto('/admin');
+    await page.fill('input[name="username"]', USERNAME);
+    await page.fill('input[name="password"]', PASSWORD);
+    await page.click('button[type="submit"]');
+    await page.waitForURL(/\/admin\/hub/);
+    await page.goto(`/admin/integrations/boards/board.html?id=${BOARD_ID}`);
+
+    // Default view: kanban (post-M2 bootstrap)
+    await expect(page.locator('.b-kanban')).toBeVisible();
+
+    // Switch to Tabla
+    await page.locator('.b-view-btn[aria-current="false"]', { hasText: 'Tabla' }).click();
+    await expect(page.locator('.b-table tbody')).toBeVisible();
+    await expect(page.locator('.b-kanban')).not.toBeVisible();
+
+    // Switch back to Kanban
+    await page.locator('.b-view-btn[aria-current="false"]', { hasText: 'Kanban' }).click();
+    await expect(page.locator('.b-kanban')).toBeVisible();
+});
+
+test('drag card between kanban columns persists status change', async ({ page }) => {
+    await page.goto('/admin');
+    await page.fill('input[name="username"]', USERNAME);
+    await page.fill('input[name="password"]', PASSWORD);
+    await page.click('button[type="submit"]');
+    await page.waitForURL(/\/admin\/hub/);
+    await page.goto(`/admin/integrations/boards/board.html?id=${BOARD_ID}`);
+
+    // Ensure Kanban view
+    await page.locator('.b-view-btn', { hasText: 'Kanban' }).click();
+    await expect(page.locator('.b-kanban')).toBeVisible();
+
+    // Find Acme card (seed has it in "Reunión")
+    const acmeCard = page.locator('.b-kanban-card', { hasText: 'Acme' });
+    await expect(acmeCard).toBeVisible();
+
+    // Find "Ganado" column for drop
+    const ganadoCol = page.locator('.b-kanban-col', { hasText: 'GANADO' });
+
+    // Drag Acme to Ganado
+    await acmeCard.hover();
+    await page.mouse.down();
+    await ganadoCol.hover();
+    await page.mouse.up();
+    await page.waitForTimeout(500);
+
+    // Reload: Acme should still be in Ganado
+    await page.reload();
+    const ganadoColAfter = page.locator('.b-kanban-col', { hasText: 'GANADO' });
+    await expect(ganadoColAfter.locator('.b-kanban-card', { hasText: 'Acme' })).toBeVisible();
+});
