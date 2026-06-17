@@ -1417,12 +1417,64 @@
           {children}
         </div>
       );
-      const Row = ({ k, v, link, onCopy }) => (
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "5px 0", color: C.textSec }}>
-          <span>{k}</span>
-          <span style={{ color: link ? C.accent : C.text, fontWeight: 600, fontFamily: mono, fontSize: 11, cursor: onCopy ? "pointer" : "default" }} onClick={onCopy} title={onCopy ? "Click para copiar" : ""}>{v || "—"}</span>
-        </div>
-      );
+      const Row = ({ k, v, link, onCopy }) => {
+        const valueText = v || "—";
+        const isEmpty = !v;
+        const isLong = !isEmpty && valueText.length > 28;
+        const sharedBorder = { borderBottom: "1px solid rgba(255,255,255,0.04)" };
+
+        if (isLong) {
+          return (
+            <div style={{ padding: "8px 0", ...sharedBorder }}>
+              <div style={{ fontSize: 11, color: C.textSec, fontWeight: 500, marginBottom: 5 }}>{k}</div>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: link ? C.accent : C.text,
+                  fontFamily: font,
+                  fontWeight: 500,
+                  lineHeight: 1.55,
+                  wordBreak: "break-word",
+                  cursor: onCopy ? "pointer" : "default",
+                }}
+                onClick={onCopy}
+                title={onCopy ? "Click para copiar" : ""}
+              >
+                {valueText}
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "baseline",
+            gap: 12,
+            padding: "6px 0",
+            fontSize: 12,
+            color: C.textSec,
+            ...sharedBorder,
+          }}>
+            <span>{k}</span>
+            <span
+              style={{
+                color: isEmpty ? C.textDim : (link ? C.accent : C.text),
+                fontWeight: isEmpty ? 400 : 600,
+                fontFamily: mono,
+                fontSize: 11,
+                textAlign: "right",
+                cursor: onCopy ? "pointer" : "default",
+              }}
+              onClick={onCopy}
+              title={onCopy ? "Click para copiar" : ""}
+            >
+              {valueText}
+            </span>
+          </div>
+        );
+      };
 
       return (
         <div style={{ padding: "0 4px" }}>
